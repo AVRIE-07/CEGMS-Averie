@@ -13,12 +13,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState(false);
+  const [usernameError, setUsernameError] = useState(false); // Separate state for username error
   const [passwordError, setPasswordError] = useState(false);
   const [inputError, setInputError] = useState(false);
   const navigate = useNavigate();
 
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-  const allowedUsernameChars = /^[a-zA-Z0-9_]+$/;
+  const allowedUsernameChars = /^[a-zA-Z0-9_]+$/; // Update username regex if needed
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -48,6 +49,14 @@ export default function Login() {
       return;
     }
 
+    if (username && !allowedUsernameChars.test(username)) {
+      setError(
+        "Invalid username. Only letters, numbers, and underscores are allowed."
+      );
+      setUsernameError(true);
+      return;
+    }
+
     axios
       .post("http://localhost:3001/login", loginData)
       .then((result) => {
@@ -67,12 +76,27 @@ export default function Login() {
       });
   };
 
-  const handleUsernameChange = (e) => {
+  const handleUsernameEmailChange = (e) => {
     const value = e.target.value;
-    if (allowedUsernameChars.test(value)) {
+
+    if (value === "") {
+      setEmail("");
+      setUsername("");
+    } else if (value.includes("@")) {
+      // If '@' is found, treat it as an email
+      setEmail(value);
+      setUsername("");
+      setEmailError(!gmailRegex.test(value)); // Apply email validation
+      setUsernameError(false); // Clear username error if any
+    } else {
+      // Otherwise, treat it as a username
       setUsername(value);
-      setInputError(false);
+      setEmail("");
+      setUsernameError(!allowedUsernameChars.test(value)); // Apply username validation
+      setEmailError(false); // Clear email error if any
     }
+
+    setInputError(false); // Clear the general input error
   };
 
   return (
@@ -96,24 +120,15 @@ export default function Login() {
                       type="text"
                       placeholder="Email or Username"
                       className={`form-control mb-3 ${
-                        inputError || emailError ? styles.errorBorder : ""
+                        inputError || emailError || usernameError
+                          ? styles.errorBorder
+                          : ""
                       }`}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.includes("@")) {
-                          setEmail(value);
-                          setUsername("");
-                        } else {
-                          handleUsernameChange(e);
-                          setEmail("");
-                        }
-                        setEmailError(false);
-                        setInputError(false);
-                      }}
+                      onChange={handleUsernameEmailChange}
                       value={email || username}
                       style={{ paddingLeft: "40px" }}
                     />
-                    {(inputError || emailError) && (
+                    {(inputError || emailError || usernameError) && (
                       <AiOutlineExclamationCircle
                         className={styles.dangerIcon}
                       />

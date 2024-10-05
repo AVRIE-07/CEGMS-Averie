@@ -1,24 +1,9 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const UsersModel = require("./models/UsersModel");
-
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-// Connect to MongoDB
-mongoose
-  .connect("mongodb://localhost:27017/inventory-system")
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
+const UsersModel = require("../models/UsersModel"); // Ensure this path is correct
+const router = express.Router();
 
 // Route to get all users
-app.get("/get-users", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const users = await UsersModel.find(); // Fetch all users
     res.status(200).json(users);
@@ -26,8 +11,9 @@ app.get("/get-users", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
+
 // Update User route
-app.put("/update-user/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { role, firstname, lastname, email, username, password } = req.body;
@@ -56,7 +42,7 @@ app.put("/update-user/:id", async (req, res) => {
 });
 
 // Delete User route
-app.delete("/delete-user/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedUser = await UsersModel.findByIdAndDelete(id);
@@ -72,7 +58,7 @@ app.delete("/delete-user/:id", async (req, res) => {
 });
 
 // Add user route
-app.post("/add-user", async (req, res) => {
+router.post("/add", async (req, res) => {
   const { role, firstName, lastName, email, username, password } = req.body;
 
   if (!firstName || !lastName || !email || !username || !password) {
@@ -117,7 +103,7 @@ app.post("/add-user", async (req, res) => {
       lastname: lastName,
       email,
       username,
-      password,
+      password, // Hash password before saving
     });
 
     await newUser.save();
@@ -127,6 +113,4 @@ app.post("/add-user", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("Server is running on port 3001");
-});
+module.exports = router; // Make sure to export the router
