@@ -17,6 +17,34 @@ mongoose
     console.error("Error connecting to MongoDB:", error);
   });
 
+// Login
+
+app.post("/login", async (req, res) => {
+  const { email, username, password } = req.body;
+
+  try {
+    let user;
+
+    // Check if the request is made using email or username
+    if (email) {
+      user = await UsersModel.findOne({ email });
+    } else if (username) {
+      user = await UsersModel.findOne({ username });
+    }
+
+    // If user not found or password does not match
+    if (!user || user.password !== password) {
+      return res.status(404).json("No Record Existed");
+    }
+
+    // If login is successful
+    res.status(200).json("Success");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("An error occurred during login.");
+  }
+});
+
 // Route to get all users
 app.get("/get-users", async (req, res) => {
   try {
