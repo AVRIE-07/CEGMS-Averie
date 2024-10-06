@@ -1,5 +1,6 @@
 const express = require("express");
 const UsersModel = require("../models/UsersModel"); // Adjust the path if necessary
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
 
@@ -16,14 +17,18 @@ router.post("/login", async (req, res) => {
     return res.status(401).json("Unauthorized: User not found");
   }
 
-  // For demonstration, we directly compare passwords (make sure to hash in production)
-  if (user.password !== password) {
+  // Compare the provided password with the hashed password
+  const passwordMatch = await bcrypt.compare(password, user.password);
+
+  if (!passwordMatch) {
     return res.status(401).json("Unauthorized: Incorrect password");
   }
 
   // Successful login, send success response or user data
   res.status(200).json("Success");
 });
+
+module.exports = router;
 
 // Route to get all users
 router.get("/get-users", async (req, res) => {
@@ -122,14 +127,16 @@ router.post("/add-user", async (req, res) => {
       });
     }
 
-    // No hashing here, directly save the password
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+
     const newUser = new UsersModel({
       role,
       firstname,
       lastname,
       email,
       username,
-      password, // Store the password directly
+      password: hashedPassword, // Store the hashed password
     });
 
     await newUser.save();
