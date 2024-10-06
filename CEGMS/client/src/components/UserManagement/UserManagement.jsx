@@ -14,7 +14,7 @@ function UserManagement() {
     email: "",
     username: "",
     password: "",
-    confirmPassword: "",
+    confirmPassword: "", // Added confirm password field
   });
   const [users, setUsers] = useState([]); // State to store users
   const [errorMessage, setErrorMessage] = useState(""); // For form validation errors
@@ -42,12 +42,6 @@ function UserManagement() {
     setShowModal(false);
   };
 
-  // Functions for Delete Confirmation Modal
-  const handleShowDeleteModal = (user) => {
-    setUserToDelete(user);
-    setShowDeleteModal(true);
-  };
-
   const handleCloseDeleteModal = () => {
     setUserToDelete(null);
     setShowDeleteModal(false);
@@ -60,7 +54,7 @@ function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/get-users");
+      const response = await axios.get("http://localhost:3001/users/get-users");
       setUsers(response.data); // Set the users in state
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -78,77 +72,44 @@ function UserManagement() {
   };
 
   // Function to handle saving the user (both Add and Update)
-  const handleSaveUser = async () => {
-    // Check if passwords match
+  const handleSaveUser = async (e) => {
+    e.preventDefault();
+
+    // Check if passwords match before proceeding
     if (!editMode && formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords do not match");
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
-    // Regex for input validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
-    // Validate email
-    if (!emailRegex.test(formData.email)) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    // Validate username
-    if (!usernameRegex.test(formData.username)) {
-      setErrorMessage(
-        "Username must be 4-20 characters long and can only contain letters, numbers, and underscores."
-      );
-      return;
-    }
-
-    // Validate password (only in add mode or if password is being updated)
-    if (!editMode || (editMode && formData.password)) {
-      if (!passwordRegex.test(formData.password)) {
-        setErrorMessage(
-          "Password must be at least 8 characters, include one uppercase letter and one number."
-        );
-        return;
-      }
-    }
+    // Prepare the payload with correct field names
+    const payload = {
+      role: formData.role,
+      firstname: formData.firstName.trim(),
+      lastname: formData.lastName.trim(),
+      email: formData.email.trim(),
+      username: formData.username.trim(),
+      password: formData.password.trim(),
+    };
 
     try {
       if (editMode) {
-        // If we are editing, update the user
-        const response = await axios.put(
-          `http://localhost:3001/update-user/${currentUserId}`,
-          {
-            role: formData.role,
-            firstName: formData.firstName.trim(),
-            lastName: formData.lastName.trim(),
-            email: formData.email.trim(),
-            username: formData.username.trim(),
-            password: formData.password.trim(),
-          }
+        // Update existing user
+        await axios.put(
+          `http://localhost:3001/users/update-user/${currentUserId}`,
+          payload
         );
-        alert(response.data.message); // Show success message
       } else {
-        // Otherwise, add a new user
-        const response = await axios.post("http://localhost:3001/add-user", {
-          role: formData.role,
-          firstName: formData.firstName.trim(),
-          lastName: formData.lastName.trim(),
-          email: formData.email.trim(),
-          username: formData.username.trim(),
-          password: formData.password.trim(),
-        });
-        alert(response.data.message); // Show success message
+        // Add new user
+        await axios.post("http://localhost:3001/users/add-user", payload);
       }
-
-      setShowModal(false); // Close the modal
-
       // Fetch users again to update the table
       fetchUsers();
+      alert("User added successfully.");
+      handleClose(); // Close modal after success
     } catch (error) {
+      console.error("Error details:", error.response.data); // Log error details for debugging
       const errorMsg =
-        error.response && error.response.data
+        error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : "Failed to save user. Please try again.";
       setErrorMessage(errorMsg);
@@ -171,13 +132,19 @@ function UserManagement() {
     setShowModal(true); // Show modal for editing
   };
 
+  // Function to handle showing the delete modal
+  const handleShowDeleteModal = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
   // Function to handle deleting a user
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
 
     try {
       const response = await axios.delete(
-        `http://localhost:3001/delete-user/${userToDelete._id}`
+        `http://localhost:3001/users/delete-user/${userToDelete._id}`
       );
       alert(response.data.message); // Show success message
 
@@ -315,66 +282,59 @@ function UserManagement() {
             </Form.Group>
 
             {!editMode && (
-              <Form.Group controlId="password" className="mb-3">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </Form.Group>
+              <>
+                <Form.Group controlId="password" className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="confirmPassword" className="mb-3">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </>
             )}
 
-            {editMode && (
-              <Form.Group controlId="password" className="mb-3">
-                <Form.Label>
-                  New Password (leave blank to keep current)
-                </Form.Label>
-                <Form.Control
-                  type="password"
-                  placeholder="New Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            )}
-
-            {!editMode && (
-              <Form.Group controlId="confirmPassword" className="mb-3">
-                <Form.Label>Confirm Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  placeholder="Confirm password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-              </Form.Group>
+            {errorMessage && (
+              <div className="alert alert-danger" role="alert">
+                {errorMessage}
+              </div>
             )}
           </Form>
-          {errorMessage && <p className="text-danger">{errorMessage}</p>}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
           <Button variant="primary" onClick={handleSaveUser}>
-            {editMode ? "Update User" : "Save User"}
+            {editMode ? "Save Changes" : "Add User"}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Bootstrap Modal for Delete Confirmation */}
+      {/* Modal for delete confirmation */}
       <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
+          <Modal.Title>Delete User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {userToDelete && (
+          {userToDelete ? (
             <p>
-              Are you sure you want to delete user{" "}
+              Are you sure you want to delete{" "}
               <strong>{userToDelete.username}</strong>?
             </p>
+          ) : (
+            <p>No user selected.</p>
           )}
         </Modal.Body>
         <Modal.Footer>
