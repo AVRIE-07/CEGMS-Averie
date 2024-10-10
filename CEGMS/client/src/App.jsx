@@ -22,6 +22,10 @@ import Email from "./components/Email/Profile.jsx";
 import Refunded from "./components/Sales/Refunded.jsx";
 import Analysis from "./components/Sales/Analysis.jsx";
 import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
+
+import InventoryApprovals from "./components/Storage/InventoryApprovals.jsx"; // Adjust the path if needed
+import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
+
 function App() {
   return (
     <>
@@ -47,7 +51,17 @@ function App() {
           <Route path="/Storage" element={<Storage />} />
           <Route path="/Sales/Refunded" element={<Refunded />} />
           <Route path="/Sales/Analysis" element={<Analysis />} />
-          <Route path="/Sales/CreateTransaction" element={<CreateTransaction />} />
+          <Route
+            path="/Sales/CreateTransaction"
+            element={<CreateTransaction />}
+          />
+          <Route path="/Storage" element={<Storage />} />
+
+          <Route
+            path="/Storage/InventoryApprovals"
+            element={<InventoryApprovals />}
+          />
+          <Route path="/Storage/Reports" element={<Reports />} />
         </Routes>
       </BrowserRouter>
     </>
