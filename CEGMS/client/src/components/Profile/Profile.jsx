@@ -2,23 +2,17 @@
 import React from "react";
 import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Profile.module.css";
-import icon from "./Profile.png"
-
+import ProfileCard from "../ProfileCard/ProfileCard.jsx";
 
 const Profile = () => {
-  return (
+  return(
     <div className={styles.dashboard}>
       <Sidebar />
       <main className={styles.mainContent}>
-      <div className={styles.header}>
-      <img src={icon} className={styles.icon} />Profile
-      </div>  
-      <div className={styles.content}>
-
-      </div> 
+      <ProfileCard></ProfileCard>
       </main>
     </div>
-  );
+    );
 };
 
 export default Profile;
