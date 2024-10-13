@@ -53,3 +53,21 @@
   align-self: center;
   /* Align icon in the center vertically */
 }
+
+.tdColor {
+  color: blue;
+}
+.no-border {
+  border: none !important;
+}
+
+.no-border th,
+.no-border td {
+  border: none !important;
+}
+
+/* Shaded header */
+.no-border th {
+  background-color: #e9ecef; /* Light gray background for the header */
+  color: #343a40; /* Dark gray text color for contrast */
+}

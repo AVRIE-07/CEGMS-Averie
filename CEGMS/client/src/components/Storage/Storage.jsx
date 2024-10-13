@@ -3,15 +3,19 @@ import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Storage.module.css";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Modal, Button } from "react-bootstrap"; // Import Modal and Button components
+import { Modal, Button, Dropdown } from "react-bootstrap";
 
 const Storage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
-  const [isEditMode, setIsEditMode] = useState(false); // State to determine if editing
-  const [currentProductId, setCurrentProductId] = useState(null); // Current product ID for editing
+  const [showModal, setShowModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [searchCategory, setSearchCategory] = useState(""); // For Category search
+  const [searchDescription, setSearchDescription] = useState(""); // For Description search
+
   const [newProduct, setNewProduct] = useState({
     product_Category: "",
     product_Description: "",
@@ -22,25 +26,20 @@ const Storage = () => {
     product_Maximum_Stock_Level: "",
   });
 
-  // Fetch products when the component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://localhost:3001/api/products");
-        console.log("API Response:", response.data);
         setProducts(response.data);
       } catch (error) {
-        console.error("Error fetching products:", error);
         setError("Could not fetch products. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  // Handle input changes for the product form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prevProduct) => ({
@@ -49,12 +48,10 @@ const Storage = () => {
     }));
   };
 
-  // Handle form submission for adding or editing a product
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (isEditMode) {
-        // Update product
         const response = await axios.put(
           `http://localhost:3001/api/products/${currentProductId}`,
           newProduct
@@ -65,22 +62,19 @@ const Storage = () => {
           )
         );
       } else {
-        // Add new product
         const response = await axios.post(
           "http://localhost:3001/api/products",
           newProduct
         );
         setProducts((prevProducts) => [...prevProducts, response.data]);
       }
-      handleModalClose(); // Close the modal after submission
-      resetForm(); // Reset the form
+      handleModalClose();
+      resetForm();
     } catch (error) {
-      console.error("Error saving product:", error);
       setError("Could not save product. Please try again.");
     }
   };
 
-  // Function to open and close the modal
   const handleModalShow = (product = null) => {
     if (product) {
       setIsEditMode(true);
@@ -103,7 +97,6 @@ const Storage = () => {
 
   const handleModalClose = () => setShowModal(false);
 
-  // Reset the form fields
   const resetForm = () => {
     setNewProduct({
       product_Category: "",
@@ -117,7 +110,6 @@ const Storage = () => {
     setCurrentProductId(null);
   };
 
-  // Handle delete product
   const handleDeleteProduct = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
@@ -126,16 +118,77 @@ const Storage = () => {
           prevProducts.filter((product) => product._id !== id)
         );
       } catch (error) {
-        console.error("Error deleting product:", error);
         setError("Could not delete product. Please try again.");
       }
     }
   };
 
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory = product.product_Category
+      .toLowerCase()
+      .includes(searchCategory.toLowerCase());
+    const matchesDescription = product.product_Description
+      .toLowerCase()
+      .includes(searchDescription.toLowerCase());
+
+    if (statusFilter === "Low Stock") {
+      return (
+        matchesCategory &&
+        matchesDescription &&
+        product.product_Quantity < product.product_Minimum_Stock_Level
+      );
+    } else if (statusFilter === "In Stock") {
+      return (
+        matchesCategory &&
+        matchesDescription &&
+        product.product_Quantity >= product.product_Minimum_Stock_Level
+      );
+    } else if (statusFilter === "Overstocked") {
+      return (
+        matchesCategory &&
+        matchesDescription &&
+        product.product_Quantity > product.product_Maximum_Stock_Level
+      );
+    }
+
+    return matchesCategory && matchesDescription; // Default return for "All" or if no filter is applied
+  });
+
   return (
     <div className={styles.dashboard}>
       <Sidebar />
       <main className={styles.mainContent}>
+        <div className="d-flex justify-content-start">
+          <ul className="nav nav-underline fs-6 me-3">
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage" // Link to Products component
+                className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
+              >
+                Products
+              </Link>
+            </li>
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage/InventoryApprovals" // Link to Inventory Approvals component
+                className="nav-link fw-semibold text-decoration-none"
+                style={{ color: "#6a6d71" }}
+              >
+                Inventory Approvals
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/Storage/Reports" // Link to Reports component
+                className="nav-link fw-semibold text-decoration-none"
+                style={{ color: "#6a6d71" }}
+              >
+                Reports
+              </Link>
+            </li>
+          </ul>
+        </div>
+
         <div className="card shadow-sm py-3 px-4 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
@@ -152,146 +205,65 @@ const Storage = () => {
             </div>
           </div>
         </div>
-        <div className="card shadow-sm px-4 py-3">
-          <div className="d-flex justify-content-end">
-            <ul className="nav nav-underline fs-6 text-end me-3">
-              <li className="nav-item pe-3">
-                <Link
-                  to="/Storage" // Link to Products component
-                  className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
-                >
-                  Products
-                </Link>
-              </li>
-              <li className="nav-item pe-3">
-                <Link
-                  to="/Storage/InventoryApprovals" // Link to Inventory Approvals component
-                  className="nav-link fw-semibold text-decoration-none"
-                  style={{ color: "#6a6d71" }}
-                >
-                  Inventory Approvals
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  to="/Storage/Reports" // Link to Reports component
-                  className="nav-link fw-semibold text-decoration-none"
-                  style={{ color: "#6a6d71" }}
-                >
-                  Reports
-                </Link>
-              </li>
-            </ul>
+
+        <div
+          className="card shadow-sm px-4 py-1"
+          style={{ backgroundColor: "#50504D" }}
+        >
+          {/* Dropdown for filtering by status */}
+          <div
+            className="d-flex align-items-center"
+            style={{ height: "50px" }} // Adjust this height as needed
+          >
+            <Dropdown onSelect={(e) => setStatusFilter(e)}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Filter by Status
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item eventKey="">All</Dropdown.Item>
+                <Dropdown.Item eventKey="Low Stock">Low Stock</Dropdown.Item>
+                <Dropdown.Item eventKey="In Stock">In Stock</Dropdown.Item>
+                <Dropdown.Item eventKey="Overstocked">
+                  Overstocked
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
         </div>
 
-        {/* Add/Edit Product Modal */}
-        <Modal show={showModal} onHide={handleModalClose} size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {isEditMode ? "Edit Product" : "Add New Product"}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label>Category</label>
-                <input
-                  type="text"
-                  name="product_Category"
-                  value={newProduct.product_Category}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Description</label>
-                <input
-                  type="text"
-                  name="product_Description"
-                  value={newProduct.product_Description}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Quantity</label>
-                <input
-                  type="number"
-                  name="product_Quantity"
-                  value={newProduct.product_Quantity}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Price</label>
-                <input
-                  type="number"
-                  name="product_Price"
-                  value={newProduct.product_Price}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Cost</label>
-                <input
-                  type="number"
-                  name="product_Cost"
-                  value={newProduct.product_Cost}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Min Stock Level</label>
-                <input
-                  type="number"
-                  name="product_Minimum_Stock_Level"
-                  value={newProduct.product_Minimum_Stock_Level}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label>Max Stock Level</label>
-                <input
-                  type="number"
-                  name="product_Maximum_Stock_Level"
-                  value={newProduct.product_Maximum_Stock_Level}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <Button type="submit" className="btn btn-success">
-                {isEditMode ? "Update Product" : "Add Product"}
-              </Button>
-            </form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleModalClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <div className="card shadow-sm px-4 py-3 mb-4">
+          {/* Search Inputs */}
+          <div className="row mb-3">
+            <div className="col">
+              <label htmlFor="searchCategory">Search by Category</label>
+              <input
+                type="text"
+                id="searchCategory"
+                className="form-control"
+                value={searchCategory}
+                onChange={(e) => setSearchCategory(e.target.value)}
+              />
+            </div>
+            <div className="col">
+              <label htmlFor="searchDescription">Search by Description</label>
+              <input
+                type="text"
+                id="searchDescription"
+                className="form-control"
+                value={searchDescription}
+                onChange={(e) => setSearchDescription(e.target.value)}
+              />
+            </div>
+          </div>
 
-        {/* Table to display products */}
-        <div className="card shadow-sm px-4 py-3">
-          <div className="table-responsive mt-4">
+          {/* Product Table */}
+          <div className="table-responsive">
             {loading ? (
-              <div>Loading products...</div>
+              <p>Loading products...</p>
             ) : error ? (
-              <div className="text-danger">{error}</div>
-            ) : (
-              <table className="table table-striped">
+              <p className="text-danger">{error}</p>
+            ) : filteredProducts.length > 0 ? (
+              <table className="table no-border">
                 <thead>
                   <tr>
                     <th>Category</th>
@@ -299,42 +271,180 @@ const Storage = () => {
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Cost</th>
-                    <th>Min Stock</th>
-                    <th>Max Stock</th>
+                    <th>Minimum Stock Level</th>
+                    <th>Maximum Stock Level</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => (
+                  {filteredProducts.map((product) => (
                     <tr key={product._id}>
-                      <td>{product.product_Category}</td>
-                      <td>{product.product_Description}</td>
-                      <td>{product.product_Quantity}</td>
-                      <td>{product.product_Price}</td>
-                      <td>{product.product_Cost}</td>
-                      <td>{product.product_Minimum_Stock_Level}</td>
-                      <td>{product.product_Maximum_Stock_Level}</td>
+                      <td style={{ color: "blue" }}>
+                        {product.product_Category}
+                      </td>
+                      <td style={{ color: "blue" }}>
+                        {product.product_Description}
+                      </td>
+                      <td style={{ color: "blue" }}>
+                        {product.product_Quantity}
+                      </td>
+                      <td style={{ color: "blue" }}>{product.product_Price}</td>
+                      <td style={{ color: "blue" }}>{product.product_Cost}</td>
+                      <td style={{ color: "blue" }}>
+                        {product.product_Minimum_Stock_Level}
+                      </td>
+                      <td style={{ color: "blue" }}>
+                        {product.product_Maximum_Stock_Level}
+                      </td>
                       <td>
-                        <Button
-                          variant="warning"
+                        <button
+                          className="btn btn-warning btn-sm me-2"
                           onClick={() => handleModalShow(product)}
                         >
                           Edit
-                        </Button>
-                        <Button
-                          variant="danger"
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
                           onClick={() => handleDeleteProduct(product._id)}
                         >
                           Delete
-                        </Button>
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            ) : (
+              <p>No products found.</p>
             )}
           </div>
         </div>
+
+        {/* Modal for adding/editing products */}
+        <Modal show={showModal} onHide={handleModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {isEditMode ? "Edit Product" : "Add Product"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form onSubmit={handleSubmit}>
+              {/* Form Fields for Product Details */}
+              <div className="mb-3">
+                <label htmlFor="product_Category" className="form-label">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  id="product_Category"
+                  name="product_Category"
+                  className="form-control"
+                  value={newProduct.product_Category}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="product_Description" className="form-label">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  id="product_Description"
+                  name="product_Description"
+                  className="form-control"
+                  value={newProduct.product_Description}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="product_Quantity" className="form-label">
+                  Quantity
+                </label>
+                <input
+                  type="number"
+                  id="product_Quantity"
+                  name="product_Quantity"
+                  className="form-control"
+                  value={newProduct.product_Quantity}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="product_Price" className="form-label">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  id="product_Price"
+                  name="product_Price"
+                  className="form-control"
+                  value={newProduct.product_Price}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="product_Cost" className="form-label">
+                  Cost
+                </label>
+                <input
+                  type="number"
+                  id="product_Cost"
+                  name="product_Cost"
+                  className="form-control"
+                  value={newProduct.product_Cost}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label
+                  htmlFor="product_Minimum_Stock_Level"
+                  className="form-label"
+                >
+                  Minimum Stock Level
+                </label>
+                <input
+                  type="number"
+                  id="product_Minimum_Stock_Level"
+                  name="product_Minimum_Stock_Level"
+                  className="form-control"
+                  value={newProduct.product_Minimum_Stock_Level}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label
+                  htmlFor="product_Maximum_Stock_Level"
+                  className="form-label"
+                >
+                  Maximum Stock Level
+                </label>
+                <input
+                  type="number"
+                  id="product_Maximum_Stock_Level"
+                  name="product_Maximum_Stock_Level"
+                  className="form-control"
+                  value={newProduct.product_Maximum_Stock_Level}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleModalClose}>
+                  Close
+                </Button>
+                <Button variant="primary" type="submit">
+                  {isEditMode ? "Update Product" : "Add Product"}
+                </Button>
+              </Modal.Footer>
+            </form>
+          </Modal.Body>
+        </Modal>
       </main>
     </div>
   );

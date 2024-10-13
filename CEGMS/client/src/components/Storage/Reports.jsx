@@ -8,6 +8,36 @@ const Storage = () => {
     <div className={styles.dashboard}>
       <Sidebar />
       <main className={styles.mainContent}>
+        <div className="d-flex justify-content-start">
+          <ul className="nav nav-underline fs-6 me-3">
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage" // Link to Products component
+                className="nav-link fw-semibold text-decoration-none "
+                style={{ color: "#6a6d71" }}
+              >
+                Products
+              </Link>
+            </li>
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage/InventoryApprovals" // Link to Inventory Approvals component
+                className="nav-link fw-semibold text-decoration-none"
+                style={{ color: "#6a6d71" }}
+              >
+                Inventory Approvals
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/Storage/Reports" // Link to Reports component
+                className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
+              >
+                Reports
+              </Link>
+            </li>
+          </ul>
+        </div>
         <div className="card shadow-sm py-3 px-4 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
@@ -25,39 +55,6 @@ const Storage = () => {
                 </Link>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="card shadow-sm px-4 py-3">
-          <div className="d-flex justify-content-end">
-            <ul className="nav nav-underline fs-6 text-end me-3">
-              <li className="nav-item pe-3">
-                <Link
-                  to="/Storage" // Link to Products component
-                  className="nav-link fw-semibold text-decoration-none"
-                  style={{ color: "#6a6d71" }}
-                >
-                  Products
-                </Link>
-              </li>
-              <li className="nav-item pe-3">
-                <Link
-                  to="/Storage/InventoryApprovals" // Link to Inventory Approvals component
-                  className="nav-link fw-semibold text-decoration-none"
-                  style={{ color: "#6a6d71" }}
-                >
-                  Inventory Approvals
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  to="/Storage/Reports" // Link to Reports component
-                  className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
-                >
-                  Reports
-                </Link>
-              </li>
-            </ul>
           </div>
         </div>
       </main>
