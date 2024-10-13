@@ -2,7 +2,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const userRoutes = require("./routes/userRoutes"); // Adjust the path as necessary
+const userRoutes = require("./routes/userRoutes");
+const productRoutes = require("./routes/productRoutes"); // Import your product routes
 
 const app = express();
 app.use(express.json());
@@ -18,8 +19,8 @@ mongoose
     console.error("Error connecting to MongoDB:", error);
   });
 
-// Use user routes with a prefix
 app.use("/users", userRoutes); // Prefix for user routes
+app.use("/api/products", productRoutes); // Prefix for product routes
 
 // Start the server
 app.listen(3001, () => {

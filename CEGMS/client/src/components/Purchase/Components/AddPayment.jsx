@@ -21,27 +21,27 @@ function AddPayment() {
     const validationErrors = {};
 
     if (!values.documentNo.trim()) {
-      validationErrors.documentNo = "Name is required";
+      validationErrors.documentNo = "Document Number is required";
     }
 
     if (!values.inwardNo.trim()) {
-      validationErrors.inwardNo = "Email is required";
+      validationErrors.inwardNo = "Inward Number is required";
     }
 
     if (!values.paymentDate.trim()) {
-      validationErrors.paymentDate = "Phone number is required";
+      validationErrors.paymentDate = "Payment Date is required";
     }
 
     if (!values.amountDue.trim()) {
-      validationErrors.amountDue = "Region is required";
+      validationErrors.amountDue = "Amount Due is required";
     }
 
     if (!values.mop.trim()) {
-      validationErrors.mop = "City is required";
+      validationErrors.mop = "Mode of Payment is required";
     }
 
     if (!values.status.trim()) {
-      validationErrors.status = "Province is required";
+      validationErrors.status = "Status is required";
     }
 
     return validationErrors;
@@ -56,6 +56,7 @@ function AddPayment() {
       console.log(values); // Proceed with form submission
     }
   };
+
   return (
     <div
       className="modal fade"
@@ -91,7 +92,7 @@ function AddPayment() {
                     onChange={handleChanges}
                     value={values.documentNo}
                   />
-                  <label for="floatingInput">Document Number</label>
+                  <label htmlFor="floatingInput">Document Number</label>
                 </div>
                 <div className="form-floating mb-3">
                   <input
@@ -104,7 +105,7 @@ function AddPayment() {
                     onChange={handleChanges}
                     value={values.inwardNo}
                   />
-                  <label for="floatingInput">Inward Number</label>
+                  <label htmlFor="floatingInput">Inward Number</label>
                 </div>
               </div>
               <div className="row">
@@ -120,7 +121,7 @@ function AddPayment() {
                       onChange={handleChanges}
                       value={values.paymentDate}
                     />
-                    <label for="floatingInput">Payment Date</label>
+                    <label htmlFor="floatingInput">Payment Date</label>
                   </div>
                   <div className="form-floating mb-3">
                     <input
@@ -133,7 +134,7 @@ function AddPayment() {
                       onChange={handleChanges}
                       value={values.amountDue}
                     />
-                    <label for="floatingInput">Amount Due</label>
+                    <label htmlFor="floatingInput">Amount Due</label>
                   </div>
                 </div>
                 <div className="col-md-6">
@@ -148,7 +149,7 @@ function AddPayment() {
                       onChange={handleChanges}
                       value={values.mop}
                     />
-                    <label for="floatingInput">Mode of Payment</label>
+                    <label htmlFor="floatingInput">Mode of Payment</label>
                   </div>
                   <div className="form-floating mb-3">
                     <input
@@ -161,7 +162,7 @@ function AddPayment() {
                       onChange={handleChanges}
                       value={values.status}
                     />
-                    <label for="floatingInput">Status</label>
+                    <label htmlFor="floatingInput">Status</label>
                   </div>
                 </div>
               </div>

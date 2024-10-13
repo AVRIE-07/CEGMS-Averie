@@ -27,7 +27,7 @@ const PaymentHistory = () => {
         </div>
 
         <div className="card shadow-sm px-4 py-3">
-          <table class="table table-hover border-top">
+          <table className="table table-hover border-top">
             <thead className="table-info">
               <tr>
                 <th scope="col" className="fw-semibold">

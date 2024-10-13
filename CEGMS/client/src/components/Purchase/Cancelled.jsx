@@ -113,7 +113,7 @@ const Purchase = () => {
 
           <div className="row g-3 align-items-center mb-4">
             <div className="col-12 col-md-2 me-4">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Transaction Type
               </label>
               <select
@@ -124,7 +124,7 @@ const Purchase = () => {
               </select>
             </div>
             <div className="col-12 col-md-2 me-4">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Goods/Services
               </label>
               <select
@@ -135,7 +135,7 @@ const Purchase = () => {
               </select>
             </div>
             <div className="col-12 col-md-2">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Status
               </label>
               <select

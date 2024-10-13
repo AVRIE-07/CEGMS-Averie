@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Purchase.module.css";
 import SelectSupplier from "./Components/SelectSupplier";
@@ -6,10 +6,17 @@ import AddCompany from "./Components/AddCompany";
 import { Link } from "react-router-dom";
 
 const Purchase = () => {
+  const [transactionType, setTransactionType] = useState(
+    "Purchase Transaction"
+  );
+  const [goodsServices, setGoodsServices] = useState("All");
+  const [status, setStatus] = useState("All");
+
   const handleLinkClick = (destination) => {
     // Store the destination in local storage or context
     localStorage.setItem("redirectDestination", destination);
   };
+
   return (
     <div className={styles.dashboard}>
       <Sidebar />
@@ -21,68 +28,66 @@ const Purchase = () => {
               <h5 className="fw-semibold ms-3 mb-0">Purchase</h5>
             </div>
             <div>
-              <div>
-                <div className="dropdown">
-                  <button
-                    className="btn btn-primary dropdown-toggle"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    + Create Document
-                  </button>
-                  <ul className="dropdown-menu">
-                    <li>
-                      <Link
-                        to="/Purchase/Purchase-Order"
-                        className="dropdown-item"
-                        onClick={() =>
-                          localStorage.setItem(
-                            "redirectDestination",
-                            "/Purchase/Purchase-Order"
-                          )
-                        }
-                        data-bs-toggle="modal"
-                        data-bs-target="#createDoc"
-                      >
-                        Purchase Order
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/Purchase/GRN"
-                        className="dropdown-item"
-                        onClick={() => handleLinkClick("/Purchase/GRN")}
-                        data-bs-toggle="modal"
-                        data-bs-target="#createDoc"
-                      >
-                        Goods Received Note
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/Purchase/RMA"
-                        className="dropdown-item"
-                        onClick={() => handleLinkClick("/Purchase/RMA")}
-                        data-bs-toggle="modal"
-                        data-bs-target="#createDoc"
-                      >
-                        Return Merchandise Authorization
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/Purchase/Backorder"
-                        className="dropdown-item"
-                        onClick={() => handleLinkClick("/Purchase/Backorder")}
-                        data-bs-toggle="modal"
-                        data-bs-target="#createDoc"
-                      >
-                        Back Order
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+              <div className="dropdown">
+                <button
+                  className="btn btn-primary dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  + Create Document
+                </button>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      to="/Purchase/Purchase-Order"
+                      className="dropdown-item"
+                      onClick={() =>
+                        localStorage.setItem(
+                          "redirectDestination",
+                          "/Purchase/Purchase-Order"
+                        )
+                      }
+                      data-bs-toggle="modal"
+                      data-bs-target="#createDoc"
+                    >
+                      Purchase Order
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/Purchase/GRN"
+                      className="dropdown-item"
+                      onClick={() => handleLinkClick("/Purchase/GRN")}
+                      data-bs-toggle="modal"
+                      data-bs-target="#createDoc"
+                    >
+                      Goods Received Note
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/Purchase/RMA"
+                      className="dropdown-item"
+                      onClick={() => handleLinkClick("/Purchase/RMA")}
+                      data-bs-toggle="modal"
+                      data-bs-target="#createDoc"
+                    >
+                      Return Merchandise Authorization
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/Purchase/Backorder"
+                      className="dropdown-item"
+                      onClick={() => handleLinkClick("/Purchase/Backorder")}
+                      data-bs-toggle="modal"
+                      data-bs-target="#createDoc"
+                    >
+                      Back Order
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -113,42 +118,50 @@ const Purchase = () => {
 
           <div className="row g-3 align-items-center mb-4">
             <div className="col-12 col-md-2 me-4">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Transaction Type
               </label>
               <select
                 className="form-select rounded-pill border-primary"
                 aria-label="Default select example"
+                value={transactionType}
+                onChange={(e) => setTransactionType(e.target.value)}
               >
-                <option selected>Purchase Transaction</option>
+                <option value="Purchase Transaction">
+                  Purchase Transaction
+                </option>
               </select>
             </div>
             <div className="col-12 col-md-2 me-4">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Goods/Services
               </label>
               <select
                 className="form-select rounded-pill border-primary"
                 aria-label="Default select example"
+                value={goodsServices}
+                onChange={(e) => setGoodsServices(e.target.value)}
               >
-                <option selected>All</option>
+                <option value="All">All</option>
               </select>
             </div>
             <div className="col-12 col-md-2">
-              <label htmlFor="" className="mb-2" style={{ fontSize: ".8rem" }}>
+              <label className="mb-2" style={{ fontSize: ".8rem" }}>
                 Status
               </label>
               <select
                 className="form-select rounded-pill border-primary"
                 aria-label="Default select example"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
               >
-                <option selected>All</option>
+                <option value="All">All</option>
               </select>
             </div>
           </div>
 
           <div>
-            <table class="table table-hover border-top">
+            <table className="table table-hover border-top">
               <thead className="table-info">
                 <tr>
                   <th scope="col" className="fw-semibold">
@@ -177,7 +190,7 @@ const Purchase = () => {
                   <td className="text-primary">PO1</td>
                   <td>
                     <button className="btn btn-outline-success rounded-pill">
-                      Recieved
+                      Received
                     </button>
                   </td>
                   <td className="text-primary">22/03/2024, 7:00 pm</td>
@@ -214,11 +227,11 @@ const Purchase = () => {
         </div>
       </main>
 
-      {/* Modal create document*/}
-      <SelectSupplier></SelectSupplier>
+      {/* Modal create document */}
+      <SelectSupplier />
 
-      {/* Modal add company*/}
-      <AddCompany></AddCompany>
+      {/* Modal add company */}
+      <AddCompany />
     </div>
   );
 };
