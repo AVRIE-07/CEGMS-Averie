@@ -91,15 +91,18 @@ router.post("/add-user", async (req, res) => {
   console.log("Request body:", req.body); // Log the request body for debugging
   const { role, firstname, lastname, email, username, password } = req.body;
 
+  // Check if all required fields are provided
   if (!firstname || !lastname || !email || !username || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+  // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: "Invalid email format" });
   }
 
+  // Validate username format
   const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
   if (!usernameRegex.test(username)) {
     return res.status(400).json({
@@ -108,6 +111,7 @@ router.post("/add-user", async (req, res) => {
     });
   }
 
+  // Validate password format
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
   if (!passwordRegex.test(password)) {
     return res.status(400).json({
@@ -117,6 +121,7 @@ router.post("/add-user", async (req, res) => {
   }
 
   try {
+    // Check if a user with the same email or username already exists
     const existingUser = await UsersModel.findOne({
       $or: [{ email }, { username }],
     });
@@ -127,9 +132,10 @@ router.post("/add-user", async (req, res) => {
       });
     }
 
-    // Hash the password before saving
+    // Hash the password before saving it in the database
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
 
+    // Create a new user
     const newUser = new UsersModel({
       role,
       firstname,
@@ -139,6 +145,7 @@ router.post("/add-user", async (req, res) => {
       password: hashedPassword, // Store the hashed password
     });
 
+    // Save the user to the database
     await newUser.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {

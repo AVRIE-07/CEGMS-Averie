@@ -21,11 +21,11 @@ const Storage = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/InventoryApprovals" // Link to Inventory Approvals component
+                to="/Storage/StockMovement" // Link to Inventory Approvals component
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
-                Inventory Approvals
+                Stock Movement
               </Link>
             </li>
             <li className="nav-item">

@@ -82,17 +82,24 @@ function UserManagement() {
     };
 
     try {
+      let response;
       if (editMode) {
-        await axios.put(
+        response = await axios.put(
           `http://localhost:3001/users/update-user/${currentUserId}`,
           payload
         );
       } else {
-        await axios.post("http://localhost:3001/users/add-user", payload);
+        response = await axios.post(
+          "http://localhost:3001/users/add-user",
+          payload
+        );
       }
       fetchUsers();
       setSuccessModalVisible(true); // Show success modal
       handleCloseModal();
+      if (response.data.userId) {
+        console.log(`User ID: ${response.data.userId}`); // Display the generated user ID in the console or in the UI
+      }
     } catch (error) {
       const errorMsg =
         error.response && error.response.data && error.response.data.message

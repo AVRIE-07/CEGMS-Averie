@@ -23,7 +23,7 @@ import Refunded from "./components/Sales/Refunded.jsx";
 import Analysis from "./components/Sales/Analysis.jsx";
 import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
 
-import InventoryApprovals from "./components/Storage/InventoryApprovals.jsx"; // Adjust the path if needed
+import StockMovement from "./components/Storage/StockMovement.jsx"; // Adjust the path if needed
 import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
 
 function App() {
@@ -57,10 +57,7 @@ function App() {
           />
           <Route path="/Storage" element={<Storage />} />
 
-          <Route
-            path="/Storage/InventoryApprovals"
-            element={<InventoryApprovals />}
-          />
+          <Route path="/Storage/StockMovement" element={<StockMovement />} />
           <Route path="/Storage/Reports" element={<Reports />} />
         </Routes>
       </BrowserRouter>
