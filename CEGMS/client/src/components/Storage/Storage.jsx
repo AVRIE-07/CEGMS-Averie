@@ -82,6 +82,7 @@ const Storage = () => {
       setNewProduct({
         product_Category: product.product_Category,
         product_Description: product.product_Description,
+        product_Current_Stock: product.product_Current_Stock,
         product_Quantity: product.product_Quantity,
         product_Price: product.product_Price,
         product_Cost: product.product_Cost,
@@ -234,77 +235,107 @@ const Storage = () => {
         <div className="card shadow-sm px-4 py-3 mb-4">
           {/* Search Inputs */}
           <div className="row mb-3">
-            <div className="col">
-              <label htmlFor="searchCategory">Search by Category</label>
+            <div className="col" style={{ maxWidth: "300px" }}>
+              <label htmlFor="searchCategory" style={{ fontSize: 13 }}>
+                Search by Category
+              </label>
               <input
                 type="text"
                 id="searchCategory"
                 className="form-control"
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}
+                style={{ borderColor: "blue", borderRadius: 50 }}
+                placeholder="Enter Category.."
               />
             </div>
-            <div className="col">
-              <label htmlFor="searchDescription">Search by Description</label>
+            <div className="col" style={{ maxWidth: "300px" }}>
+              <label htmlFor="searchDescription" style={{ fontSize: 13 }}>
+                Search by Description
+              </label>
               <input
                 type="text"
                 id="searchDescription"
                 className="form-control"
                 value={searchDescription}
                 onChange={(e) => setSearchDescription(e.target.value)}
+                style={{ borderColor: "blue", borderRadius: 50 }}
+                placeholder="Enter Description.."
               />
             </div>
           </div>
 
           {/* Product Table */}
-          <div className="table-responsive">
+          <div className="table-responsive" style={{ marginTop: "20px" }}>
             {loading ? (
               <p>Loading products...</p>
             ) : error ? (
               <p className="text-danger">{error}</p>
             ) : filteredProducts.length > 0 ? (
-              <table className="table no-border">
-                <thead>
+              <table className="table table-hover border-top">
+                <thead className="table-info">
                   <tr>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Cost</th>
-                    <th>Minimum Stock Level</th>
-                    <th>Maximum Stock Level</th>
-                    <th>Actions</th>
+                    <th scope="col" className="fw-semibold">
+                      Category
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Description
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Current Stock
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Quantity
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Price
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Cost
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Minimum Stock Level
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Maximum Stock Level
+                    </th>
+                    <th scope="col" className="fw-semibold">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="fs-6 align-middle table-group-divider">
                   {filteredProducts.map((product) => (
                     <tr key={product._id}>
-                      <td style={{ color: "blue" }}>
+                      <th scope="row" className="text-primary">
                         {product.product_Category}
-                      </td>
-                      <td style={{ color: "blue" }}>
+                      </th>
+                      <td className="text-primary">
                         {product.product_Description}
                       </td>
-                      <td style={{ color: "blue" }}>
+                      <td className="text-primary">
+                        {product.product_Current_Stock}
+                      </td>
+                      <td className="text-primary">
                         {product.product_Quantity}
                       </td>
-                      <td style={{ color: "blue" }}>{product.product_Price}</td>
-                      <td style={{ color: "blue" }}>{product.product_Cost}</td>
-                      <td style={{ color: "blue" }}>
+                      <td className="text-primary">{product.product_Price}</td>
+                      <td className="text-primary">{product.product_Cost}</td>
+                      <td className="text-primary">
                         {product.product_Minimum_Stock_Level}
                       </td>
-                      <td style={{ color: "blue" }}>
+                      <td className="text-primary">
                         {product.product_Maximum_Stock_Level}
                       </td>
                       <td>
                         <button
-                          className="btn btn-warning btn-sm me-2"
+                          className="btn btn-outline-primary rounded-pill me-2"
                           onClick={() => handleModalShow(product)}
                         >
                           Edit
                         </button>
                         <button
-                          className="btn btn-danger btn-sm"
+                          className="btn btn-outline-danger rounded-pill"
                           onClick={() => handleDeleteProduct(product._id)}
                         >
                           Delete
@@ -354,6 +385,20 @@ const Storage = () => {
                   name="product_Description"
                   className="form-control"
                   value={newProduct.product_Description}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="product_Current_Stock" className="form-label">
+                  Current Stock
+                </label>
+                <input
+                  type="text"
+                  id="product_Current_Stock"
+                  name="product_Current_Stock"
+                  className="form-control"
+                  value={newProduct.product_Current_Stock}
                   onChange={handleInputChange}
                   required
                 />
