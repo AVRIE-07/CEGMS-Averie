@@ -4,6 +4,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes"); // Import your product routes
+const categoryRoutes = require("./routes/categoryRoutes");
+const manualAdjustmentRoutes = require("./routes/manualAdjustmentRoutes");
+const stockMovement = require("./routes/stockMovement");
 
 const app = express();
 app.use(express.json());
@@ -21,6 +24,9 @@ mongoose
 
 app.use("/users", userRoutes); // Prefix for user routes
 app.use("/api/products", productRoutes); // Prefix for product routes
+app.use("/api/category", categoryRoutes); // Prefix for product routes
+app.use("/api/manualAdjustment", manualAdjustmentRoutes); // Prefix for product routes
+app.use("/api/stockMovement", stockMovement); // Prefix for product routes
 
 // Start the server
 app.listen(3001, () => {

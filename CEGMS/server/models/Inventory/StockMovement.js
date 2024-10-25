@@ -5,11 +5,7 @@ const mongoose = require("mongoose");
 // Define the schema for productDetails
 const StockMovementSchema = new mongoose.Schema(
   {
-    manualAdjust_ID: {
-      type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
-      ref: "ManualAdjustment", // Reference to the Category collection
-      required: true,
-    },
+    manualAdjust_ID: { type: String, required: true },
     user_ID: {
       type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
       ref: "Users", // Reference to the Category collection

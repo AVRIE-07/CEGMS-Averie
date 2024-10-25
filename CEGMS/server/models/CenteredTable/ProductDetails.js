@@ -9,7 +9,6 @@ const ProductDetailsSchema = new mongoose.Schema(
     product_Current_Stock: { type: Number, required: true },
     product_Quantity: { type: Number, required: true },
     product_Price: { type: Number, required: true },
-    product_Cost: { type: Number, required: true },
     product_Minimum_Stock_Level: { type: Number, required: true },
     product_Maximum_Stock_Level: { type: Number, required: true },
   },

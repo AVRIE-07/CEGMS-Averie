@@ -4,6 +4,9 @@ import styles from "./Storage.module.css";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Modal, Button, Dropdown } from "react-bootstrap";
+import ProductTable from "./ProductTable";
+import ProductModal from "./ProductModal";
+import AddCategoryModal from "./AddCategoryModal"; // Adjust the path as needed
 
 const Storage = () => {
   const [products, setProducts] = useState([]);
@@ -15,13 +18,51 @@ const Storage = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [searchCategory, setSearchCategory] = useState(""); // For Category search
   const [searchDescription, setSearchDescription] = useState(""); // For Description search
+  const [selectedProducts, setSelectedProducts] = useState([]); // State for Selected Products that will be deleted
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [overStockCount, setOverStockCount] = useState(0);
+  const [selectAll, setSelectAll] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/category");
+      setCategories(response.data);
+    } catch (error) {
+      setError("Could not fetch categories. Please try again later.");
+    }
+  };
+  const handleShowCategoryModal = () => {
+    setShowCategoryModal(true);
+  };
+
+  const handleCloseCategoryModal = () => {
+    setShowCategoryModal(false);
+  };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/category");
+        setCategories(response.data);
+      } catch (error) {
+        setError("Could not fetch categories. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const [newProduct, setNewProduct] = useState({
     product_Category: "",
     product_Description: "",
+    product_Current_Stock: "",
     product_Quantity: "",
     product_Price: "",
-    product_Cost: "",
     product_Minimum_Stock_Level: "",
     product_Maximum_Stock_Level: "",
   });
@@ -51,8 +92,10 @@ const Storage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      let response;
       if (isEditMode) {
-        const response = await axios.put(
+        // Update product logic
+        response = await axios.put(
           `http://localhost:3001/api/products/${currentProductId}`,
           newProduct
         );
@@ -62,11 +105,23 @@ const Storage = () => {
           )
         );
       } else {
-        const response = await axios.post(
+        // Create a new product
+        response = await axios.post(
           "http://localhost:3001/api/products",
           newProduct
         );
-        setProducts((prevProducts) => [...prevProducts, response.data]);
+        const createdProduct = response.data;
+        setProducts((prevProducts) => [...prevProducts, createdProduct]);
+
+        // Add manual adjustment entry for new product
+        await axios.post("http://localhost:3001/api/manualAdjustment", {
+          product_ID: createdProduct.product_Id,
+          adj_Description: "Initial stock entry",
+          adj_Category: createdProduct.product_Category,
+          adj_Quantity: createdProduct.product_Quantity,
+          adj_Price: createdProduct.product_Price,
+          adj_Adjustment_Type: "Add", // or other type based on context
+        });
       }
       handleModalClose();
       resetForm();
@@ -85,7 +140,6 @@ const Storage = () => {
         product_Current_Stock: product.product_Current_Stock,
         product_Quantity: product.product_Quantity,
         product_Price: product.product_Price,
-        product_Cost: product.product_Cost,
         product_Minimum_Stock_Level: product.product_Minimum_Stock_Level,
         product_Maximum_Stock_Level: product.product_Maximum_Stock_Level,
       });
@@ -102,9 +156,9 @@ const Storage = () => {
     setNewProduct({
       product_Category: "",
       product_Description: "",
+      product_Current_Stock: "",
       product_Quantity: "",
       product_Price: "",
-      product_Cost: "",
       product_Minimum_Stock_Level: "",
       product_Maximum_Stock_Level: "",
     });
@@ -128,7 +182,7 @@ const Storage = () => {
     const matchesCategory = product.product_Category
       .toLowerCase()
       .includes(searchCategory.toLowerCase());
-    const matchesDescription = product.product_Description
+    const matchesDescription = (product.product_Description || "")
       .toLowerCase()
       .includes(searchDescription.toLowerCase());
 
@@ -154,6 +208,84 @@ const Storage = () => {
 
     return matchesCategory && matchesDescription; // Default return for "All" or if no filter is applied
   });
+
+  const handleSelectProduct = (id) => {
+    setSelectedProducts((prevSelectedProducts) =>
+      prevSelectedProducts.includes(id)
+        ? prevSelectedProducts.filter((productId) => productId !== id)
+        : [...prevSelectedProducts, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedProducts([]); // Deselect all
+    } else {
+      setSelectedProducts(products.map((product) => product._id)); // Select all
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (
+      selectedProducts.length > 0 &&
+      window.confirm("Are you sure you want to delete the selected products?")
+    ) {
+      try {
+        for (let id of selectedProducts) {
+          await axios.delete(`http://localhost:3001/api/products/${id}`);
+        }
+        setProducts((prevProducts) =>
+          prevProducts.filter(
+            (product) => !selectedProducts.includes(product._id)
+          )
+        );
+        setSelectedProducts([]); // Clear selection after deletion
+        setSelectAll(false); // Reset select all checkbox
+      } catch (error) {
+        setError("Could not delete selected products. Please try again.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/products");
+        const fetchedProducts = response.data;
+
+        // Calculate totals
+        let quantitySum = 0;
+        let priceSum = 0;
+        let lowStock = 0;
+        let overStock = 0;
+
+        fetchedProducts.forEach((product) => {
+          quantitySum += product.product_Quantity;
+          priceSum += product.product_Quantity * product.product_Price;
+          if (product.product_Quantity < product.product_Minimum_Stock_Level) {
+            lowStock += 1;
+          }
+          if (product.product_Quantity > product.product_Maximum_Stock_Level) {
+            overStock += 1;
+          }
+        });
+
+        // Update products and totals
+        setProducts(fetchedProducts);
+        setTotalQuantity(quantitySum);
+        setTotalPrice(priceSum);
+        setLowStockCount(lowStock);
+        setOverStockCount(overStock);
+      } catch (error) {
+        setError("Could not fetch products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <div className={styles.dashboard}>
@@ -190,31 +322,45 @@ const Storage = () => {
           </ul>
         </div>
 
-        <div className="card shadow-sm py-3 px-4 mb-3">
+        <div className="card shadow-sm py-4 px-5 mb-4">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
-              <i className="bi bi-bar-chart-fill fs-3"></i>
+              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
-            <div>
+            <div className="d-flex align-items-center">
               <Button
-                onClick={() => handleModalShow()}
-                className="btn btn-primary"
+                onClick={handleDeleteSelected}
+                className="btn btn-danger me-2"
+                disabled={selectedProducts.length === 0}
               >
-                + Add Product
+                Delete Selected
               </Button>
+              <Dropdown>
+                <Dropdown.Toggle variant="primary" id="dropdown-basic">
+                  Actions
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => handleModalShow()}>
+                    Add Product
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleShowCategoryModal()}>
+                    Add Category
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
           </div>
         </div>
-
         <div
-          className="card shadow-sm px-4 py-1"
+          className="card shadow-sm px-4 py-2"
           style={{ backgroundColor: "#50504D" }}
         >
           {/* Dropdown for filtering by status */}
           <div
-            className="d-flex align-items-center"
-            style={{ height: "50px" }} // Adjust this height as needed
+            className="d-flex justify-content-between align-items-center"
+            style={{ height: "50px" }}
           >
             <Dropdown onSelect={(e) => setStatusFilter(e)}>
               <Dropdown.Toggle variant="secondary" id="dropdown-basic">
@@ -229,6 +375,28 @@ const Storage = () => {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+
+            {/* Statistics */}
+            <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
+              <div className="me-4 px-3 py-2 bg-secondary rounded">
+                <strong style={{ fontWeight: "normal" }}>
+                  Total Quantity:
+                </strong>{" "}
+                {totalQuantity}
+              </div>
+              <div className="me-4 px-3 py-2 bg-secondary rounded">
+                <strong style={{ fontWeight: "normal" }}>Total Price:</strong> $
+                {totalPrice.toFixed(2)}
+              </div>
+              <div className="me-4 px-3 py-2 bg-secondary rounded">
+                <strong style={{ fontWeight: "normal" }}>Low Stock:</strong>{" "}
+                {lowStockCount}
+              </div>
+              <div className="px-3 py-2 bg-secondary rounded">
+                <strong style={{ fontWeight: "normal" }}>Over Stock:</strong>{" "}
+                {overStockCount}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -266,230 +434,33 @@ const Storage = () => {
           </div>
 
           {/* Product Table */}
-          <div className="table-responsive" style={{ marginTop: "20px" }}>
-            {loading ? (
-              <p>Loading products...</p>
-            ) : error ? (
-              <p className="text-danger">{error}</p>
-            ) : filteredProducts.length > 0 ? (
-              <table className="table table-hover border-top">
-                <thead className="table-info">
-                  <tr>
-                    <th scope="col" className="fw-semibold">
-                      Category
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Description
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Current Stock
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Quantity
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Price
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Cost
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Minimum Stock Level
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Maximum Stock Level
-                    </th>
-                    <th scope="col" className="fw-semibold">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="fs-6 align-middle table-group-divider">
-                  {filteredProducts.map((product) => (
-                    <tr key={product._id}>
-                      <th scope="row" className="text-primary">
-                        {product.product_Category}
-                      </th>
-                      <td className="text-primary">
-                        {product.product_Description}
-                      </td>
-                      <td className="text-primary">
-                        {product.product_Current_Stock}
-                      </td>
-                      <td className="text-primary">
-                        {product.product_Quantity}
-                      </td>
-                      <td className="text-primary">{product.product_Price}</td>
-                      <td className="text-primary">{product.product_Cost}</td>
-                      <td className="text-primary">
-                        {product.product_Minimum_Stock_Level}
-                      </td>
-                      <td className="text-primary">
-                        {product.product_Maximum_Stock_Level}
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-outline-primary rounded-pill me-2"
-                          onClick={() => handleModalShow(product)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-outline-danger rounded-pill"
-                          onClick={() => handleDeleteProduct(product._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No products found.</p>
-            )}
-          </div>
+          <ProductTable
+            filteredProducts={filteredProducts}
+            loading={loading}
+            error={error}
+            selectAll={selectAll}
+            handleSelectAll={handleSelectAll}
+            handleSelectProduct={handleSelectProduct}
+            handleModalShow={handleModalShow}
+            selectedProducts={selectedProducts}
+          />
         </div>
 
-        {/* Modal for adding/editing products */}
-        <Modal show={showModal} onHide={handleModalClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {isEditMode ? "Edit Product" : "Add Product"}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <form onSubmit={handleSubmit}>
-              {/* Form Fields for Product Details */}
-              <div className="mb-3">
-                <label htmlFor="product_Category" className="form-label">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  id="product_Category"
-                  name="product_Category"
-                  className="form-control"
-                  value={newProduct.product_Category}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="product_Description" className="form-label">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  id="product_Description"
-                  name="product_Description"
-                  className="form-control"
-                  value={newProduct.product_Description}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="product_Current_Stock" className="form-label">
-                  Current Stock
-                </label>
-                <input
-                  type="text"
-                  id="product_Current_Stock"
-                  name="product_Current_Stock"
-                  className="form-control"
-                  value={newProduct.product_Current_Stock}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="product_Quantity" className="form-label">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  id="product_Quantity"
-                  name="product_Quantity"
-                  className="form-control"
-                  value={newProduct.product_Quantity}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="product_Price" className="form-label">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  id="product_Price"
-                  name="product_Price"
-                  className="form-control"
-                  value={newProduct.product_Price}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="product_Cost" className="form-label">
-                  Cost
-                </label>
-                <input
-                  type="number"
-                  id="product_Cost"
-                  name="product_Cost"
-                  className="form-control"
-                  value={newProduct.product_Cost}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label
-                  htmlFor="product_Minimum_Stock_Level"
-                  className="form-label"
-                >
-                  Minimum Stock Level
-                </label>
-                <input
-                  type="number"
-                  id="product_Minimum_Stock_Level"
-                  name="product_Minimum_Stock_Level"
-                  className="form-control"
-                  value={newProduct.product_Minimum_Stock_Level}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label
-                  htmlFor="product_Maximum_Stock_Level"
-                  className="form-label"
-                >
-                  Maximum Stock Level
-                </label>
-                <input
-                  type="number"
-                  id="product_Maximum_Stock_Level"
-                  name="product_Maximum_Stock_Level"
-                  className="form-control"
-                  value={newProduct.product_Maximum_Stock_Level}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleModalClose}>
-                  Close
-                </Button>
-                <Button variant="primary" type="submit">
-                  {isEditMode ? "Update Product" : "Add Product"}
-                </Button>
-              </Modal.Footer>
-            </form>
-          </Modal.Body>
-        </Modal>
+        {/* Product Modal */}
+        <ProductModal
+          showModal={showModal}
+          handleModalClose={handleModalClose}
+          isEditMode={isEditMode}
+          newProduct={newProduct}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit}
+          categories={categories} // Pass categories here
+        />
+        <AddCategoryModal
+          show={showCategoryModal}
+          handleClose={handleCloseCategoryModal}
+          fetchCategories={fetchCategories}
+        />
       </main>
     </div>
   );
