@@ -1,16 +1,77 @@
-import React, { useState } from "react"; // Import useState from React
+import React, { useEffect, useState } from "react";
 import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Storage.module.css";
 import { Link } from "react-router-dom";
-import { Dropdown } from "react-bootstrap"; // Import Dropdown from react-bootstrap
+import { Dropdown } from "react-bootstrap";
+import axios from "axios";
 
 const Storage = () => {
-  // State for search inputs
-  const [searchMovementID, setSearchMovementID] = useState("");
-  const [searchProductID, setSearchProductID] = useState("");
-  const [searchProductName, setSearchProductName] = useState("");
-  const [searchMovementDate, setSearchMovementDate] = useState("");
-  const [searchHandledBy, setSearchHandledBy] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAction, setSelectedAction] = useState(""); // State for selected action
+  const [stockMovements, setStockMovements] = useState([]);
+  const [filteredMovements, setFilteredMovements] = useState([]);
+
+  const fetchStockMovements = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/stockMovement"
+      );
+      setStockMovements(response.data);
+      setFilteredMovements(response.data); // Initially set filtered to all movements
+    } catch (error) {
+      console.error("Error fetching stock movements:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStockMovements();
+  }, []);
+
+  // Function to handle search
+  const handleSearch = (event) => {
+    const value = event.target.value.toLowerCase();
+    setSearchQuery(value);
+    filterMovements(value, selectedAction); // Call filterMovements with the new search value
+  };
+
+  // Function to handle dropdown selection
+  const handleSelectAction = (action) => {
+    setSelectedAction(action);
+    filterMovements(searchQuery, action); // Call filterMovements with the selected action
+  };
+
+  // Function to filter stock movements
+  const filterMovements = (search, action) => {
+    const filtered = stockMovements.filter((movement) => {
+      const matchesSearch =
+        movement.movement_ID.toString().toLowerCase().includes(search) ||
+        movement.product_ID.toString().toLowerCase().includes(search) ||
+        movement.adj_Description.toLowerCase().includes(search) ||
+        movement.adj_Adjustment_Type.toLowerCase().includes(search) ||
+        new Date(movement.adj_Date).toLocaleDateString().includes(search); // Filter by date string
+
+      const matchesAction = action
+        ? movement.adj_Adjustment_Type === action
+        : true; // Filter by selected action
+
+      return matchesSearch && matchesAction; // Return true if both conditions are met
+    });
+
+    setFilteredMovements(filtered);
+  };
+
+  const getRowColor = (action) => {
+    switch (action) {
+      case "Added":
+        return "table-success";
+      case "Sold":
+        return "table-danger";
+      case "Returned":
+        return "table-warning";
+      default:
+        return "";
+    }
+  };
 
   return (
     <div className={styles.dashboard}>
@@ -20,7 +81,7 @@ const Storage = () => {
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/Storage" // Link to Products component
+                to="/Storage"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -29,7 +90,7 @@ const Storage = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/StockMovement" // Link to Inventory Approvals component
+                to="/Storage/StockMovement"
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Stock Movement
@@ -37,7 +98,7 @@ const Storage = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports" // Link to Reports component
+                to="/Storage/Reports"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -60,13 +121,33 @@ const Storage = () => {
           className="card shadow-sm px-4 py-1"
           style={{ backgroundColor: "#50504D" }}
         >
-          {/* Dropdown for filtering by stock action */}
-          <div className="d-flex align-items-center" style={{ height: "50px" }}>
-            <Dropdown>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Stock Action Filter
+          <div className="d-flex align-items-center" style={{ height: "68px" }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearch}
+              placeholder="Search..."
+              className="form-control"
+              style={{ width: "300px" }}
+            />
+            <Dropdown className="ms-3" onSelect={handleSelectAction}>
+              <Dropdown.Toggle
+                style={{
+                  backgroundColor: "#343a40", // Dark background for the toggle button
+                  color: "#ffffff", // White text color
+                  border: "none", // Remove border if needed
+                }}
+                variant="secondary"
+                id="dropdown-basic"
+              >
+                {selectedAction || "Stock Action Filter"}
               </Dropdown.Toggle>
-              <Dropdown.Menu>
+              <Dropdown.Menu
+                style={{
+                  backgroundColor: "#9df1fa", // Background for dropdown items
+                  border: "none", // Optional: remove border
+                }}
+              >
                 <Dropdown.Item eventKey="">All Actions</Dropdown.Item>
                 <Dropdown.Item eventKey="Added">Added</Dropdown.Item>
                 <Dropdown.Item eventKey="Sold">Sold</Dropdown.Item>
@@ -77,80 +158,6 @@ const Storage = () => {
         </div>
 
         <div className="card shadow-sm px-4 py-3">
-          {/* Search Inputs in one line maximizing width */}
-          <div className="row mb-3 g-3">
-            <div className="col">
-              <label htmlFor="searchMovementID" style={{ fontSize: 13 }}>
-                Movement ID
-              </label>
-              <input
-                type="text"
-                id="searchMovementID"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchMovementID}
-                onChange={(e) => setSearchMovementID(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="ID"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchProductID" style={{ fontSize: 13 }}>
-                Product ID
-              </label>
-              <input
-                type="text"
-                id="searchProductID"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchProductID}
-                onChange={(e) => setSearchProductID(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="ID"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchProductName" style={{ fontSize: 13 }}>
-                Product Name
-              </label>
-              <input
-                type="text"
-                id="searchProductName"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchProductName}
-                onChange={(e) => setSearchProductName(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Name"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchMovementDate" style={{ fontSize: 13 }}>
-                Movement Date
-              </label>
-              <input
-                type="date"
-                id="searchMovementDate"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchMovementDate}
-                onChange={(e) => setSearchMovementDate(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchHandledBy" style={{ fontSize: 13 }}>
-                Handled By
-              </label>
-              <input
-                type="text"
-                id="searchHandledBy"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchHandledBy}
-                onChange={(e) => setSearchHandledBy(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Name"
-              />
-            </div>
-          </div>
-
-          {/* Table with responsiveness */}
           <div className="table-responsive">
             <table className="table table-hover border-top">
               <thead className="table-info">
@@ -173,39 +180,26 @@ const Storage = () => {
                   <th scope="col" className="fw-semibold">
                     Movement Date
                   </th>
-                  <th scope="col" className="fw-semibold">
-                    Handled By
-                  </th>
                 </tr>
               </thead>
               <tbody className="fs-6 align-middle table-group-divider">
-                <tr>
-                  <td className="text-primary">M001</td>
-                  <td className="text-primary">P001</td>
-                  <td className="text-primary">Laptop</td>
-                  <td className="text-success">Added</td>
-                  <td className="text-primary">10</td>
-                  <td className="text-primary">01/10/2024</td>
-                  <td className="text-primary">Alice Smith</td>
-                </tr>
-                <tr>
-                  <td className="text-primary">M002</td>
-                  <td className="text-primary">P002</td>
-                  <td className="text-primary">Monitor</td>
-                  <td className="text-danger">Sold</td>
-                  <td className="text-primary">5</td>
-                  <td className="text-primary">02/10/2024</td>
-                  <td className="text-primary">Bob Johnson</td>
-                </tr>
-                <tr>
-                  <td className="text-primary">M003</td>
-                  <td className="text-primary">P003</td>
-                  <td className="text-primary">Keyboard</td>
-                  <td className="text-warning">Returned</td>
-                  <td className="text-primary">3</td>
-                  <td className="text-primary">03/10/2024</td>
-                  <td className="text-primary">Charlie Brown</td>
-                </tr>
+                {filteredMovements.map((movement) => (
+                  <tr
+                    key={movement.movement_ID}
+                    className={getRowColor(movement.adj_Adjustment_Type)}
+                  >
+                    <td className="text-primary">{movement.movement_ID}</td>
+                    <td className="text-primary">{movement.product_ID}</td>
+                    <td className="text-primary">{movement.adj_Description}</td>
+                    <td className="text-primary">
+                      {movement.adj_Adjustment_Type}
+                    </td>
+                    <td className="text-primary">{movement.adj_Quantity}</td>
+                    <td className="text-primary">
+                      {new Date(movement.adj_Date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

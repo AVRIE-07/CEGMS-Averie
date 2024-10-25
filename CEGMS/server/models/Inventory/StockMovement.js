@@ -5,17 +5,35 @@ const mongoose = require("mongoose");
 // Define the schema for productDetails
 const StockMovementSchema = new mongoose.Schema(
   {
-    manualAdjust_ID: { type: String, required: true },
-    user_ID: {
-      type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
-      ref: "Users", // Reference to the Category collection
+    movement_ID: { type: String },
+    product_ID: {
+      type: String,
       required: true,
     },
-    adj_Quantity: { type: Number, required: true },
-    stock_Date: { type: String, required: true },
-    adj_Adjustment_Type: { type: String, required: true },
-
-    stock_Status: { type: String, required: true },
+    adj_Description: {
+      type: String,
+      required: true,
+    },
+    adj_Category: {
+      type: String,
+      required: true,
+    },
+    adj_Quantity: {
+      type: Number,
+      required: true,
+    },
+    adj_Price: {
+      type: Number,
+      required: true,
+    },
+    adj_Adjustment_Type: {
+      type: String,
+      required: true,
+    },
+    adj_Date: {
+      type: Date, // Change to Date type
+      default: Date.now, // Automatically set to current date
+    },
   },
   {
     collection: "stockMovement", // Specify the collection name explicitly

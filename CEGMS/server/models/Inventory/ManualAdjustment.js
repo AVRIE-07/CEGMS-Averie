@@ -33,6 +33,10 @@ const ManualAdjustmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    adj_Date: {
+      type: Date, // Change to Date type
+      default: Date.now, // Automatically set to current date
+    },
   },
   {
     collection: "manualAdjustment", // Explicitly specify collection name

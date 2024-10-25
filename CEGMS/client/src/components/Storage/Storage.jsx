@@ -27,6 +27,10 @@ const Storage = () => {
   const [categories, setCategories] = useState([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
+  // Handle category filter change
+  const handleCategoryFilterChange = (category) => {
+    setSearchCategory(category);
+  };
   const fetchCategories = async () => {
     try {
       const response = await axios.get("http://localhost:3001/api/category");
@@ -120,7 +124,17 @@ const Storage = () => {
           adj_Category: createdProduct.product_Category,
           adj_Quantity: createdProduct.product_Quantity,
           adj_Price: createdProduct.product_Price,
-          adj_Adjustment_Type: "Add", // or other type based on context
+          adj_Adjustment_Type: "Added", // or other type based on context
+        });
+
+        // Add manual adjustment entry for new product
+        await axios.post("http://localhost:3001/api/stockMovement", {
+          product_ID: createdProduct.product_Id,
+          adj_Description: "Initial stock entry",
+          adj_Category: createdProduct.product_Category,
+          adj_Quantity: createdProduct.product_Quantity,
+          adj_Price: createdProduct.product_Price,
+          adj_Adjustment_Type: "Added", // or other type based on context
         });
       }
       handleModalClose();
@@ -322,7 +336,7 @@ const Storage = () => {
           </ul>
         </div>
 
-        <div className="card shadow-sm py-4 px-5 mb-4">
+        <div className="card shadow-sm py-3 px-5 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
               <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
@@ -359,14 +373,68 @@ const Storage = () => {
         >
           {/* Dropdown for filtering by status */}
           <div
-            className="d-flex justify-content-between align-items-center"
-            style={{ height: "50px" }}
+            className="d-flex align-items-center" // Remove justify-content-between to avoid extra space
+            style={{ height: "60px" }}
           >
+            <input
+              type="text"
+              id="searchDescription"
+              className="form-control me-2" // Added margin-end for spacing
+              value={searchDescription}
+              onChange={(e) => setSearchDescription(e.target.value)}
+              style={{ borderRadius: 5, width: 300, marginRight: 0 }} // Set marginRight to 0
+              placeholder="Enter Description.."
+            />
+            <Dropdown className="me-3">
+              <Dropdown.Toggle
+                id="dropdown-basic"
+                style={{
+                  backgroundColor: "#343a40", // Dark background for the toggle button
+                  color: "#ffffff", // White text color
+                  border: "none", // Remove border if needed
+                }}
+              >
+                Filter by Category
+              </Dropdown.Toggle>
+              <Dropdown.Menu
+                style={{
+                  backgroundColor: "#9df1fa", // Background for dropdown items
+                  border: "none", // Optional: remove border
+                }}
+              >
+                <Dropdown.Item onClick={() => handleCategoryFilterChange("")}>
+                  All Categories
+                </Dropdown.Item>
+                {categories.map((category) => (
+                  <Dropdown.Item
+                    key={category._id}
+                    onClick={() =>
+                      handleCategoryFilterChange(category.product_Category)
+                    }
+                  >
+                    {category.product_Category}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+
             <Dropdown onSelect={(e) => setStatusFilter(e)}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+              <Dropdown.Toggle
+                id="dropdown-basic"
+                style={{
+                  backgroundColor: "#343a40", // Dark background for the toggle button
+                  color: "#ffffff", // White text color
+                  border: "none", // Remove border if needed
+                }}
+              >
                 Filter by Status
               </Dropdown.Toggle>
-              <Dropdown.Menu>
+              <Dropdown.Menu
+                style={{
+                  backgroundColor: "#9df1fa ", // Background for dropdown items
+                  border: "none", // Optional: remove border
+                }}
+              >
                 <Dropdown.Item eventKey="">All</Dropdown.Item>
                 <Dropdown.Item eventKey="Low Stock">Low Stock</Dropdown.Item>
                 <Dropdown.Item eventKey="In Stock">In Stock</Dropdown.Item>
@@ -378,21 +446,21 @@ const Storage = () => {
 
             {/* Statistics */}
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
-              <div className="me-4 px-3 py-2 bg-secondary rounded">
+              <div className="me-4 px-3 py-2 bg-dark rounded">
                 <strong style={{ fontWeight: "normal" }}>
                   Total Quantity:
                 </strong>{" "}
                 {totalQuantity}
               </div>
-              <div className="me-4 px-3 py-2 bg-secondary rounded">
+              <div className="me-4 px-3 py-2 bg-dark rounded">
                 <strong style={{ fontWeight: "normal" }}>Total Price:</strong> $
                 {totalPrice.toFixed(2)}
               </div>
-              <div className="me-4 px-3 py-2 bg-secondary rounded">
+              <div className="me-4 px-3 py-2 bg-dark rounded">
                 <strong style={{ fontWeight: "normal" }}>Low Stock:</strong>{" "}
                 {lowStockCount}
               </div>
-              <div className="px-3 py-2 bg-secondary rounded">
+              <div className="px-3 py-2 bg-dark rounded">
                 <strong style={{ fontWeight: "normal" }}>Over Stock:</strong>{" "}
                 {overStockCount}
               </div>
@@ -401,38 +469,6 @@ const Storage = () => {
         </div>
 
         <div className="card shadow-sm px-4 py-3 mb-4">
-          {/* Search Inputs */}
-          <div className="row mb-3">
-            <div className="col" style={{ maxWidth: "300px" }}>
-              <label htmlFor="searchCategory" style={{ fontSize: 13 }}>
-                Search by Category
-              </label>
-              <input
-                type="text"
-                id="searchCategory"
-                className="form-control"
-                value={searchCategory}
-                onChange={(e) => setSearchCategory(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Enter Category.."
-              />
-            </div>
-            <div className="col" style={{ maxWidth: "300px" }}>
-              <label htmlFor="searchDescription" style={{ fontSize: 13 }}>
-                Search by Description
-              </label>
-              <input
-                type="text"
-                id="searchDescription"
-                className="form-control"
-                value={searchDescription}
-                onChange={(e) => setSearchDescription(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Enter Description.."
-              />
-            </div>
-          </div>
-
           {/* Product Table */}
           <ProductTable
             filteredProducts={filteredProducts}
