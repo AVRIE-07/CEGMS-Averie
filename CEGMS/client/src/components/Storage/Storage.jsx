@@ -26,6 +26,11 @@ const Storage = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [categories, setCategories] = useState([]);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Unified search term
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   // Handle category filter change
   const handleCategoryFilterChange = (category) => {
@@ -212,9 +217,12 @@ const Storage = () => {
     const matchesCategory = product.product_Category
       .toLowerCase()
       .includes(searchCategory.toLowerCase());
+    const matchesId = (product.product_Id || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesDescription = (product.product_Description || "")
       .toLowerCase()
-      .includes(searchDescription.toLowerCase());
+      .includes(searchTerm.toLowerCase());
 
     if (statusFilter === "Low Stock") {
       return (
@@ -236,7 +244,7 @@ const Storage = () => {
       );
     }
 
-    return matchesCategory && matchesDescription; // Default return for "All" or if no filter is applied
+    return (matchesCategory && matchesId) || matchesDescription; // Default return for "All" or if no filter is applied
   });
 
   const handleSelectProduct = (id) => {
@@ -394,13 +402,13 @@ const Storage = () => {
           >
             <input
               type="text"
-              id="searchDescription"
-              className="form-control me-2" // Added margin-end for spacing
-              value={searchDescription}
-              onChange={(e) => setSearchDescription(e.target.value)}
-              style={{ borderRadius: 5, width: 300, marginRight: 0 }} // Set marginRight to 0
-              placeholder="Enter Description.."
+              placeholder="Search by ID or Description"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="form-control me-2" // Add Bootstrap classes for styling
+              style={{ borderRadius: 5, width: 300, marginRight: 0 }}
             />
+
             <Dropdown className="me-3">
               <Dropdown.Toggle
                 id="dropdown-basic"
