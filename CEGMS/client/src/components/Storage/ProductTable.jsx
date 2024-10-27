@@ -29,6 +29,9 @@ const ProductTable = ({
                 />
               </th>
               <th scope="col" className="fw-semibold">
+                Product ID
+              </th>
+              <th scope="col" className="fw-semibold">
                 Category
               </th>
               <th scope="col" className="fw-semibold">
@@ -50,7 +53,7 @@ const ProductTable = ({
                 Max Stock Level
               </th>
               <th scope="col" className="fw-semibold">
-                Actions
+                Edit
               </th>
             </tr>
           </thead>
@@ -64,6 +67,7 @@ const ProductTable = ({
                     onChange={() => handleSelectProduct(product._id)}
                   />
                 </td>
+                <td className="text-primary">{product.product_Id}</td>
                 <td className="text-primary">{product.product_Category}</td>
                 <td className="text-primary">{product.product_Description}</td>
                 <td className="text-primary">
@@ -79,11 +83,11 @@ const ProductTable = ({
                 </td>
                 <td>
                   <Button
-                    variant="warning"
+                    variant="secondary"
                     onClick={() => handleModalShow(product)}
                     className="me-2 rounded-pill"
                   >
-                    Edit
+                    <i class="bi bi-pencil-square"></i>
                   </Button>
                 </td>
               </tr>

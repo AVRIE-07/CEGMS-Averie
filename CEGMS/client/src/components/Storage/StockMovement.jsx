@@ -10,6 +10,9 @@ const Storage = () => {
   const [selectedAction, setSelectedAction] = useState(""); // State for selected action
   const [stockMovements, setStockMovements] = useState([]);
   const [filteredMovements, setFilteredMovements] = useState([]);
+  const [addedCount, setAddedCount] = useState(0);
+  const [soldCount, setSoldCount] = useState(0);
+  const [returnedCount, setReturnedCount] = useState(0);
 
   const fetchStockMovements = async () => {
     try {
@@ -18,6 +21,32 @@ const Storage = () => {
       );
       setStockMovements(response.data);
       setFilteredMovements(response.data); // Initially set filtered to all movements
+
+      // Calculate totals
+      let added = 0;
+      let sold = 0;
+      let returned = 0;
+
+      response.data.forEach((movement) => {
+        switch (movement.adj_Adjustment_Type) {
+          case "Added":
+            added += 1;
+            break;
+          case "Sold":
+            sold += 1;
+            break;
+          case "Returned":
+            returned += 1;
+            break;
+          default:
+            break;
+        }
+      });
+
+      // Update state with calculated totals
+      setAddedCount(added);
+      setSoldCount(sold);
+      setReturnedCount(returned);
     } catch (error) {
       console.error("Error fetching stock movements:", error);
     }
@@ -111,7 +140,7 @@ const Storage = () => {
         <div className="card shadow-sm py-3 px-4 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
-              <i className="bi bi-bar-chart-fill fs-3"></i>
+              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
           </div>
@@ -154,6 +183,38 @@ const Storage = () => {
                 <Dropdown.Item eventKey="Returned">Returned</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+            <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
+              <div className="me-4 px-3 py-2 bg-dark rounded">
+                <strong style={{ fontWeight: "normal" }}>
+                  <i
+                    className="bi bi-box-fill"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  Added:
+                </strong>{" "}
+                {addedCount}
+              </div>
+              <div className="me-4 px-3 py-2 bg-dark rounded">
+                <strong style={{ fontWeight: "normal" }}>
+                  <i
+                    className="bi bi-box-fill"
+                    style={{ marginRight: "10px" }}
+                  ></i>
+                  Sold:
+                </strong>
+                {soldCount}
+              </div>
+              <div className="me-4 px-3 py-2 bg-dark rounded">
+                <strong style={{ fontWeight: "normal" }}>
+                  <i
+                    className="bi bi-box-fill"
+                    style={{ marginRight: "10px" }}
+                  />
+                  Returned:
+                </strong>{" "}
+                {returnedCount}
+              </div>
+            </div>
           </div>
         </div>
 

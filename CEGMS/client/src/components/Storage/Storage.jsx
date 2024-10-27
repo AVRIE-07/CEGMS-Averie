@@ -97,6 +97,22 @@ const Storage = () => {
     e.preventDefault();
     try {
       let response;
+      // Determine the status based on quantity levels
+      let productStatus;
+      if (
+        newProduct.product_Quantity < newProduct.product_Minimum_Stock_Level
+      ) {
+        productStatus = "Low Stock";
+      } else if (
+        newProduct.product_Quantity > newProduct.product_Maximum_Stock_Level
+      ) {
+        productStatus = "Overstocked";
+      } else {
+        productStatus = "In Stock";
+      }
+
+      // Include the calculated status in the product object
+      const productData = { ...newProduct, product_Status: productStatus };
       if (isEditMode) {
         // Update product logic
         response = await axios.put(
@@ -112,7 +128,7 @@ const Storage = () => {
         // Create a new product
         response = await axios.post(
           "http://localhost:3001/api/products",
-          newProduct
+          productData
         );
         const createdProduct = response.data;
         setProducts((prevProducts) => [...prevProducts, createdProduct]);
@@ -448,20 +464,36 @@ const Storage = () => {
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
               <div className="me-4 px-3 py-2 bg-dark rounded">
                 <strong style={{ fontWeight: "normal" }}>
+                  <i class="bi bi-activity" style={{ marginRight: "10px" }}></i>
                   Total Quantity:
                 </strong>{" "}
                 {totalQuantity}
               </div>
               <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>Total Price:</strong> $
-                {totalPrice.toFixed(2)}
+                <strong style={{ fontWeight: "normal" }}>
+                  <i className="bi bi-cash" style={{ marginRight: "10px" }}></i>
+                  Total Price:
+                </strong>{" "}
+                ${totalPrice.toFixed(2)}
               </div>
               <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>Low Stock:</strong>{" "}
+                <strong style={{ fontWeight: "normal" }}>
+                  <i
+                    className="bi bi-box-fill"
+                    style={{ marginRight: "10px" }}
+                  />
+                  Low Stock:
+                </strong>{" "}
                 {lowStockCount}
               </div>
               <div className="px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>Over Stock:</strong>{" "}
+                <strong style={{ fontWeight: "normal" }}>
+                  <i
+                    className="bi bi-box-fill"
+                    style={{ marginRight: "10px" }}
+                  />
+                  Over Stock:
+                </strong>{" "}
                 {overStockCount}
               </div>
             </div>

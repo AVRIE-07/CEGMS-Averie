@@ -11,6 +11,7 @@ const ProductDetailsSchema = new mongoose.Schema(
     product_Price: { type: Number, required: true },
     product_Minimum_Stock_Level: { type: Number, required: true },
     product_Maximum_Stock_Level: { type: Number, required: true },
+    product_Status: { type: String },
   },
   {
     collection: "productDetails", // Specify the collection name explicitly

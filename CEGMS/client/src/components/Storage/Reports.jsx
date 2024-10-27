@@ -49,7 +49,7 @@ const Reports = () => {
         <div className="card shadow-sm py-3 px-4 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
-              <i className="bi bi-bar-chart-fill fs-3"></i>
+              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
             <div>
