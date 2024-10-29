@@ -5,27 +5,11 @@ const mongoose = require("mongoose");
 // Define the schema for productDetails
 const InventoryReportsSchema = new mongoose.Schema(
   {
-    user_ID: {
-      type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
-      ref: "Users", // Reference to the Category collection
-      required: true,
-    },
-    manualAdjust_ID: {
-      type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
-      ref: "ManualAdjustment", // Reference to the Category collection
-      required: true,
-    },
-    stockMovement_ID: {
-      type: mongoose.Schema.Types.ObjectId, // Reference by ObjectId
-      ref: "StockMovement", // Reference to the Category collection
-      required: true,
-    },
-    report_Type: { type: String, required: true },
-    report_Date_Generated: { type: String, required: true },
-
-    start_Date: { type: String, required: true },
-    end_Date: { type: String, required: true },
-    summary: { type: String, required: true },
+    report_ID: { type: String, required: true },
+    reportType: { type: String, required: true },
+    startDate: { type: String, required: true },
+    endDate: { type: String, required: true },
+    generatedDate: { type: String },
   },
   {
     collection: "inventoryReports", // Specify the collection name explicitly

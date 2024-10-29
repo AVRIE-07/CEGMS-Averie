@@ -1,26 +1,129 @@
-import React, { useState } from "react"; // Import useState from React
+import React, { useState, useEffect } from "react";
 import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Storage.module.css";
 import { Link } from "react-router-dom";
-import { Dropdown, Button } from "react-bootstrap"; // Import Dropdown from react-bootstrap
+import { Dropdown, Button, Modal, Form } from "react-bootstrap";
+import axios from "axios";
+import LowStockModal from "./LowStockModal";
+import StockMovementModal from "./StockMovementModal";
 
 const Reports = () => {
-  // State for search inputs
-  const [searchReportID, setSearchReportID] = useState("");
-  const [searchReportType, setSearchReportType] = useState("");
-  const [searchGeneratedBy, setSearchGeneratedBy] = useState("");
-  const [searchDateGenerated, setSearchDateGenerated] = useState("");
+  const [products, setProducts] = useState([]);
+  const [stockMovements, setStockMovements] = useState([]);
+  const [reports, setReports] = useState([]);
+  const handleCloseLowStockModal = () => setShowLowStockModal(false);
+  const handleCloseStockMovementModal = () => setShowStockMovementsModal(false);
+
+  // State for modal and date range inputs
+  const [showModal, setShowModal] = useState(false);
+  const [showStockMovementsModal, setShowStockMovementsModal] = useState(false);
+  const [showLowStockModal, setShowLowStockModal] = useState(false); // Modal for low stock products
+  const [selectedReportType, setSelectedReportType] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [stockSummaryMovements, setStockSummaryMovements] = useState([]);
+
+  // State for filtered low stock products
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/products");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchStockMovements = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/api/stockMovement"
+        );
+        setStockMovements(response.data);
+      } catch (error) {
+        console.error("Error fetching stock movements:", error);
+      }
+    };
+    fetchStockMovements();
+  }, []);
+
+  const handleReportSelection = (reportType) => {
+    setSelectedReportType(reportType);
+    if (reportType === "Low Stock Levels") {
+      handleGenerateReport();
+    } else if (reportType === "Stock Movement") {
+      setShowModal(true);
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      await axios.post("http://localhost:3001/api/reportRoutes/", {
+        reportType: selectedReportType,
+        startDate: fromDate || "/N/A", // Set to "/N/A" if fromDate is empty
+        endDate: toDate || "/N/A", // Set to "/N/A" if toDate is empty
+      });
+      fetchReports();
+    } catch (error) {
+      console.error("Error generating report:", error);
+    } finally {
+      setShowModal(false);
+      setFromDate("");
+      setToDate("");
+    }
+  };
+
+  const fetchReports = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/reportRoutes/"
+      );
+      setReports(response.data);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    }
+  };
+
+  const handleReportRowClick = (report) => {
+    if (report.reportType === "Low Stock Levels") {
+      const filteredProducts = products.filter(
+        (product) =>
+          product.product_Quantity < product.product_Minimum_Stock_Level
+      );
+      setLowStockProducts(filteredProducts);
+      setShowLowStockModal(true);
+    } else if (report.reportType === "Stock Movement") {
+      // Ensure `filteredProducts` is correctly defined and returned
+      const filteredStockMovements = stockMovements.filter(
+        (movement) =>
+          new Date(movement.adj_Date) >= new Date(report.startDate) &&
+          new Date(movement.adj_Date) <= new Date(report.endDate)
+      );
+      setStockSummaryMovements(filteredStockMovements);
+      setShowStockMovementsModal(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   return (
     <div className={styles.dashboard}>
       <Sidebar />
       <main className={styles.mainContent} style={{ width: "100%" }}>
+        {/* Navigation Links */}
         <div className="d-flex justify-content-start">
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/Storage" // Link to Products component
-                className="nav-link fw-semibold text-decoration-none "
+                to="/Storage"
+                className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
                 Products
@@ -28,7 +131,7 @@ const Reports = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/StockMovement" // Link to Inventory Approvals component
+                to="/Storage/StockMovement"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -37,7 +140,7 @@ const Reports = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports" // Link to Reports component
+                to="/Storage/Reports"
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Reports
@@ -46,6 +149,7 @@ const Reports = () => {
           </ul>
         </div>
 
+        {/* Report Generation Card */}
         <div className="card shadow-sm py-3 px-4 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
@@ -53,97 +157,41 @@ const Reports = () => {
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
             <div>
-              <Button
-                onClick={() => handleModalShow()}
-                className="btn btn-primary"
-              >
-                + Generate Reports
-              </Button>
+              <Dropdown>
+                <Dropdown.Toggle variant="primary" id="dropdown-basic">
+                  + Generate Report
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    onClick={() => handleReportSelection("Low Stock Levels")}
+                  >
+                    Low Stock Levels
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={() => handleReportSelection("Stock Movement")}
+                  >
+                    Stock Movement
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
           </div>
         </div>
-
         <div
           className="card shadow-sm px-4 py-1"
           style={{ backgroundColor: "#50504D" }}
         >
-          {/* Dropdown for filtering by report type */}
-          <div className="d-flex align-items-center" style={{ height: "50px" }}>
-            <Dropdown>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Report Type Filter
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item eventKey="">All Reports</Dropdown.Item>
-                <Dropdown.Item eventKey="Inventory">Inventory</Dropdown.Item>
-                <Dropdown.Item eventKey="Sales">Sales</Dropdown.Item>
-                <Dropdown.Item eventKey="Returns">Returns</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+          <div className="d-flex align-items-center" style={{ height: "68px" }}>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="form-control"
+              style={{ width: "300px" }}
+            />
           </div>
         </div>
-
+        {/* Reports Table */}
         <div className="card shadow-sm px-4 py-3">
-          {/* Search Inputs in one line maximizing width */}
-          <div className="row mb-3 g-3">
-            <div className="col">
-              <label htmlFor="searchReportID" style={{ fontSize: 13 }}>
-                Report ID
-              </label>
-              <input
-                type="text"
-                id="searchReportID"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchReportID}
-                onChange={(e) => setSearchReportID(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Report ID"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchReportType" style={{ fontSize: 13 }}>
-                Report Type
-              </label>
-              <input
-                type="text"
-                id="searchReportType"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchReportType}
-                onChange={(e) => setSearchReportType(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Type"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchGeneratedBy" style={{ fontSize: 13 }}>
-                Generated By
-              </label>
-              <input
-                type="text"
-                id="searchGeneratedBy"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchGeneratedBy}
-                onChange={(e) => setSearchGeneratedBy(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-                placeholder="Name"
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="searchDateGenerated" style={{ fontSize: 13 }}>
-                Date Generated
-              </label>
-              <input
-                type="date"
-                id="searchDateGenerated"
-                className="form-control" // Use Bootstrap form-control for styling
-                value={searchDateGenerated}
-                onChange={(e) => setSearchDateGenerated(e.target.value)}
-                style={{ borderColor: "blue", borderRadius: 50 }}
-              />
-            </div>
-          </div>
-
-          {/* Table with sample content */}
           <div className="table-responsive">
             <table className="table table-hover border-top">
               <thead className="table-info">
@@ -155,9 +203,6 @@ const Reports = () => {
                     Report Type
                   </th>
                   <th scope="col" className="fw-semibold">
-                    Generated By
-                  </th>
-                  <th scope="col" className="fw-semibold">
                     Date Generated
                   </th>
                   <th scope="col" className="fw-semibold">
@@ -166,37 +211,80 @@ const Reports = () => {
                 </tr>
               </thead>
               <tbody className="fs-6 align-middle table-group-divider">
-                <tr>
-                  <td className="text-primary">R001</td>
-                  <td className="text-primary">Inventory</td>
-                  <td className="text-primary">Alice Smith</td>
-                  <td className="text-primary">01/10/2024</td>
-                  <td className="text-primary">
-                    Overview of current inventory levels.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-primary">R002</td>
-                  <td className="text-primary">Sales</td>
-                  <td className="text-primary">Bob Johnson</td>
-                  <td className="text-primary">02/10/2024</td>
-                  <td className="text-primary">
-                    Sales summary for the month of September.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-primary">R003</td>
-                  <td className="text-primary">Returns</td>
-                  <td className="text-primary">Charlie Brown</td>
-                  <td className="text-primary">03/10/2024</td>
-                  <td className="text-primary">
-                    Details of returned items in the last week.
-                  </td>
-                </tr>
+                {reports.length > 0 ? (
+                  reports.map((report) => (
+                    <tr
+                      key={report.id}
+                      onClick={() => handleReportRowClick(report)}
+                    >
+                      <td className="text-primary">{report.report_ID}</td>
+                      <td className="text-primary">{report.reportType}</td>
+                      <td className="text-primary">{report.generatedDate}</td>
+                      <td className="text-primary">View</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="text-center text-muted">
+                      No reports available.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
+
+        <LowStockModal
+          show={showLowStockModal}
+          handleClose={handleCloseLowStockModal}
+          lowStockItems={lowStockProducts} // Use lowStockProducts instead of lowStockItems
+          style={{ width: "80%", maxWidth: "600px" }}
+        />
+
+        <StockMovementModal
+          show={showStockMovementsModal}
+          handleClose={handleCloseStockMovementModal}
+          stockMovements={stockSummaryMovements}
+          style={{ width: "100%", maxWidth: "1000px" }}
+        />
+
+        {/* Modal for Date Range Selection */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              Select Date Range for {selectedReportType} Report
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="fromDate">
+                <Form.Label>From Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                />
+              </Form.Group>
+              <Form.Group controlId="toDate" className="mt-3">
+                <Form.Label>To Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleGenerateReport}>
+              Generate Report
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </main>
     </div>
   );

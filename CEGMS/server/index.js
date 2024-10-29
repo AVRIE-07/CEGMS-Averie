@@ -7,6 +7,7 @@ const productRoutes = require("./routes/productRoutes"); // Import your product 
 const categoryRoutes = require("./routes/categoryRoutes");
 const manualAdjustmentRoutes = require("./routes/manualAdjustmentRoutes");
 const stockMovement = require("./routes/stockMovement");
+const reportRoutes = require("./routes/reportRoutes");
 
 const app = express();
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use("/api/products", productRoutes); // Prefix for product routes
 app.use("/api/category", categoryRoutes); // Prefix for product routes
 app.use("/api/manualAdjustment", manualAdjustmentRoutes); // Prefix for product routes
 app.use("/api/stockMovement", stockMovement); // Prefix for product routes
+app.use("/api/reportRoutes", reportRoutes);
 
 // Start the server
 app.listen(3001, () => {
