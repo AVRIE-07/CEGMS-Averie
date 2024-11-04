@@ -184,35 +184,32 @@ const Storage = () => {
               </Dropdown.Menu>
             </Dropdown>
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
+              <div className="me-4 px-3 py-2 bg-success rounded">
+                <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   ></i>
-                  Added:
+                  Added:{addedCount}
                 </strong>{" "}
-                {addedCount}
               </div>
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
+              <div className="me-4 px-3 py-2 bg-danger rounded">
+                <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   ></i>
-                  Sold:
+                  Sold:{soldCount}
                 </strong>
-                {soldCount}
               </div>
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
+              <div className="me-4 px-3 py-2 bg-warning rounded">
+                <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Returned:
+                  Returned:{returnedCount}
                 </strong>{" "}
-                {returnedCount}
               </div>
             </div>
           </div>

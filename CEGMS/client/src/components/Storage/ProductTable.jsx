@@ -41,9 +41,6 @@ const ProductTable = ({
                 Current Stock Level
               </th>
               <th scope="col" className="fw-semibold">
-                Quantity
-              </th>
-              <th scope="col" className="fw-semibold">
                 Price
               </th>
               <th scope="col" className="fw-semibold">
@@ -53,7 +50,7 @@ const ProductTable = ({
                 Max Stock Level
               </th>
               <th scope="col" className="fw-semibold">
-                Edit
+                Edit/Add
               </th>
             </tr>
           </thead>
@@ -73,7 +70,6 @@ const ProductTable = ({
                 <td className="text-primary">
                   {product.product_Current_Stock}
                 </td>
-                <td className="text-primary">{product.product_Quantity}</td>
                 <td className="text-primary">${product.product_Price}</td>
                 <td className="text-primary">
                   {product.product_Minimum_Stock_Level}

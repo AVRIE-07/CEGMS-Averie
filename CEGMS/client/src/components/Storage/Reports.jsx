@@ -11,46 +11,20 @@ const Reports = () => {
   const [products, setProducts] = useState([]);
   const [stockMovements, setStockMovements] = useState([]);
   const [reports, setReports] = useState([]);
-  const handleCloseLowStockModal = () => setShowLowStockModal(false);
-  const handleCloseStockMovementModal = () => setShowStockMovementsModal(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // State for modal and date range inputs
+  // Modal and Date Range State
   const [showModal, setShowModal] = useState(false);
   const [showStockMovementsModal, setShowStockMovementsModal] = useState(false);
-  const [showLowStockModal, setShowLowStockModal] = useState(false); // Modal for low stock products
+  const [showLowStockModal, setShowLowStockModal] = useState(false);
   const [selectedReportType, setSelectedReportType] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [stockSummaryMovements, setStockSummaryMovements] = useState([]);
-
-  // State for filtered low stock products
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/products");
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    const fetchStockMovements = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3001/api/stockMovement"
-        );
-        setStockMovements(response.data);
-      } catch (error) {
-        console.error("Error fetching stock movements:", error);
-      }
-    };
-    fetchStockMovements();
-  }, []);
+  const handleCloseLowStockModal = () => setShowLowStockModal(false);
+  const handleCloseStockMovementModal = () => setShowStockMovementsModal(false);
 
   const handleReportSelection = (reportType) => {
     setSelectedReportType(reportType);
@@ -65,8 +39,8 @@ const Reports = () => {
     try {
       await axios.post("http://localhost:3001/api/reportRoutes/", {
         reportType: selectedReportType,
-        startDate: fromDate || "/N/A", // Set to "/N/A" if fromDate is empty
-        endDate: toDate || "/N/A", // Set to "/N/A" if toDate is empty
+        startDate: fromDate || "/N/A",
+        endDate: toDate || "/N/A",
       });
       fetchReports();
     } catch (error) {
@@ -98,7 +72,6 @@ const Reports = () => {
       setLowStockProducts(filteredProducts);
       setShowLowStockModal(true);
     } else if (report.reportType === "Stock Movement") {
-      // Ensure `filteredProducts` is correctly defined and returned
       const filteredStockMovements = stockMovements.filter(
         (movement) =>
           new Date(movement.adj_Date) >= new Date(report.startDate) &&
@@ -110,8 +83,37 @@ const Reports = () => {
   };
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/products");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    const fetchStockMovements = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/api/stockMovement"
+        );
+        setStockMovements(response.data);
+      } catch (error) {
+        console.error("Error fetching stock movements:", error);
+      }
+    };
+
+    fetchProducts();
+    fetchStockMovements();
     fetchReports();
   }, []);
+
+  // Filter reports based on Report ID, Report Type, or Date Generated
+  const filteredReports = reports.filter((report) =>
+    `${report.report_ID} ${report.reportType} ${report.generatedDate}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className={styles.dashboard}>
@@ -177,6 +179,8 @@ const Reports = () => {
             </div>
           </div>
         </div>
+
+        {/* Search Bar */}
         <div
           className="card shadow-sm px-4 py-1"
           style={{ backgroundColor: "#50504D" }}
@@ -184,16 +188,19 @@ const Reports = () => {
           <div className="d-flex align-items-center" style={{ height: "68px" }}>
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by Report ID, Type, or Date..."
               className="form-control"
               style={{ width: "300px" }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
+
         {/* Reports Table */}
         <div className="card shadow-sm px-4 py-3">
           <div className="table-responsive">
-            <table className="table table-hover border-top">
+            <table className="table table-hover table-striped border-top">
               <thead className="table-info">
                 <tr>
                   <th scope="col" className="fw-semibold">
@@ -205,14 +212,12 @@ const Reports = () => {
                   <th scope="col" className="fw-semibold">
                     Date Generated
                   </th>
-                  <th scope="col" className="fw-semibold">
-                    Report Details
-                  </th>
                 </tr>
               </thead>
+
               <tbody className="fs-6 align-middle table-group-divider">
-                {reports.length > 0 ? (
-                  reports.map((report) => (
+                {filteredReports.length > 0 ? (
+                  filteredReports.map((report) => (
                     <tr
                       key={report.id}
                       onClick={() => handleReportRowClick(report)}
@@ -220,12 +225,11 @@ const Reports = () => {
                       <td className="text-primary">{report.report_ID}</td>
                       <td className="text-primary">{report.reportType}</td>
                       <td className="text-primary">{report.generatedDate}</td>
-                      <td className="text-primary">View</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center text-muted">
+                    <td colSpan="3" className="text-center text-muted">
                       No reports available.
                     </td>
                   </tr>
@@ -238,7 +242,7 @@ const Reports = () => {
         <LowStockModal
           show={showLowStockModal}
           handleClose={handleCloseLowStockModal}
-          lowStockItems={lowStockProducts} // Use lowStockProducts instead of lowStockItems
+          lowStockItems={lowStockProducts}
           style={{ width: "80%", maxWidth: "600px" }}
         />
 
@@ -278,7 +282,7 @@ const Reports = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
+              Close
             </Button>
             <Button variant="primary" onClick={handleGenerateReport}>
               Generate Report

@@ -1,8 +1,11 @@
 import React from "react";
 import { Modal, Table, Button } from "react-bootstrap";
+import { useState, useEffect } from "react";
 import "./StockMovementModal.css"; // Ensure the path is correct
 
 const StockMovementModal = ({ show, handleClose, stockMovements }) => {
+  const [getDate, setGetDate] = useState({ earliest: " ", latest: " " });
+
   // Function to find the earliest and latest dates
   const getDateRange = () => {
     if (stockMovements.length === 0) return { earliest: "", latest: "" };
@@ -16,6 +19,10 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
       latest: latest.toLocaleDateString(),
     };
   };
+
+  useEffect(() => {
+    setGetDate(getDateRange());
+  }, [stockMovements]);
   const handlePrint = () => {
     const { earliest, latest } = getDateRange();
     const printContent = document.getElementById("printable-content");
@@ -107,12 +114,14 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Stock Movements</Modal.Title>
+        <Modal.Title style={{ color: "#0d6efd" }}>
+          Stock Movements From: {getDate.earliest} to {getDate.latest}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body className="custom-modal">
         <div id="printable-content">
           <Table striped bordered hover responsive>
-            <thead>
+            <thead className="table-info">
               <tr>
                 <th>Movement ID</th>
                 <th>Product ID</th>

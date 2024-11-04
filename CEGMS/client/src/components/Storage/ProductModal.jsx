@@ -13,7 +13,9 @@ const ProductModal = ({
   return (
     <Modal show={showModal} onHide={handleModalClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{isEditMode ? "Edit Product" : "Add Product"}</Modal.Title>
+        <Modal.Title>
+          {isEditMode ? "Edit Product" : "Create Product"}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={handleSubmit}>
@@ -70,20 +72,6 @@ const ProductModal = ({
           </div>
 
           <div className="mb-3">
-            <label htmlFor="product_Quantity" className="form-label">
-              Quantity
-            </label>
-            <input
-              type="text"
-              id="product_Quantity"
-              name="product_Quantity"
-              className="form-control"
-              value={newProduct.product_Quantity}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="mb-3">
             <label htmlFor="product_Price" className="form-label">
               Price
             </label>
@@ -125,6 +113,22 @@ const ProductModal = ({
             />
           </div>
 
+          {/* Conditionally display "Add Product" heading */}
+          {isEditMode && <h1>Add Product</h1>}
+
+          <div className="mb-3">
+            <label htmlFor="product_Quantity" className="form-label">
+              Quantity
+            </label>
+            <input
+              type="text"
+              id="product_Quantity"
+              name="product_Quantity"
+              className="form-control"
+              value={newProduct.product_Quantity}
+              onChange={handleInputChange}
+            />
+          </div>
           <Button variant="primary" type="submit">
             {isEditMode ? "Update" : "Add"}
           </Button>

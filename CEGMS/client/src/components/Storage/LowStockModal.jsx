@@ -22,6 +22,7 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
     printWindow.document.write(`
       <html>
         <head>
+          
           <title>Print Low Stock Products</title>
           <link 
             rel="stylesheet" 
@@ -68,7 +69,6 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
           </style>
         </head>
         <body>
-          <h1>Low Stock Products</h1>
           <p><strong>Lowest Stock Level:</strong> ${earliest}</p>
           <p><strong>Highest Stock Level:</strong> ${latest}</p>
           ${printContent.innerHTML}
@@ -83,13 +83,15 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Low Stock Products</Modal.Title>
+        <Modal.Title style={{ color: "#0d6efd" }}>
+          Low Stock Products
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body id="printable-content">
         {" "}
         {/* Added an ID for printing */}
         <Table striped bordered hover responsive>
-          <thead>
+          <thead className="table-info">
             <tr>
               <th>Product ID</th>
               <th>Category</th>

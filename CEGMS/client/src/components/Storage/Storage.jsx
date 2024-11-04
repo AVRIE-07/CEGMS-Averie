@@ -118,12 +118,27 @@ const Storage = () => {
 
       // Include the calculated status in the product object
       const productData = { ...newProduct, product_Status: productStatus };
+
       if (isEditMode) {
+        // Fetch the current product details to get the existing current stock
+        const existingProduct = products.find(
+          (product) => product._id === currentProductId
+        );
+
+        // Add the new product quantity to the current stock
+        const updatedProductData = {
+          ...newProduct,
+          product_Current_Stock:
+            parseInt(existingProduct.product_Current_Stock) +
+            parseInt(newProduct.product_Quantity),
+        };
+
         // Update product logic
         response = await axios.put(
           `http://localhost:3001/api/products/${currentProductId}`,
-          newProduct
+          updatedProductData
         );
+
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentProductId ? response.data : product
@@ -145,17 +160,16 @@ const Storage = () => {
           adj_Category: createdProduct.product_Category,
           adj_Quantity: createdProduct.product_Quantity,
           adj_Price: createdProduct.product_Price,
-          adj_Adjustment_Type: "Added", // or other type based on context
+          adj_Adjustment_Type: "Added",
         });
 
-        // Add manual adjustment entry for new product
         await axios.post("http://localhost:3001/api/stockMovement", {
           product_ID: createdProduct.product_Id,
           adj_Description: "Initial stock entry",
           adj_Category: createdProduct.product_Category,
           adj_Quantity: createdProduct.product_Quantity,
           adj_Price: createdProduct.product_Price,
-          adj_Adjustment_Type: "Added", // or other type based on context
+          adj_Adjustment_Type: "Added",
         });
       }
       handleModalClose();
@@ -214,37 +228,50 @@ const Storage = () => {
   };
 
   const filteredProducts = products.filter((product) => {
-    const matchesCategory = product.product_Category
-      .toLowerCase()
-      .includes(searchCategory.toLowerCase());
-    const matchesId = (product.product_Id || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesDescription = (product.product_Description || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const matchesCategory = searchCategory
+      ? product.product_Category
+          .toLowerCase()
+          .includes(searchCategory.toLowerCase())
+      : true;
 
-    if (statusFilter === "Low Stock") {
-      return (
-        matchesCategory &&
-        matchesDescription &&
-        product.product_Quantity < product.product_Minimum_Stock_Level
-      );
-    } else if (statusFilter === "In Stock") {
-      return (
-        matchesCategory &&
-        matchesDescription &&
-        product.product_Quantity >= product.product_Minimum_Stock_Level
-      );
-    } else if (statusFilter === "Overstocked") {
-      return (
-        matchesCategory &&
-        matchesDescription &&
-        product.product_Quantity > product.product_Maximum_Stock_Level
-      );
-    }
+    const matchesDescription = searchTerm
+      ? product.product_Description
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : true;
 
-    return (matchesCategory && matchesId) || matchesDescription; // Default return for "All" or if no filter is applied
+    const matchesId = searchTerm
+      ? (product.product_Id || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : true;
+
+    const matchesStatus = (statusFilter) => {
+      switch (statusFilter) {
+        case "Low Stock":
+          return (
+            product.product_Current_Stock < product.product_Minimum_Stock_Level
+          );
+        case "In Stock":
+          return (
+            product.product_Current_Stock >=
+              product.product_Minimum_Stock_Level &&
+            product.product_Current_Stock <= product.product_Maximum_Stock_Level
+          );
+        case "Overstocked":
+          return (
+            product.product_Current_Stock > product.product_Maximum_Stock_Level
+          );
+        default:
+          return true; // No status filter applied
+      }
+    };
+
+    return (
+      matchesCategory &&
+      (matchesId || matchesDescription) &&
+      matchesStatus(statusFilter)
+    );
   });
 
   const handleSelectProduct = (id) => {
@@ -381,10 +408,10 @@ const Storage = () => {
 
                 <Dropdown.Menu>
                   <Dropdown.Item onClick={() => handleModalShow()}>
-                    Add Product
+                    Create Product
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => handleShowCategoryModal()}>
-                    Add Category
+                    Create Category
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -484,25 +511,23 @@ const Storage = () => {
                 </strong>{" "}
                 ${totalPrice.toFixed(2)}
               </div>
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
+              <div className="me-4 px-3 py-2 bg-danger rounded">
+                <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Low Stock:
+                  Low Stock:{lowStockCount}
                 </strong>{" "}
-                {lowStockCount}
               </div>
-              <div className="px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
+              <div className="px-3 py-2 bg-warning rounded">
+                <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Over Stock:
+                  Over Stock:{overStockCount}
                 </strong>{" "}
-                {overStockCount}
               </div>
             </div>
           </div>

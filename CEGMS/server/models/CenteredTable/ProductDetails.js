@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const CounterModel = require("./Counter"); // Import the Counter model
 
 // Define the schema for productDetails
 const ProductDetailsSchema = new mongoose.Schema(
@@ -7,7 +8,7 @@ const ProductDetailsSchema = new mongoose.Schema(
     product_Category: { type: String, required: true },
     product_Description: { type: String, required: true },
     product_Current_Stock: { type: Number, required: true },
-    product_Quantity: { type: Number, required: true },
+    product_Quantity: { type: Number },
     product_Price: { type: Number, required: true },
     product_Minimum_Stock_Level: { type: Number, required: true },
     product_Maximum_Stock_Level: { type: Number, required: true },
@@ -22,31 +23,27 @@ const ProductDetailsSchema = new mongoose.Schema(
 ProductDetailsSchema.pre("save", async function (next) {
   const product = this;
 
-  // Generate a random 4-digit number
-  function generateRandomId() {
-    return Math.floor(1000 + Math.random() * 9000); // 4-digit random number
-  }
-
-  // Generate custom ID in the format "PRDCTxxxx"
+  // Only generate a new product ID if it hasn't been set already
   if (!product.product_Id) {
-    let unique = false;
-    let newProductId;
+    try {
+      // Find the counter and increment it by 1
+      const counter = await CounterModel.findOneAndUpdate(
+        { id: "productId" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true } // Create if doesn't exist
+      );
 
-    // Loop to ensure the product_Id is unique
-    while (!unique) {
-      newProductId = `PRDCT${generateRandomId()}`;
-      const existingProduct = await mongoose.models.ProductDetails.findOne({
-        product_Id: newProductId,
-      });
-      if (!existingProduct) {
-        unique = true;
-      }
+      // Format the ID as "PI" followed by a 5-digit number
+      const formattedId = `PI${String(counter.seq).padStart(5, "0")}`;
+      product.product_Id = formattedId;
+
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    product.product_Id = newProductId;
+  } else {
+    next();
   }
-
-  next();
 });
 
 // Create the model based on the schema
