@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Dropdown, Button, Modal, Form } from "react-bootstrap";
 import axios from "axios";
 import LowStockModal from "./LowStockModal";
-import StockMovementModal from "./StockMovementModal";
+import StockMovementModal from "./stockMovementModal";
 
 const Reports = () => {
   const [products, setProducts] = useState([]);

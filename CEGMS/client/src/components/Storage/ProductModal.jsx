@@ -59,7 +59,7 @@ const ProductModal = ({
 
           <div className="mb-3">
             <label htmlFor="product_Current_Stock" className="form-label">
-              Current Stock
+              Stock
             </label>
             <input
               type="text"

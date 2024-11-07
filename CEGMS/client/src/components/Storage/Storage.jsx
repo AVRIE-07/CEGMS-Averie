@@ -105,11 +105,13 @@ const Storage = () => {
       // Determine the status based on quantity levels
       let productStatus;
       if (
-        newProduct.product_Quantity < newProduct.product_Minimum_Stock_Level
+        newProduct.product_Current_Stock <
+        newProduct.product_Minimum_Stock_Level
       ) {
         productStatus = "Low Stock";
       } else if (
-        newProduct.product_Quantity > newProduct.product_Maximum_Stock_Level
+        newProduct.product_Current_Stock >
+        newProduct.product_Maximum_Stock_Level
       ) {
         productStatus = "Overstocked";
       } else {
@@ -156,18 +158,18 @@ const Storage = () => {
         // Add manual adjustment entry for new product
         await axios.post("http://localhost:3001/api/manualAdjustment", {
           product_ID: createdProduct.product_Id,
-          adj_Description: "Initial stock entry",
+          adj_Description: createdProduct.product_Description,
           adj_Category: createdProduct.product_Category,
-          adj_Quantity: createdProduct.product_Quantity,
+          adj_Quantity: createdProduct.product_Current_Stock,
           adj_Price: createdProduct.product_Price,
           adj_Adjustment_Type: "Added",
         });
 
         await axios.post("http://localhost:3001/api/stockMovement", {
           product_ID: createdProduct.product_Id,
-          adj_Description: "Initial stock entry",
+          adj_Description: createdProduct.product_Description,
           adj_Category: createdProduct.product_Category,
-          adj_Quantity: createdProduct.product_Quantity,
+          adj_Quantity: createdProduct.product_Current_Stock,
           adj_Price: createdProduct.product_Price,
           adj_Adjustment_Type: "Added",
         });
@@ -328,10 +330,14 @@ const Storage = () => {
         fetchedProducts.forEach((product) => {
           quantitySum += product.product_Quantity;
           priceSum += product.product_Quantity * product.product_Price;
-          if (product.product_Quantity < product.product_Minimum_Stock_Level) {
+          if (
+            product.product_Current_Stock < product.product_Minimum_Stock_Level
+          ) {
             lowStock += 1;
           }
-          if (product.product_Quantity > product.product_Maximum_Stock_Level) {
+          if (
+            product.product_Current_Stock > product.product_Maximum_Stock_Level
+          ) {
             overStock += 1;
           }
         });

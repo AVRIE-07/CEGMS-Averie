@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import cokinslogo from "../_images/cokinslogo.png";
 import styles from "../_css/login.module.css";
@@ -151,12 +151,13 @@ export default function Login() {
                 {errors.server && (
                   <p className={styles.errorMessage}>{errors.server}</p>
                 )}
-                <p
-                  className="text-end text-primary"
-                  style={{ cursor: "pointer" }}
+                <Link
+                  to="/ForgotPassword" // Link to Reports component
+                  className="nav-link fw-semibold text-decoration-none"
+                  style={{ color: "#6a6d71" }}
                 >
                   Forgot Password?
-                </p>
+                </Link>
                 <button className={`${styles.loginButton} w-100`} type="submit">
                   Login
                 </button>

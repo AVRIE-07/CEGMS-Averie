@@ -22,6 +22,7 @@ import Email from "./components/Email/Profile.jsx";
 import Refunded from "./components/Sales/Refunded.jsx";
 import Analysis from "./components/Sales/Analysis.jsx";
 import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
+import ForgotPassword from "./components/ForgotPassword.jsx";
 
 import StockMovement from "./components/Storage/StockMovement.jsx"; // Adjust the path if needed
 import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
@@ -33,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/sidebar" element={<Sidebar />}></Route>
           <Route path="/login" element={<Login />}></Route>
+          <Route path="/ForgotPassword" element={<ForgotPassword />}></Route>
           <Route path="/home" element={<Home />}></Route>
           <Route path="/" element={<Login />} />
           <Route path="/Dashboard" element={<Dashboard />} />
