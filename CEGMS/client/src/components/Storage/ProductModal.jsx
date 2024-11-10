@@ -113,22 +113,24 @@ const ProductModal = ({
             />
           </div>
 
-          {/* Conditionally display "Add Product" heading */}
-          {isEditMode && <h1>Add Product</h1>}
+          {/* Conditionally display quantity input only in edit mode */}
+          {isEditMode && (
+            <div className="mb-3">
+              <h1>Add Product</h1>
+              <label htmlFor="product_Quantity" className="form-label">
+                Quantity
+              </label>
+              <input
+                type="text"
+                id="product_Quantity"
+                name="product_Quantity"
+                className="form-control"
+                value={newProduct.product_Quantity}
+                onChange={handleInputChange}
+              />
+            </div>
+          )}
 
-          <div className="mb-3">
-            <label htmlFor="product_Quantity" className="form-label">
-              Quantity
-            </label>
-            <input
-              type="text"
-              id="product_Quantity"
-              name="product_Quantity"
-              className="form-control"
-              value={newProduct.product_Quantity}
-              onChange={handleInputChange}
-            />
-          </div>
           <Button variant="primary" type="submit">
             {isEditMode ? "Update" : "Add"}
           </Button>

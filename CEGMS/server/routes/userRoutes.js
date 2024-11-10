@@ -4,7 +4,18 @@ const bcrypt = require("bcrypt");
 
 const router = express.Router();
 
-// Route to handle user login
+const isLoggedIn = (req, res, next) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  next();
+};
+
+router.get("/protected-route", isLoggedIn, (req, res) => {
+  // This route is accessible only if the user has a valid session
+  res.json({ message: "Welcome, authorized user!" });
+});
+// Route to handle user login with session
 router.post("/login", async (req, res) => {
   const { email, username, password } = req.body;
 
@@ -24,8 +35,15 @@ router.post("/login", async (req, res) => {
     return res.status(401).json("Unauthorized: Incorrect password");
   }
 
-  // Successful login, send success response or user data
-  res.status(200).json("Success");
+  // Successful login, store user data in session
+  req.session.user = {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role, // Optional: store user role if needed for authorization
+  };
+
+  res.status(200).json({ message: "Login successful" });
 });
 
 module.exports = router;
@@ -150,6 +168,25 @@ router.post("/add-user", async (req, res) => {
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error(error); // Log error for debugging
+    res.status(500).json({ message: "Server error, please try again later" });
+  }
+});
+
+// Route to get the user's profile (get-user-profile)
+router.get("/get-user-profile", isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.session.user.id; // Get the logged-in user's ID from the session
+    const user = await UsersModel.findById(userId).select(
+      "firstname lastname email username" 
+    ); // Fetch the user by ID and select necessary fields
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user); // Send the user's profile data as the response
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error, please try again later" });
   }
 });

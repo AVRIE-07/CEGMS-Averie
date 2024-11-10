@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Table, Button } from "react-bootstrap";
 
 const LowStockModal = ({ show, handleClose, lowStockItems }) => {
-  // Function to get date range (customize according to your data structure)
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // You can adjust this number to show more/less items per page
+
+  // Calculate total pages
+  const totalPages = Math.ceil(lowStockItems.length / itemsPerPage);
+
+  // Slice the items for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = lowStockItems.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // Handle page change
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Function to get stock level range
   const getStockLevelRange = () => {
     if (lowStockItems.length === 0) return { earliest: "", latest: "" };
 
@@ -16,13 +35,57 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
   // Function to handle printing
   const handlePrint = () => {
     const { earliest, latest } = getStockLevelRange();
-    const printContent = document.getElementById("printable-content");
-    const printWindow = window.open("", "_blank");
 
+    // Prepare all the items for printing
+    const printContent = document.createElement("div");
+
+    // Add the stock range and table headers to the print content
+    const tableHeader = `
+      <table class="table table-bordered">
+        <thead class="table-info">
+          <tr>
+            <th>Product ID</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Current Stock</th>
+            <th>Minimum Stock Level</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    // Add the rows for all lowStockItems
+    const tableRows = lowStockItems
+      .map((item) => {
+        return `
+        <tr>
+          <td>${item.product_Id}</td>
+          <td>${item.product_Category}</td>
+          <td>${item.product_Description}</td>
+          <td>${item.product_Current_Stock}</td>
+          <td>${item.product_Minimum_Stock_Level}</td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    const tableFooter = `</tbody></table>`;
+
+    // Add everything to the print content
+    printContent.innerHTML = `
+      <h1>Low Stock Products</h1>
+      <p><strong>Lowest Stock Level:</strong> ${earliest}</p>
+      <p><strong>Highest Stock Level:</strong> ${latest}</p>
+      ${tableHeader}
+      ${tableRows}
+      ${tableFooter}
+    `;
+
+    // Open the print window
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
         <head>
-          
           <title>Print Low Stock Products</title>
           <link 
             rel="stylesheet" 
@@ -69,13 +132,10 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
           </style>
         </head>
         <body>
-          <p><strong>Lowest Stock Level:</strong> ${earliest}</p>
-          <p><strong>Highest Stock Level:</strong> ${latest}</p>
           ${printContent.innerHTML}
         </body>
       </html>
     `);
-
     printWindow.document.close();
     printWindow.print();
   };
@@ -88,7 +148,6 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body id="printable-content">
-        {" "}
         {/* Added an ID for printing */}
         <Table striped bordered hover responsive>
           <thead className="table-info">
@@ -101,7 +160,7 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
             </tr>
           </thead>
           <tbody>
-            {lowStockItems.map((item) => (
+            {currentItems.map((item) => (
               <tr key={item.product_Id}>
                 <td>{item.product_Id}</td>
                 <td>{item.product_Category}</td>
@@ -121,6 +180,49 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
           Close
         </Button>
       </Modal.Footer>
+
+      {/* Pagination Controls */}
+      <div className="d-flex justify-content-center mt-3">
+        <nav>
+          <ul className="pagination">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => paginate(currentPage - 1)}
+              >
+                Previous
+              </button>
+            </li>
+            {[...Array(totalPages)].map((_, index) => (
+              <li
+                key={index}
+                className={`page-item ${
+                  currentPage === index + 1 ? "active" : ""
+                }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              </li>
+            ))}
+            <li
+              className={`page-item ${
+                currentPage === totalPages ? "disabled" : ""
+              }`}
+            >
+              <button
+                className="page-link"
+                onClick={() => paginate(currentPage + 1)}
+              >
+                Next
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </Modal>
   );
 };

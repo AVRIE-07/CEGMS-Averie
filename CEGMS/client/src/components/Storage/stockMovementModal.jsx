@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Table, Button } from "react-bootstrap";
-import { useState, useEffect } from "react";
 import "./StockMovementModal.css"; // Ensure the path is correct
 
 const StockMovementModal = ({ show, handleClose, stockMovements }) => {
   const [getDate, setGetDate] = useState({ earliest: " ", latest: " " });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of items to show per page
 
   // Function to find the earliest and latest dates
   const getDateRange = () => {
@@ -20,13 +21,40 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
     };
   };
 
+  // Update the getDate state only if the values are different from the current ones
   useEffect(() => {
-    setGetDate(getDateRange());
-  }, [stockMovements]);
+    const newGetDate = getDateRange();
+    if (
+      newGetDate.earliest !== getDate.earliest ||
+      newGetDate.latest !== getDate.latest
+    ) {
+      setGetDate(newGetDate);
+    }
+  }, [stockMovements]); // Only run when stockMovements changes
+
   const handlePrint = () => {
     const { earliest, latest } = getDateRange();
     const printContent = document.getElementById("printable-content");
     const printWindow = window.open("", "_blank");
+
+    // Include all stockMovements, not just the current page's
+    const allMovements = stockMovements
+      .map(
+        (movement) => ` 
+      <tr>
+        <td>${movement.movement_ID}</td>
+        <td>${movement.product_ID}</td>
+        <td>${movement.adj_Description}</td>
+        <td>${movement.adj_Category}</td>
+        <td>${movement.adj_Quantity}</td>
+        <td>${movement.adj_Price}</td>
+        <td>${movement.adj_Adjustment_Type}</td>
+        <td>${new Date(movement.adj_Date).toLocaleDateString()}</td>
+      </tr>
+    `
+      )
+      .join("");
+
     printWindow.document.write(`
       <html>
         <head>
@@ -42,11 +70,11 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
               font-family: 'Arial', sans-serif;
               margin: 20px;
               color: #333;
-              background-color: #f4f4f4; /* Slight background color for contrast */
+              background-color: #f4f4f4;
             }
             h1 {
               text-align: center;
-              color: #007bff; /* Bootstrap primary color */
+              color: #007bff;
               margin-bottom: 20px;
             }
             p {
@@ -58,7 +86,7 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
               text-align: center;
               font-weight: bold;
               color: #333;
-              background-color: #e9ecef; /* Light grey background */
+              background-color: #e9ecef;
               padding: 10px;
               border-radius: 5px;
             }
@@ -66,24 +94,23 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
               width: 100%;
               border-collapse: collapse;
               margin-top: 20px;
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Stronger shadow */
-              background-color: #fff; /* White background for the table */
+              background-color: #fff;
             }
             th, td {
-              border: 1px solid #007bff; /* Strong blue borders */
+              border: 1px solid #007bff;
               padding: 12px;
               text-align: left;
             }
             th {
-              background-color: blue; /* Bootstrap primary color */
-              color:whit; /* White text for contrast */
+              background-color: blue;
+              color: white;
               font-weight: bold;
             }
             tr:nth-child(even) {
-              background-color: #f8f9fa; /* Light grey for even rows */
+              background-color: #f8f9fa;
             }
             tr:hover {
-              background-color: #e2e6ea; /* Slightly darker hover color */
+              background-color: #e2e6ea;
             }
             footer {
               margin-top: 20px;
@@ -100,7 +127,23 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
             <p>Start Date: <strong>${earliest}</strong></p>
             <p>End Date: <strong>${latest}</strong></p>
           </div>
-          ${printContent.innerHTML}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Movement ID</th>
+                <th>Product ID</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Adjustment Type</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allMovements}
+            </tbody>
+          </table>
           <footer>
             <p>Generated on: ${new Date().toLocaleDateString()}</p>
           </footer>
@@ -110,6 +153,18 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
     printWindow.document.close();
     printWindow.print();
   };
+
+  // Paginate function
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Get the current items to display based on the page
+  const totalPages = Math.ceil(stockMovements.length / itemsPerPage);
+  const currentItems = stockMovements.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
@@ -134,7 +189,7 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
               </tr>
             </thead>
             <tbody>
-              {stockMovements.map((movement) => (
+              {currentItems.map((movement) => (
                 <tr key={movement.movement_ID}>
                   <td>{movement.movement_ID}</td>
                   <td>{movement.product_ID}</td>
@@ -148,6 +203,51 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
               ))}
             </tbody>
           </Table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="d-flex justify-content-center mt-3">
+          <nav>
+            <ul className="pagination">
+              <li
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginate(currentPage - 1)}
+                >
+                  Previous
+                </button>
+              </li>
+              {[...Array(totalPages)].map((_, index) => (
+                <li
+                  key={index}
+                  className={`page-item ${
+                    currentPage === index + 1 ? "active" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => paginate(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li
+                className={`page-item ${
+                  currentPage === totalPages ? "disabled" : ""
+                }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginate(currentPage + 1)}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       </Modal.Body>
       <Modal.Footer>

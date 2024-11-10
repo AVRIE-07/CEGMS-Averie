@@ -7,12 +7,16 @@ import axios from "axios";
 
 const Storage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAction, setSelectedAction] = useState(""); // State for selected action
+  const [selectedAction, setSelectedAction] = useState("");
   const [stockMovements, setStockMovements] = useState([]);
   const [filteredMovements, setFilteredMovements] = useState([]);
   const [addedCount, setAddedCount] = useState(0);
   const [soldCount, setSoldCount] = useState(0);
   const [returnedCount, setReturnedCount] = useState(0);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Number of items per page
 
   const fetchStockMovements = async () => {
     try {
@@ -20,7 +24,7 @@ const Storage = () => {
         "http://localhost:3001/api/stockMovement"
       );
       setStockMovements(response.data);
-      setFilteredMovements(response.data); // Initially set filtered to all movements
+      setFilteredMovements(response.data);
 
       // Calculate totals
       let added = 0;
@@ -60,13 +64,13 @@ const Storage = () => {
   const handleSearch = (event) => {
     const value = event.target.value.toLowerCase();
     setSearchQuery(value);
-    filterMovements(value, selectedAction); // Call filterMovements with the new search value
+    filterMovements(value, selectedAction);
   };
 
   // Function to handle dropdown selection
   const handleSelectAction = (action) => {
     setSelectedAction(action);
-    filterMovements(searchQuery, action); // Call filterMovements with the selected action
+    filterMovements(searchQuery, action);
   };
 
   // Function to filter stock movements
@@ -77,17 +81,30 @@ const Storage = () => {
         movement.product_ID.toString().toLowerCase().includes(search) ||
         movement.adj_Description.toLowerCase().includes(search) ||
         movement.adj_Adjustment_Type.toLowerCase().includes(search) ||
-        new Date(movement.adj_Date).toLocaleDateString().includes(search); // Filter by date string
+        new Date(movement.adj_Date).toLocaleDateString().includes(search);
 
       const matchesAction = action
         ? movement.adj_Adjustment_Type === action
-        : true; // Filter by selected action
+        : true;
 
-      return matchesSearch && matchesAction; // Return true if both conditions are met
+      return matchesSearch && matchesAction;
     });
 
     setFilteredMovements(filtered);
   };
+
+  // Pagination logic to get current items for the page
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredMovements.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  // Pagination controls
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
 
   const getRowColor = (action) => {
     switch (action) {
@@ -241,7 +258,7 @@ const Storage = () => {
                 </tr>
               </thead>
               <tbody className="fs-6 align-middle table-group-divider">
-                {filteredMovements.map((movement) => (
+                {currentItems.map((movement) => (
                   <tr
                     key={movement.movement_ID}
                     className={getRowColor(movement.adj_Adjustment_Type)}
@@ -260,6 +277,51 @@ const Storage = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="d-flex justify-content-center mt-3">
+            <nav>
+              <ul className="pagination">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => paginate(currentPage - 1)}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {[...Array(totalPages)].map((_, index) => (
+                  <li
+                    key={index}
+                    className={`page-item ${
+                      currentPage === index + 1 ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  </li>
+                ))}
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => paginate(currentPage + 1)}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </main>

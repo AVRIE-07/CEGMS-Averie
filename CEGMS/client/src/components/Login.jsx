@@ -28,7 +28,7 @@ export default function Login() {
 
     // Regex for email and username validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const usernameRegex = /^[a-zA-Z0-9_]{3,}$/; // Adjust this regex as per your username rules
+    const usernameRegex = /^[a-zA-Z0-9_]{3,}$/;
 
     // Validation
     if (!email && !username) {
@@ -60,13 +60,14 @@ export default function Login() {
         "http://localhost:3001/users/login",
         loginData
       );
-      if (response.data === "Success") {
+
+      if (response.data.message === "Login successful") {
         navigate("/dashboard");
       } else {
-        setErrors({ server: response.data });
+        setErrors({ server: response.data.message || "Login failed." });
       }
     } catch (error) {
-      // Handle the error based on the response
+      // Handle error based on response
       if (error.response && error.response.status === 401) {
         setErrors({ server: "Unauthorized. Please check your credentials." });
       } else {
@@ -77,7 +78,6 @@ export default function Login() {
 
   const handleInputChange = (e) => {
     const { value } = e.target;
-    // Clear any previous errors when user starts typing
     setErrors((prev) => ({ ...prev, input: "", email: "", username: "" }));
 
     if (value.includes("@")) {
@@ -152,7 +152,7 @@ export default function Login() {
                   <p className={styles.errorMessage}>{errors.server}</p>
                 )}
                 <Link
-                  to="/ForgotPassword" // Link to Reports component
+                  to="/ForgotPassword"
                   className="nav-link fw-semibold text-decoration-none"
                   style={{ color: "#6a6d71" }}
                 >

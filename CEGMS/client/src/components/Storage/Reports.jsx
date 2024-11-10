@@ -37,7 +37,7 @@ const Reports = () => {
 
   const handleGenerateReport = async () => {
     try {
-      await axios.post("http://localhost:3001/api/reportRoutes/", {
+      await axios.post("http://localhost:3001/api/report/", {
         reportType: selectedReportType,
         startDate: fromDate || "/N/A",
         endDate: toDate || "/N/A",
@@ -54,9 +54,7 @@ const Reports = () => {
 
   const fetchReports = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3001/api/reportRoutes/"
-      );
+      const response = await axios.get("http://localhost:3001/api/report/");
       setReports(response.data);
     } catch (error) {
       console.error("Error fetching reports:", error);

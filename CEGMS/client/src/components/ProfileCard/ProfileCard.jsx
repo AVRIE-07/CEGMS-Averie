@@ -15,13 +15,13 @@ const ProfileCard = () => {
   });
 
   useEffect(() => {
-    // Fetch only the logged-in user's data, assuming an endpoint like /get-user-profile
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
           "http://localhost:3001/users/get-user-profile"
         );
-        setUser(response.data); // Set only the specific user's data
+        console.log(response.data); // Check response structure
+        setUser(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -40,6 +40,11 @@ const ProfileCard = () => {
           alt="Profile"
         />
         <div className={styles.infoContainer}>
+          <h3>
+            {user.firstname} {user.lastname}
+          </h3>{" "}
+          {/* Display full name */}
+          {/* Other sections and links */}
           <div className={styles.blueBox}>
             <div className={styles.boxesContainer}>
               <Link to="/Profile">
@@ -53,28 +58,9 @@ const ProfileCard = () => {
                   </h5>
                 </div>
               </Link>
-              <Link to="/Profile/Email">
-                <div className={styles.grayBox}>
-                  <img src={mail} className={styles.logo} alt="Mail" />
-                  <h5 style={{ marginTop: "10%", fontSize: "15px" }}>Email</h5>
-                </div>
-              </Link>
-              <Link to="/Profile/Password">
-                <div className={styles.grayBox}>
-                  <img
-                    src={password}
-                    className={styles.logo}
-                    style={{ width: "20%", height: "40%" }}
-                    alt="Password"
-                  />
-                  <h5 style={{ marginTop: "10%", fontSize: "15px" }}>
-                    Password
-                  </h5>
-                </div>
-              </Link>
+              {/* Other links for Email and Password */}
             </div>
           </div>
-
           {/* Display User Information */}
           <div className="mb-3 mt-3 p-3" style={{ width: "100%" }}>
             <label htmlFor="firstname" className="form-label fs-6 fw-semibold">
