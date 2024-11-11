@@ -28,6 +28,9 @@ const Storage = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Unified search term
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -146,6 +149,7 @@ const Storage = () => {
             product._id === currentProductId ? response.data : product
           )
         );
+        alert("Successfull");
       } else {
         // Create a new product
         response = await axios.post(
@@ -173,6 +177,7 @@ const Storage = () => {
           adj_Price: createdProduct.product_Price,
           adj_Adjustment_Type: "Added",
         });
+        alert("Successfully Added");
       }
       handleModalClose();
       resetForm();
@@ -214,19 +219,6 @@ const Storage = () => {
       product_Maximum_Stock_Level: "",
     });
     setCurrentProductId(null);
-  };
-
-  const handleDeleteProduct = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await axios.delete(`http://localhost:3001/api/products/${id}`);
-        setProducts((prevProducts) =>
-          prevProducts.filter((product) => product._id !== id)
-        );
-      } catch (error) {
-        setError("Could not delete product. Please try again.");
-      }
-    }
   };
 
   const filteredProducts = products.filter((product) => {
@@ -294,25 +286,33 @@ const Storage = () => {
   };
 
   const handleDeleteSelected = async () => {
-    if (
-      selectedProducts.length > 0 &&
-      window.confirm("Are you sure you want to delete the selected products?")
-    ) {
-      try {
-        for (let id of selectedProducts) {
-          await axios.delete(`http://localhost:3001/api/products/${id}`);
-        }
-        setProducts((prevProducts) =>
-          prevProducts.filter(
-            (product) => !selectedProducts.includes(product._id)
-          )
-        );
-        setSelectedProducts([]); // Clear selection after deletion
-        setSelectAll(false); // Reset select all checkbox
-      } catch (error) {
-        setError("Could not delete selected products. Please try again.");
-      }
+    if (selectedProducts.length > 0) {
+      setShowDeleteModal(true);
     }
+  };
+
+  const confirmDeletion = async () => {
+    try {
+      for (let id of selectedProducts) {
+        await axios.delete(`http://localhost:3001/api/products/${id}`);
+      }
+      setProducts((prevProducts) =>
+        prevProducts.filter(
+          (product) => !selectedProducts.includes(product._id)
+        )
+      );
+
+      setSelectedProducts([]); // Clear selection after deletion
+      setSelectAll(false); // Reset select all checkbox
+      setShowDeleteModal(false); // Simply close the modal without doing anything
+    } catch (error) {
+      setError("Could not delete selected products. Please try again.");
+    }
+  };
+
+  // Function to handle cancellation of deletion
+  const cancelDeletion = () => {
+    setShowDeleteModal(false); // Simply close the modal without doing anything
   };
 
   useEffect(() => {
@@ -568,6 +568,25 @@ const Storage = () => {
           handleClose={handleCloseCategoryModal}
           fetchCategories={fetchCategories}
         />
+
+        {/* Confirmation Modal */}
+        <Modal show={showDeleteModal} onHide={cancelDeletion}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Deletion</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete the selected products?
+            {deleteError && <div className="text-danger">{deleteError}</div>}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelDeletion}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmDeletion}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </main>
     </div>
   );
