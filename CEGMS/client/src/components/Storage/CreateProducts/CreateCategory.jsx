@@ -1,0 +1,335 @@
+import React, { useEffect, useState } from "react";
+import Sidebar from "../../SidebarComponents/Sidebar";
+import styles from "../Storage.module.css";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { Modal, Button, Form } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+const CreateProducts = () => {
+  const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editCategory, setEditCategory] = useState({});
+  const [newCategory, setNewCategory] = useState("");
+  const [action, setAction] = useState(""); // To track whether it's an add, edit, or delete action
+  const [deleteId, setDeleteId] = useState(null); // To track which category is being deleted
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/category")
+      .then((response) => {
+        setCategories(response.data);
+        setFilteredCategories(response.data);
+      })
+      .catch((error) => console.error("Error fetching categories:", error));
+  }, []);
+
+  // Handle search query change
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    const filtered = categories.filter((category) =>
+      category.product_Category.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  };
+
+  const handleAddCategory = () => {
+    setAction("add");
+    setShowConfirmModal(true);
+  };
+
+  const handleEditCategory = () => {
+    setAction("edit");
+    setShowConfirmModal(true);
+  };
+
+  const confirmAddCategory = () => {
+    axios
+      .post("http://localhost:3001/api/category", {
+        product_Category: newCategory,
+      })
+      .then((response) => {
+        setCategories([...categories, response.data.data]);
+        setFilteredCategories([...filteredCategories, response.data.data]);
+        setShowModal(false);
+        setShowConfirmModal(false);
+      })
+      .catch((error) => console.error("Error adding category:", error));
+  };
+
+  const confirmEditCategory = () => {
+    axios
+      .put(`http://localhost:3001/api/category/${editCategory._id}`, {
+        product_Category: editCategory.product_Category,
+      })
+      .then((response) => {
+        const updatedCategories = categories.map((category) =>
+          category._id === editCategory._id ? response.data.data : category
+        );
+        setCategories(updatedCategories);
+        setFilteredCategories(updatedCategories);
+        setShowModal(false);
+        setShowConfirmModal(false);
+      })
+      .catch((error) => console.error("Error updating category:", error));
+  };
+
+  const handleDeleteCategory = (id) => {
+    setDeleteId(id);
+    setShowDeleteConfirmModal(true); // Show confirmation modal for delete
+  };
+
+  const confirmDeleteCategory = () => {
+    axios
+      .delete(`http://localhost:3001/api/category/${deleteId}`)
+      .then(() => {
+        setCategories(
+          categories.filter((category) => category._id !== deleteId)
+        );
+        setFilteredCategories(
+          filteredCategories.filter((category) => category._id !== deleteId)
+        );
+        setShowDeleteConfirmModal(false);
+      })
+      .catch((error) => console.error("Error deleting category:", error));
+  };
+
+  const handleShowModal = (category = null) => {
+    if (category) {
+      setEditCategory(category);
+      setIsEditMode(true);
+    } else {
+      setNewCategory("");
+      setIsEditMode(false);
+    }
+    setShowModal(true);
+  };
+
+  return (
+    <div className={styles.dashboard}>
+      <Sidebar />
+      <main className={styles.mainContent}>
+        <div className="d-flex justify-content-start">
+          <ul className="nav nav-underline fs-6 me-3">
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage"
+                className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
+              >
+                Products
+              </Link>
+            </li>
+            <li className="nav-item pe-3">
+              <Link
+                to="/Storage/StockMovement"
+                className="nav-link fw-semibold text-decoration-none"
+                style={{ color: "#6a6d71" }}
+              >
+                Stock Movement
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/Storage/Reports"
+                className="nav-link fw-semibold text-decoration-none"
+                style={{ color: "#6a6d71" }}
+              >
+                Reports
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="card shadow-sm py-3 px-5 mb-3">
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center">
+              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
+              <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
+            </div>
+
+            <div className="d-flex ms-auto">
+              <button
+                className="btn btn-primary me-2"
+                onClick={() => handleShowModal()}
+              >
+                <i className="bi bi-plus-circle me-2"></i> Add Category
+              </button>
+
+              <button
+                className="btn btn-secondary"
+                onClick={() => window.history.back()}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="card shadow-sm px-4 py-2"
+          style={{ backgroundColor: "#50504D" }}
+        >
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search Categories"
+            value={searchQuery}
+            onChange={handleSearch}
+            style={{ maxWidth: "250px" }}
+          />
+        </div>
+
+        <div className="card shadow-sm ">
+          <div className="container py-4">
+            <div className="table-responsive">
+              <table className="table table-hover table-striped border-top">
+                <thead className="table-info">
+                  <tr>
+                    <th scope="col">Categories</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="align-middle table-group-divider">
+                  {filteredCategories.map((category) => (
+                    <tr key={category._id}>
+                      <td className="fw-semibold text-primary">
+                        {category.product_Category}
+                      </td>
+                      <td>
+                        <div className="d-flex justify-content-center">
+                          <button
+                            className="btn btn-warning btn-sm me-2 shadow-sm fs-6 fw-medium rounded-pill"
+                            onClick={() => handleShowModal(category)}
+                          >
+                            <i className="bi bi-pencil-square me-2"></i> Edit
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm shadow-sm fs-6 fw-medium rounded-pill"
+                            onClick={() => handleDeleteCategory(category._id)}
+                          >
+                            <i className="bi bi-trash-fill me-2"></i> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal for Add/Edit Category */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {isEditMode ? "Edit Category" : "Add Category"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="categoryName">
+                <Form.Label>Category Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter category name"
+                  value={
+                    isEditMode ? editCategory.product_Category : newCategory
+                  }
+                  onChange={(e) => {
+                    if (isEditMode) {
+                      setEditCategory({
+                        ...editCategory,
+                        product_Category: e.target.value,
+                      });
+                    } else {
+                      setNewCategory(e.target.value);
+                    }
+                  }}
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              onClick={isEditMode ? handleEditCategory : handleAddCategory}
+            >
+              {isEditMode ? "Update" : "Add"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Confirmation Modal for Add/Edit */}
+        <Modal
+          show={showConfirmModal}
+          onHide={() => setShowConfirmModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              Confirm {action === "add" ? "Add" : "Edit"} Category
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to{" "}
+            {action === "add" ? "add this new category" : "edit this category"}?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={
+                action === "add" ? confirmAddCategory : confirmEditCategory
+              }
+            >
+              Yes, {action === "add" ? "Add" : "Edit"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Confirmation Modal for Delete */}
+        <Modal
+          show={showDeleteConfirmModal}
+          onHide={() => setShowDeleteConfirmModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete Category</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this category?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmDeleteCategory}>
+              Yes, Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </main>
+    </div>
+  );
+};
+
+export default CreateProducts;

@@ -23,6 +23,8 @@ import Refunded from "./components/Sales/Refunded.jsx";
 import Analysis from "./components/Sales/Analysis.jsx";
 import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
 import ForgotPassword from "./components/ForgotPassword.jsx";
+import CreateProducts from "./components/Storage/CreateProducts/CreateProducts.jsx";
+import CreateCategory from "./components/Storage/CreateProducts/CreateCategory.jsx";
 
 import StockMovement from "./components/Storage/StockMovement.jsx"; // Adjust the path if needed
 import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
@@ -51,6 +53,8 @@ function App() {
           <Route path="/Sales" element={<Sales />} />
           <Route path="/Settings" element={<Settings />} />
           <Route path="/Storage" element={<Storage />} />
+          <Route path="/Storage/CreateProducts" element={<CreateProducts />} />
+          <Route path="/Storage/CreateCategory" element={<CreateCategory />} />
           <Route path="/Sales/Refunded" element={<Refunded />} />
           <Route path="/Sales/Analysis" element={<Analysis />} />
           <Route

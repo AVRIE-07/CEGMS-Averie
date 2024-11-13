@@ -125,14 +125,13 @@ const ProductModal = ({
                 id="product_Quantity"
                 name="product_Quantity"
                 className="form-control"
-                value={newProduct.product_Quantity}
                 onChange={handleInputChange}
               />
             </div>
           )}
 
           <Button variant="primary" type="submit">
-            {isEditMode ? "Update" : "Add"}
+            {isEditMode ? "Save" : "Add"}
           </Button>
         </form>
       </Modal.Body>

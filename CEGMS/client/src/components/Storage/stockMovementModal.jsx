@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Table, Button } from "react-bootstrap";
-import "./StockMovementModal.css"; // Ensure the path is correct
 
 const StockMovementModal = ({ show, handleClose, stockMovements }) => {
   const [getDate, setGetDate] = useState({ earliest: " ", latest: " " });

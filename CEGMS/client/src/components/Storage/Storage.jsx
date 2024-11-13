@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Modal, Button, Dropdown } from "react-bootstrap";
 import ProductTable from "./ProductTable";
 import ProductModal from "./ProductModal";
-import AddCategoryModal from "./AddCategoryModal"; // Adjust the path as needed
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 
 const Storage = () => {
   const [products, setProducts] = useState([]);
@@ -17,7 +17,6 @@ const Storage = () => {
   const [currentProductId, setCurrentProductId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [searchCategory, setSearchCategory] = useState(""); // For Category search
-  const [searchDescription, setSearchDescription] = useState(""); // For Description search
   const [selectedProducts, setSelectedProducts] = useState([]); // State for Selected Products that will be deleted
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -25,11 +24,8 @@ const Storage = () => {
   const [overStockCount, setOverStockCount] = useState(0);
   const [selectAll, setSelectAll] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Unified search term
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteError, setDeleteError] = useState(null);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -38,21 +34,6 @@ const Storage = () => {
   // Handle category filter change
   const handleCategoryFilterChange = (category) => {
     setSearchCategory(category);
-  };
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("http://localhost:3001/api/category");
-      setCategories(response.data);
-    } catch (error) {
-      setError("Could not fetch categories. Please try again later.");
-    }
-  };
-  const handleShowCategoryModal = () => {
-    setShowCategoryModal(true);
-  };
-
-  const handleCloseCategoryModal = () => {
-    setShowCategoryModal(false);
   };
 
   useEffect(() => {
@@ -144,12 +125,22 @@ const Storage = () => {
           updatedProductData
         );
 
+        // Update product in the state
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === currentProductId ? response.data : product
           )
         );
-        alert("Successfull");
+
+        // Add the stock movement entry for updating stock
+        await axios.post("http://localhost:3001/api/stockMovement", {
+          product_ID: existingProduct.product_Id,
+          adj_Description: existingProduct.product_Description,
+          adj_Category: existingProduct.product_Category,
+          adj_Quantity: newProduct.product_Quantity,
+          adj_Price: existingProduct.product_Price,
+          adj_Adjustment_Type: "Added", // You can adjust this based on the operation
+        });
       } else {
         // Create a new product
         response = await axios.post(
@@ -169,6 +160,7 @@ const Storage = () => {
           adj_Adjustment_Type: "Added",
         });
 
+        // Add stock movement for new product
         await axios.post("http://localhost:3001/api/stockMovement", {
           product_ID: createdProduct.product_Id,
           adj_Description: createdProduct.product_Description,
@@ -177,7 +169,6 @@ const Storage = () => {
           adj_Price: createdProduct.product_Price,
           adj_Adjustment_Type: "Added",
         });
-        alert("Successfully Added");
       }
       handleModalClose();
       resetForm();
@@ -207,7 +198,6 @@ const Storage = () => {
   };
 
   const handleModalClose = () => setShowModal(false);
-
   const resetForm = () => {
     setNewProduct({
       product_Category: "",
@@ -285,13 +275,12 @@ const Storage = () => {
     setSelectAll(!selectAll);
   };
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedProducts.length > 0) {
-      setShowDeleteModal(true);
+      setShowDeleteModal(true); // Show confirmation modal
     }
   };
-
-  const confirmDeletion = async () => {
+  const confirmDelete = async () => {
     try {
       for (let id of selectedProducts) {
         await axios.delete(`http://localhost:3001/api/products/${id}`);
@@ -301,18 +290,17 @@ const Storage = () => {
           (product) => !selectedProducts.includes(product._id)
         )
       );
-
       setSelectedProducts([]); // Clear selection after deletion
       setSelectAll(false); // Reset select all checkbox
-      setShowDeleteModal(false); // Simply close the modal without doing anything
     } catch (error) {
       setError("Could not delete selected products. Please try again.");
+    } finally {
+      setShowDeleteModal(false); // Close modal after action
     }
   };
 
-  // Function to handle cancellation of deletion
-  const cancelDeletion = () => {
-    setShowDeleteModal(false); // Simply close the modal without doing anything
+  const cancelDelete = () => {
+    setShowDeleteModal(false); // Close modal without deleting
   };
 
   useEffect(() => {
@@ -413,10 +401,12 @@ const Storage = () => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => handleModalShow()}>
+                  <Dropdown.Item as={Link} to="/Storage/CreateProducts">
+                    {" "}
+                    {/* Updated here */}
                     Create Product
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleShowCategoryModal()}>
+                  <Dropdown.Item as={Link} to="/Storage/CreateCategory">
                     Create Category
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -563,30 +553,12 @@ const Storage = () => {
           handleSubmit={handleSubmit}
           categories={categories} // Pass categories here
         />
-        <AddCategoryModal
-          show={showCategoryModal}
-          handleClose={handleCloseCategoryModal}
-          fetchCategories={fetchCategories}
+        <ConfirmationModal
+          show={showDeleteModal}
+          message="Are you sure you want to delete the selected products?"
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
         />
-
-        {/* Confirmation Modal */}
-        <Modal show={showDeleteModal} onHide={cancelDeletion}>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Are you sure you want to delete the selected products?
-            {deleteError && <div className="text-danger">{deleteError}</div>}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={cancelDeletion}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDeletion}>
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </main>
     </div>
   );

@@ -45,4 +45,19 @@ router.post("/", async (req, res) => {
   }
 });
 
+// In stockMovement.js
+router.post("/bulk", async (req, res) => {
+  try {
+    const stockMovements = req.body;
+    const result = await StockMovementModel.insertMany(stockMovements);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("Error creating stock movements:", error);
+    res.status(500).json({
+      message: "Error creating stock movements",
+      error,
+    });
+  }
+});
+
 module.exports = router;

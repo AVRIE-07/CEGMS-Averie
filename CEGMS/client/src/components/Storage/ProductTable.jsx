@@ -144,7 +144,7 @@ const ProductTable = ({
                   <td className="text-primary">
                     {product.product_Current_Stock}
                   </td>
-                  <td className="text-primary">${product.product_Price}</td>
+                  <td className="text-primary">P{product.product_Price}</td>
                   <td className="text-primary">
                     {product.product_Minimum_Stock_Level}
                   </td>

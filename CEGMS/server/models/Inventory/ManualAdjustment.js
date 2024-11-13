@@ -43,25 +43,6 @@ const ManualAdjustmentSchema = new mongoose.Schema(
   }
 );
 
-// Middleware to generate unique manualAdjust_ID before saving
-ManualAdjustmentSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    let uniqueId;
-    let exists = true;
-
-    // Generate ID and ensure uniqueness
-    while (exists) {
-      uniqueId = `MADJT${Math.floor(1000 + Math.random() * 9000)}`; // MADJT followed by random 4 digits
-      exists = await mongoose.models.ManualAdjustment.findOne({
-        manualAdjust_ID: uniqueId,
-      });
-    }
-
-    this.manualAdjust_ID = uniqueId;
-  }
-  next();
-});
-
 // Create the model based on the schema
 const ManualAdjustmentModel = mongoose.model(
   "ManualAdjustment",
