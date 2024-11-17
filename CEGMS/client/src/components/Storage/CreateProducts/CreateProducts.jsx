@@ -18,15 +18,14 @@ const CreateProducts = () => {
     product_Maximum_Stock_Level: "",
   });
   const [productList, setProductList] = useState([]);
-  const [categories, setCategories] = useState([]); // New state for categories
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    // Fetch categories from the backend on component mount
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/category/"); // Adjust endpoint if needed
+        const response = await axios.get("http://localhost:3001/api/category/");
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -38,10 +37,88 @@ const CreateProducts = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
+
+    // Allow empty value (for clearing inputs)
+    if (value === "") {
+      setNewProduct((prev) => ({ ...prev, [name]: value }));
+      setError(""); // Clear any existing errors
+      return;
+    }
+
+    // Example regex for validating fields
+    let validValue = value;
+    switch (name) {
+      case "product_Name":
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(value)) {
+          setError("Product name can only contain letters and spaces.");
+          return;
+        }
+        break;
+
+      case "product_Description":
+        const descriptionRegex = /^[A-Za-z\s]+$/;
+        if (!descriptionRegex.test(value)) {
+          setError("Description can only contain letters and spaces.");
+          return;
+        }
+        break;
+
+      case "product_Price":
+        const priceRegex = /^[0-9]+(\.[0-9]{1,2})?$/;
+        if (!priceRegex.test(value)) {
+          setError(
+            "Price must be a positive number with up to two decimal places."
+          );
+          return;
+        }
+        break;
+
+      case "product_Quantity":
+        const quantityRegex = /^[1-9][0-9]*$/;
+        if (!quantityRegex.test(value)) {
+          setError("Quantity must be a positive integer.");
+          return;
+        }
+        break;
+
+      case "product_Current_Stock":
+      case "product_Minimum_Stock_Level":
+      case "product_Maximum_Stock_Level":
+        const stockRegex = /^[0-9]+$/;
+        if (!stockRegex.test(value)) {
+          setError("Stock levels must be valid numbers.");
+          return;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    // If validation passed, update the state
+    setNewProduct((prev) => ({ ...prev, [name]: validValue }));
+    setError(""); // Clear error if validation passes
   };
 
   const handleAddProduct = () => {
+    // Check if any required fields are empty
+    for (const key in newProduct) {
+      if (newProduct[key] === "" || newProduct[key] === undefined) {
+        setError("All fields are required!");
+        return;
+      }
+    }
+
+    // Check if Minimum Stock Level is lower than Maximum Stock Level
+    if (
+      parseInt(newProduct.product_Minimum_Stock_Level) >=
+      parseInt(newProduct.product_Maximum_Stock_Level)
+    ) {
+      setError("Minimum Stock Level must be lower than Maximum Stock Level.");
+      return;
+    }
+
     let productStatus;
     if (
       newProduct.product_Current_Stock < newProduct.product_Minimum_Stock_Level
@@ -61,6 +138,11 @@ const CreateProducts = () => {
     ]);
 
     resetForm();
+    setError(""); // Clear the error if product is added
+  };
+
+  const handleRemoveProduct = (index) => {
+    setProductList((prevList) => prevList.filter((_, i) => i !== index));
   };
 
   const handleCreateProducts = async () => {
@@ -145,7 +227,7 @@ const CreateProducts = () => {
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/Storage" // Link to Products component
+                to="/Storage"
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Products
@@ -153,7 +235,7 @@ const CreateProducts = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/StockMovement" // Link to Inventory Approvals component
+                to="/Storage/StockMovement"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -162,7 +244,7 @@ const CreateProducts = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports" // Link to Reports component
+                to="/Storage/Reports"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -189,7 +271,9 @@ const CreateProducts = () => {
         </div>
 
         <div className="card shadow-sm p-4 mb-4">
-          <h5 className="card-title">Add New Products</h5>
+          <h5 className="card-title">
+            <i className="bi bi-plus-circle me-2"></i>Add New Products
+          </h5>
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
@@ -215,23 +299,18 @@ const CreateProducts = () => {
                     value={newProduct[field.name]}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
-                    required={[
-                      "product_Name",
-                      "product_Quantity",
-                      "product_Price",
-                    ].includes(field.name)}
+                    required // Ensure this field is required
                   />
                 </div>
               ))}
 
-              {/* Dropdown for product_Category */}
               <div className="col-md-6">
                 <select
                   name="product_Category"
                   className="form-control"
                   value={newProduct.product_Category}
                   onChange={handleInputChange}
-                  required
+                  required // Ensure category selection is required
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
@@ -246,57 +325,84 @@ const CreateProducts = () => {
               </div>
             </div>
 
-            <div className="mt-4">
+            {error && (
+              <div className="text-danger mt-2">
+                <i className="bi bi-exclamation-triangle"></i> {error}
+              </div>
+            )}
+
+            <div className="d-flex justify-content-end mt-3">
               <button
                 type="button"
-                className="btn btn-secondary me-2"
+                className="btn btn-primary me-2"
                 onClick={handleAddProduct}
               >
                 Add Product
               </button>
               <button
-                type="button"
-                className="btn btn-primary"
+                type="submit"
+                className="btn btn-success"
                 onClick={() => setShowModal(true)}
+                disabled={productList.length === 0}
               >
-                Create All Products
+                Save All Products
               </button>
             </div>
-            {error && <p className="text-danger mt-2">{error}</p>}
           </form>
         </div>
 
-        <div className="card shadow-sm p-4">
-          <h5 className="card-title">Products to be Added</h5>
-          <ul className="list-group list-group-flush">
-            {productList.map((product, index) => (
-              <li key={index} className="list-group-item">
-                <strong>{product.product_Name}</strong> -{" "}
-                {product.product_Quantity} units @ ${product.product_Price}{" "}
-                each, Status: {product.product_Status}
-              </li>
-            ))}
-          </ul>
+        {/* Modal */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Product Creation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to create the selected products?</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleCreateProducts}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Product List Preview */}
+        <div className="card shadow-sm p-4 mt-4">
+          <h5 className="card-title">Products Preview</h5>
+          <table className="table table-bordered mt-3">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productList.map((product, index) => (
+                <tr key={index}>
+                  <td>{product.product_Name}</td>
+                  <td>{product.product_Category}</td>
+                  <td>{product.product_Quantity}</td>
+                  <td>{product.product_Price}</td>
+                  <td>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleRemoveProduct(index)}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
-
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Product Creation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to create all products and record stock
-          movements?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleCreateProducts}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

@@ -68,12 +68,13 @@ const ProductModal = ({
               className="form-control"
               value={newProduct.product_Current_Stock}
               onChange={handleInputChange}
+              disabled={isEditMode}
             />
           </div>
 
           <div className="mb-3">
             <label htmlFor="product_Price" className="form-label">
-              Price
+              Unit Price(P)
             </label>
             <input
               type="text"

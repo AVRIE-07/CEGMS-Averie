@@ -19,6 +19,10 @@ const CreateProducts = () => {
   const [deleteId, setDeleteId] = useState(null); // To track which category is being deleted
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // You can adjust this number
+
   // Fetch categories on component mount
   useEffect(() => {
     axios
@@ -41,6 +45,17 @@ const CreateProducts = () => {
     setFilteredCategories(filtered);
   };
 
+  // Handle pagination logic
+  const indexOfLastCategory = currentPage * itemsPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
+  const currentCategories = filteredCategories.slice(
+    indexOfFirstCategory,
+    indexOfLastCategory
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Handle category actions
   const handleAddCategory = () => {
     setAction("add");
     setShowConfirmModal(true);
@@ -117,36 +132,7 @@ const CreateProducts = () => {
     <div className={styles.dashboard}>
       <Sidebar />
       <main className={styles.mainContent}>
-        <div className="d-flex justify-content-start">
-          <ul className="nav nav-underline fs-6 me-3">
-            <li className="nav-item pe-3">
-              <Link
-                to="/Storage"
-                className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
-              >
-                Products
-              </Link>
-            </li>
-            <li className="nav-item pe-3">
-              <Link
-                to="/Storage/StockMovement"
-                className="nav-link fw-semibold text-decoration-none"
-                style={{ color: "#6a6d71" }}
-              >
-                Stock Movement
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/Storage/Reports"
-                className="nav-link fw-semibold text-decoration-none"
-                style={{ color: "#6a6d71" }}
-              >
-                Reports
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {/* Your header and other UI elements */}
 
         <div className="card shadow-sm py-3 px-5 mb-3">
           <div className="d-flex justify-content-between align-items-center">
@@ -199,7 +185,7 @@ const CreateProducts = () => {
                   </tr>
                 </thead>
                 <tbody className="align-middle table-group-divider">
-                  {filteredCategories.map((category) => (
+                  {currentCategories.map((category) => (
                     <tr key={category._id}>
                       <td className="fw-semibold text-primary">
                         {category.product_Category}
@@ -224,6 +210,73 @@ const CreateProducts = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination controls */}
+            <div className="d-flex justify-content-center mt-3">
+              <nav>
+                <ul className="pagination">
+                  {/* Previous Button */}
+                  <li
+                    className={`page-item ${
+                      currentPage === 1 ? "disabled" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+                  </li>
+
+                  {/* Page Number Buttons */}
+                  {Array.from(
+                    {
+                      length: Math.ceil(
+                        filteredCategories.length / itemsPerPage
+                      ),
+                    },
+                    (_, index) => (
+                      <li
+                        key={index + 1}
+                        className={`page-item ${
+                          currentPage === index + 1 ? "active" : ""
+                        }`}
+                      >
+                        <button
+                          className="page-link"
+                          onClick={() => paginate(index + 1)}
+                        >
+                          {index + 1}
+                        </button>
+                      </li>
+                    )
+                  )}
+
+                  {/* Next Button */}
+                  <li
+                    className={`page-item ${
+                      currentPage ===
+                      Math.ceil(filteredCategories.length / itemsPerPage)
+                        ? "disabled"
+                        : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(filteredCategories.length / itemsPerPage)
+                      }
+                    >
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>

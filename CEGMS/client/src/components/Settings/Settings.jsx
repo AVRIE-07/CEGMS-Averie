@@ -11,7 +11,7 @@ const Settings = () => {
       <main className={styles.mainContent}>
         <div className={styles.header}>
           <img src={icon} className={styles.icon} />
-          Settings
+          User Accounts
         </div>
         <div className={styles.content}>
           <UserManagement></UserManagement>

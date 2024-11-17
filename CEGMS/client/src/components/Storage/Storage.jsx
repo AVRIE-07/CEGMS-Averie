@@ -141,6 +141,7 @@ const Storage = () => {
           adj_Price: existingProduct.product_Price,
           adj_Adjustment_Type: "Added", // You can adjust this based on the operation
         });
+        alert("Product Successfully Saved");
       } else {
         // Create a new product
         response = await axios.post(
@@ -404,10 +405,10 @@ const Storage = () => {
                   <Dropdown.Item as={Link} to="/Storage/CreateProducts">
                     {" "}
                     {/* Updated here */}
-                    Create Product
+                    Product
                   </Dropdown.Item>
                   <Dropdown.Item as={Link} to="/Storage/CreateCategory">
-                    Create Category
+                    Category
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

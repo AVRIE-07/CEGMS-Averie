@@ -108,7 +108,7 @@ const Sidebar = () => {
               }
             >
               <i className="bi bi-gear fs-5 me-4"></i>
-              <span className="fs-6">Settings</span>
+              <span className="fs-6">User Accounts</span>
             </NavLink>
           </li>
           <li className="sidebar-item">

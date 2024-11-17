@@ -7,7 +7,10 @@ const ManualAdjustmentSchema = new mongoose.Schema(
   {
     manualAdjust_ID: {
       type: String,
-      unique: true, // Ensure each ID is unique
+      unique: true, // Ensures uniqueness
+      default: function () {
+        return `MI${Math.floor(1000 + Math.random() * 9000)}`; // Default ID generator
+      },
     },
     product_ID: {
       type: String,

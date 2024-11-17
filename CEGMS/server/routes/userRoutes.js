@@ -177,7 +177,7 @@ router.get("/get-user-profile", isLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user.id; // Get the logged-in user's ID from the session
     const user = await UsersModel.findById(userId).select(
-      "firstname lastname email username" 
+      "firstname lastname email username"
     ); // Fetch the user by ID and select necessary fields
 
     if (!user) {
