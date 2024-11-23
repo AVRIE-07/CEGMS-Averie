@@ -1,15 +1,39 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Sidebar.module.css";
 import Logo from "./cokins.png";
+import classNames from "classnames";
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const navigate = useNavigate(); // Importing useNavigate for routing
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
+
+  const handleLogout = () => {
+    // Remove the token and user information from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("firstname");
+    localStorage.removeItem("lastname");
+    localStorage.removeItem("role");
+
+    // Redirect to login page after logout
+    navigate("/login");
+  };
+
+  // Sidebar links configuration
+  const sidebarLinks = [
+    { to: "/Dashboard", icon: "bi-house", label: "Dashboard" },
+    { to: "/Purchase", icon: "bi-calendar-check", label: "Purchase" },
+    { to: "/Payment-History", icon: "bi-clock", label: "Payment History" },
+    { to: "/Sales", icon: "bi-bar-chart", label: "Sales" },
+    { to: "/Storage", icon: "bi-box-seam", label: "Storage" },
+    { to: "/Profile", icon: "bi-person-circle", label: "Profile" },
+    { to: "/Settings", icon: "bi-gear", label: "User Accounts" },
+  ];
 
   return (
     <>
@@ -30,97 +54,60 @@ const Sidebar = () => {
           </a>
         </div>
       </nav>
-      <aside id="sidebar" className={isExpanded ? "expand" : ""}>
+
+      <aside id="sidebar" className={classNames({ expand: isExpanded })}>
         <ul className="sidebar-nav">
-          <li className="sidebar-item">
-            <NavLink
-              to="/Dashboard"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-house fs-5 me-4"></i>
-              <span className="fs-6">Dashboard</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Purchase"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-calendar-check fs-5 me-4"></i>
-              <span className="fs-6">Purchase</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Payment-History"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-clock fs-5 me-4"></i>
-              <span className="fs-6">Payment History</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Sales"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-bar-chart fs-5 me-4"></i>
-              <span className="fs-6">Sales</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Storage"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-box-seam fs-5 me-4"></i>
-              <span className="fs-6">Storage</span>
-            </NavLink>
-          </li>
+          {sidebarLinks.slice(0, 5).map((link, index) => (
+            <li key={index} className="sidebar-item">
+              <NavLink
+                to={link.to}
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                <i className={`bi ${link.icon} fs-5 me-4`}></i>
+                <span className="fs-6">{link.label}</span>
+              </NavLink>
+            </li>
+          ))}
         </ul>
+
         <div className="sidebar-footer">
+          {sidebarLinks.slice(5).map((link, index) => (
+            <li key={index} className="sidebar-item">
+              <NavLink
+                to={link.to}
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                <i className={`bi ${link.icon} fs-5 me-4`}></i>
+                <span className="fs-6">{link.label}</span>
+              </NavLink>
+            </li>
+          ))}
           <li className="sidebar-item">
-            <NavLink
-              to="/Profile"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
+            {/* Logout treated as a sidebar item with the same style, but with red color */}
+            <button
+              className="sidebar-link logout-link"
+              onClick={handleLogout}
+              style={{
+                background: "none",
+                border: "none",
+                width: "100%",
+                textAlign: "left",
+                padding: "8px 16px 8px 30px",
+              }}
             >
-              <i className="bi bi-person-circle fs-5 me-4"></i>
-              <span className="fs-6">Profile</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Settings"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-gear fs-5 me-4"></i>
-              <span className="fs-6">User Accounts</span>
-            </NavLink>
-          </li>
-          <li className="sidebar-item">
-            <NavLink
-              to="/Login"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              <i className="bi bi-box-arrow-left fs-5 me-4"></i>
-              <span className="fs-6">Logout</span>
-            </NavLink>
+              <i
+                className="bi bi-box-arrow-right fs-5 me-4"
+                style={{ color: "red" }}
+              ></i>
+              {/* Conditionally render the text based on sidebar expansion or hover */}
+              <span className="fs-6 logout-text" style={{ color: "red" }}>
+                Logout
+              </span>
+            </button>
           </li>
         </div>
       </aside>

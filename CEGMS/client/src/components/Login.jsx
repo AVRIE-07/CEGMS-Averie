@@ -1,182 +1,191 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import cokinslogo from "../_images/cokinslogo.png";
 import styles from "../_css/login.module.css";
-import googleLogo from "../_images/google.png";
-import { FaUser, FaLock } from "react-icons/fa";
+import { FaUser } from "react-icons/fa"; // User Icon
+import { FaLock } from "react-icons/fa"; // Lock Icon
 import { AiOutlineExclamationCircle } from "react-icons/ai";
+import { BsFillEyeFill, BsFillEyeSlashFill } from "react-icons/bs"; // Eye icons from Bootstrap
 
-export default function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState({});
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // To toggle password visibility
   const navigate = useNavigate();
+
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { email, username, password } = formData;
 
     // Clear previous errors
-    setErrors({});
+    setError("");
+    setEmailError(false);
+    setPasswordError(false);
 
     let hasError = false;
-    const newErrors = {};
 
-    // Regex for email and username validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const usernameRegex = /^[a-zA-Z0-9_]{3,}$/;
-
-    // Validation
-    if (!email && !username) {
-      newErrors.input = "Please fill in all required fields.";
+    // Validate email
+    if (!email) {
+      setEmailError(true);
+      setError("Please enter your email.");
       hasError = true;
-    } else if (email && !emailRegex.test(email)) {
-      newErrors.email = "Invalid email format.";
-      hasError = true;
-    } else if (username && !usernameRegex.test(username)) {
-      newErrors.username =
-        "Invalid username. Must be at least 3 characters long and can contain letters, numbers, and underscores.";
+    } else if (!gmailRegex.test(email)) {
+      setEmailError(true);
+      setError("Please enter a valid Gmail address.");
       hasError = true;
     }
 
+    // Validate password
     if (!password) {
-      newErrors.password = "Password is required.";
+      setPasswordError(true);
+      setError("Password is required.");
       hasError = true;
     }
 
     if (hasError) {
-      setErrors(newErrors);
       return;
     }
 
-    const loginData = email ? { email, password } : { username, password };
+    const loginData = { email, password };
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/users/login",
+        "http://localhost:3001/api/users/login",
         loginData
       );
 
-      if (response.data.message === "Login successful") {
-        navigate("/dashboard");
-      } else {
-        setErrors({ server: response.data.message || "Login failed." });
-      }
+      const { token, username, firstname, email, lastname, role } =
+        response.data;
+
+      // Store in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", username);
+      localStorage.setItem("firstname", firstname);
+      localStorage.setItem("email", email);
+      localStorage.setItem("lastname", lastname);
+      localStorage.setItem("role", role);
+
+      navigate("/dashboard");
     } catch (error) {
-      // Handle error based on response
       if (error.response && error.response.status === 401) {
-        setErrors({ server: "Unauthorized. Please check your credentials." });
+        setError("Unauthorized. Please check your credentials.");
       } else {
-        setErrors({ server: "An error occurred. Please try again." });
+        setError("Incorrect Email or Password. Please try again.");
       }
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { value } = e.target;
-    setErrors((prev) => ({ ...prev, input: "", email: "", username: "" }));
-
-    if (value.includes("@")) {
-      setFormData({ email: value, username: "", password: formData.password });
-    } else {
-      setFormData({ email: "", username: value, password: formData.password });
-    }
-  };
-
-  const handlePasswordChange = (e) => {
-    setFormData((prev) => ({ ...prev, password: e.target.value }));
   };
 
   return (
-    <div className={styles.container}>
-      <div
-        className={`col-8 mx-auto d-flex justify-content-center align-items-center border mt-5 p-4 ${styles.border}`}
-      >
-        <div className="row">
-          <div className="col-6">
-            <img src={cokinslogo} alt="Cokins Logo" className="w-100 h-100" />
-          </div>
-          <div className="col-6 text-center d-flex flex-column justify-content-center align-items-center">
-            <div className={styles.w}>
-              <h1 className="mb-1 fw-semibold">Welcome</h1>
-              <p className="lead mb-5">Login with username or email</p>
-              <form onSubmit={handleSubmit}>
-                <div className={styles.inputContainer}>
-                  <FaUser className={styles.icon} />
-                  <input
-                    type="text"
-                    placeholder="Email or Username"
-                    className={`form-control mb-3 ${
-                      errors.input || errors.email || errors.username
-                        ? styles.errorBorder
-                        : ""
-                    }`}
-                    onChange={handleInputChange}
-                    value={formData.email || formData.username}
-                    style={{ paddingLeft: "40px" }}
-                  />
-                  {(errors.input || errors.email || errors.username) && (
-                    <AiOutlineExclamationCircle className={styles.dangerIcon} />
-                  )}
-                </div>
-                {errors.username && (
-                  <p className={styles.errorMessage}>{errors.username}</p>
-                )}
-                <div className={styles.inputContainer}>
-                  <FaLock className={styles.icon} />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    onChange={handlePasswordChange}
-                    value={formData.password}
-                    className={`form-control mb-3 ${
-                      errors.password ? styles.errorBorder : ""
-                    }`}
-                    style={{ paddingLeft: "40px" }}
-                  />
-                  {errors.password && (
-                    <AiOutlineExclamationCircle className={styles.dangerIcon} />
-                  )}
-                </div>
-                {errors.password && (
-                  <p className={styles.errorMessage}>{errors.password}</p>
-                )}
-                {errors.input && (
-                  <p className={styles.errorMessage}>{errors.input}</p>
-                )}
-                {errors.server && (
-                  <p className={styles.errorMessage}>{errors.server}</p>
-                )}
-                <Link
-                  to="/ForgotPassword"
-                  className="nav-link fw-semibold text-decoration-none"
-                  style={{ color: "#6a6d71" }}
-                >
-                  Forgot Password?
-                </Link>
-                <button className={`${styles.loginButton} w-100`} type="submit">
-                  Login
-                </button>
-              </form>
-              <button
-                className={`${styles.googleButton} w-100 mt-3`}
-                type="button"
-              >
-                <img
-                  src={googleLogo}
-                  alt="Google logo"
-                  style={{ marginRight: "8px", height: "24px" }}
-                />
-                Sign in with Google
-              </button>
+    <>
+      <div className={styles.container}>
+        <div
+          className={`col-8 mx-auto d-flex justify-content-center align-items-center border mt-5 p-4 ${styles.border}`}
+        >
+          <div className="row">
+            <div className="col-6">
+              <img src={cokinslogo} alt="" className="w-100 h-100" />
+            </div>
+            <div className="col-6 text-center d-flex flex-column justify-content-center align-items-center">
+              <div className={styles.w}>
+                <h1 className="mb-1 fw-semibold">Welcome</h1>
+                <p className="lead mb-5">Login with your email</p>
+                <form onSubmit={handleSubmit}>
+                  <div className={styles.inputContainer}>
+                    <FaUser className={styles.icon} />
+                    <input
+                      type="text"
+                      placeholder="Email"
+                      className={`form-control mb-3 ${
+                        emailError ? styles.errorBorder : ""
+                      }`}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError(false);
+                        setError("");
+                      }}
+                      value={email}
+                      style={{ paddingLeft: "40px" }}
+                    />
+                    {emailError && (
+                      <AiOutlineExclamationCircle
+                        className={styles.dangerIcon}
+                      />
+                    )}
+                  </div>
+
+                  {/* Password input with eye icon */}
+                  <div className={styles.inputContainer}>
+                    {/* Lock Icon in Front */}
+                    <FaLock className={`${styles.icon} ${styles.lockIcon}`} />
+                    <div className="position-relative">
+                      <input
+                        type={showPassword ? "text" : "password"} // Toggle password visibility
+                        placeholder="Password"
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setPasswordError(false);
+                          setError("");
+                        }}
+                        value={password}
+                        className={`form-control mb-3 ${
+                          passwordError ? styles.errorBorder : ""
+                        }`}
+                        style={{
+                          paddingLeft: "40px",
+                          paddingRight: "40px", // Added padding for the eye icon
+                        }}
+                      />
+                      {/* Eye Icon */}
+                      <div
+                        className="position-absolute"
+                        style={{
+                          top: "50%",
+                          right: "10px", // Adjusted right positioning to make room
+                          transform: "translateY(-50%)",
+                          cursor: "pointer",
+                          zIndex: 2, // Ensures eye icon appears in front
+                        }}
+                        onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
+                      >
+                        {showPassword ? (
+                          <BsFillEyeSlashFill />
+                        ) : (
+                          <BsFillEyeFill />
+                        )}{" "}
+                        {/* Show appropriate icon */}
+                      </div>
+                    </div>
+                    {passwordError && (
+                      <AiOutlineExclamationCircle
+                        className={styles.dangerIcon}
+                      />
+                    )}
+                  </div>
+                  <div className="text-end mb-3">
+                    <a href="/ForgotPassword" className="text-primary">
+                      Forgot Password?
+                    </a>
+                  </div>
+                  {error && <p className={styles.errorMessage}>{error}</p>}
+                  <button
+                    className={`${styles.loginButton} w-100`}
+                    type="submit"
+                  >
+                    Login
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+export default Login;

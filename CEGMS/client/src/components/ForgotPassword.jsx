@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaKey } from "react-icons/fa";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1); // 1 = Request code, 2 = Enter code
@@ -125,6 +126,11 @@ export default function ForgotPassword() {
               </form>
             </>
           )}
+          <div className="text-center mt-3">
+            <Link to="/" className="text-secondary">
+              Back to Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>

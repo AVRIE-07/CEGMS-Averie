@@ -25,6 +25,7 @@ import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
 import ForgotPassword from "./components/ForgotPassword.jsx";
 import CreateProducts from "./components/Storage/CreateProducts/CreateProducts.jsx";
 import CreateCategory from "./components/Storage/CreateProducts/CreateCategory.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import StockMovement from "./components/Storage/StockMovement.jsx"; // Adjust the path if needed
 import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
@@ -39,32 +40,176 @@ function App() {
           <Route path="/ForgotPassword" element={<ForgotPassword />}></Route>
           <Route path="/home" element={<Home />}></Route>
           <Route path="/" element={<Login />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/Profile/Email" element={<Email />} />
-          <Route path="/Profile" element={<Profile />} />
+          <Route
+            path="/Dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Profile/Email"
+            element={
+              <ProtectedRoute>
+                <Email />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/Profile/Password" element={<Password />} />
-          <Route path="/Purchase" element={<Purchase />} />
-          <Route path="/Purchase/Cancelled" element={<Cancelled />} />
-          <Route path="/Purchase/Purchase-Order" element={<PurchaseOrder />} />
-          <Route path="/Purchase/GRN" element={<GRN />} />
-          <Route path="/Purchase/RMA" element={<RMA />} />
-          <Route path="/Purchase/Backorder" element={<Backorder />} />
-          <Route path="/Payment-History" element={<PaymentHistory />} />
-          <Route path="/Sales" element={<Sales />} />
-          <Route path="/Settings" element={<Settings />} />
-          <Route path="/Storage" element={<Storage />} />
-          <Route path="/Storage/CreateProducts" element={<CreateProducts />} />
-          <Route path="/Storage/CreateCategory" element={<CreateCategory />} />
-          <Route path="/Sales/Refunded" element={<Refunded />} />
-          <Route path="/Sales/Analysis" element={<Analysis />} />
+          <Route
+            path="/Purchase"
+            element={
+              <ProtectedRoute>
+                <Purchase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Purchase/Cancelled"
+            element={
+              <ProtectedRoute>
+                <Cancelled />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Purchase/Purchase-Order"
+            element={
+              <ProtectedRoute>
+                <PurchaseOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Purchase/GRN"
+            element={
+              <ProtectedRoute>
+                <GRN />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Purchase/RMA"
+            element={
+              <ProtectedRoute>
+                <RMA />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Purchase/Backorder"
+            element={
+              <ProtectedRoute>
+                <Backorder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Payment-History"
+            element={
+              <ProtectedRoute>
+                <PaymentHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Sales"
+            element={
+              <ProtectedRoute>
+                <Sales />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Storage"
+            element={
+              <ProtectedRoute>
+                <Storage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Storage/CreateProducts"
+            element={
+              <ProtectedRoute>
+                <CreateProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Storage/CreateCategory"
+            element={
+              <ProtectedRoute>
+                <CreateCategory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Sales/Refunded"
+            element={
+              <ProtectedRoute>
+                <Refunded />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Sales/Analysis"
+            element={
+              <ProtectedRoute>
+                <Analysis />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/Sales/CreateTransaction"
-            element={<CreateTransaction />}
+            element={
+              <ProtectedRoute>
+                <CreateTransaction />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/Storage" element={<Storage />} />
+          <Route
+            path="/Storage"
+            element={
+              <ProtectedRoute>
+                <Storage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/Storage/StockMovement" element={<StockMovement />} />
-          <Route path="/Storage/Reports" element={<Reports />} />
+          <Route
+            path="/Storage/StockMovement"
+            element={
+              <ProtectedRoute>
+                <StockMovement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Storage/Reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </>

@@ -122,7 +122,7 @@ const ProductTable = ({
                   Max Stock Level
                 </th>
                 <th scope="col" className="fw-semibold">
-                  Edit/Add
+                  Edit
                 </th>
               </tr>
             </thead>

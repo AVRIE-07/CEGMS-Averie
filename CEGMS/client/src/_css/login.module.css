@@ -90,3 +90,10 @@
 .googleButton:focus {
   outline: none;
 }
+.lockIcon {
+  position: absolute;
+  top: 50%;
+  left: 10px; /* Adjust lock position */
+  transform: translateY(-50%);
+  z-index: 2; /* Ensure lock icon is in front */
+}

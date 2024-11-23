@@ -21,7 +21,7 @@ const CreateProducts = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5); // You can adjust this number
+  const [itemsPerPage] = useState(9); // You can adjust this number
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -137,7 +137,7 @@ const CreateProducts = () => {
         <div className="card shadow-sm py-3 px-5 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
-              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
+              <i className="bi bi-bar-chart-fill fs-3"></i>
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
 
@@ -283,7 +283,7 @@ const CreateProducts = () => {
 
         {/* Modal for Add/Edit Category */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>
               {isEditMode ? "Edit Category" : "Add Category"}
             </Modal.Title>
@@ -362,7 +362,7 @@ const CreateProducts = () => {
           show={showDeleteConfirmModal}
           onHide={() => setShowDeleteConfirmModal(false)}
         >
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>Confirm Delete Category</Modal.Title>
           </Modal.Header>
           <Modal.Body>

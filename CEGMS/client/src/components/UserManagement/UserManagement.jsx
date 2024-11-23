@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import {
   Modal,
   Button,
@@ -31,20 +32,55 @@ function UserManagement() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  // Fetch users when the component mounts
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of users per page
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <li
+          key={i}
+          className={`page-item ${currentPage === i ? "active" : ""}`}
+        >
+          <button className="page-link" onClick={() => paginate(i)}>
+            {i}
+          </button>
+        </li>
+      );
+    }
+    return pageNumbers;
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Update filtered users whenever searchTerm or users list changes
   useEffect(() => {
     filterUsers();
   }, [searchTerm, users]);
 
-  // Fetch users from the backend
+  useEffect(() => {
+    setCurrentPage(1); // Reset to the first page on search/filter
+  }, [filteredUsers]);
+
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/users/get-users");
+      const response = await axios.get(
+        "http://localhost:3001/api/users/get-users"
+      );
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -52,7 +88,6 @@ function UserManagement() {
     }
   };
 
-  // Filter users based on the search term
   const filterUsers = () => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
     const filtered = users.filter(
@@ -66,7 +101,6 @@ function UserManagement() {
     setFilteredUsers(filtered);
   };
 
-  // Handle opening the modal for adding a new user
   const handleShowModal = () => {
     setEditMode(false);
     setFormData({
@@ -81,13 +115,11 @@ function UserManagement() {
     setShowModal(true);
   };
 
-  // Handle closing the modal
   const handleCloseModal = () => {
     setErrorMessage("");
     setShowModal(false);
   };
 
-  // Handle form field changes
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -96,17 +128,14 @@ function UserManagement() {
     }));
   };
 
-  // Save new or updated user
   const handleSaveUser = async (e) => {
     e.preventDefault();
 
-    // Validate passwords if not in edit mode
     if (!editMode && formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match.");
       return;
     }
 
-    // Create payload for the API request
     const payload = {
       role: formData.role,
       firstname: formData.firstName.trim(),
@@ -117,23 +146,17 @@ function UserManagement() {
     };
 
     try {
-      let response;
       if (editMode) {
-        // Update user if in edit mode
-        response = await axios.put(
-          `http://localhost:3001/users/update-user/${currentUserId}`,
+        await axios.put(
+          `http://localhost:3001/api/users/update-user/${currentUserId}`,
           payload
         );
       } else {
-        // Add new user if not in edit mode
-        response = await axios.post(
-          "http://localhost:3001/users/add-user",
-          payload
-        );
+        await axios.post("http://localhost:3001/api/users/add-user", payload);
       }
-      fetchUsers(); // Refresh users list
-      setSuccessModalVisible(true); // Show success modal
-      handleCloseModal(); // Close form modal
+      fetchUsers();
+      setSuccessModalVisible(true);
+      handleCloseModal();
     } catch (error) {
       const errorMsg =
         error.response?.data?.message ||
@@ -142,7 +165,6 @@ function UserManagement() {
     }
   };
 
-  // Handle editing an existing user
   const handleEditUser = (user) => {
     setEditMode(true);
     setCurrentUserId(user._id);
@@ -158,36 +180,52 @@ function UserManagement() {
     setShowModal(true);
   };
 
-  // Handle showing the delete confirmation modal
   const showDeleteModal = (userId) => {
     setUserToDelete(userId);
     setDeleteModalVisible(true);
   };
 
-  // Handle deleting a user
   const handleDeleteUser = async () => {
     try {
       await axios.delete(
-        `http://localhost:3001/users/delete-user/${userToDelete}`
+        `http://localhost:3001/api/users/delete-user/${userToDelete}`
       );
-      fetchUsers(); // Refresh users list
-      setDeleteModalVisible(false); // Close delete modal
+      fetchUsers();
+      setDeleteModalVisible(false);
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Failed to delete user. Please try again later.");
     }
   };
 
-  // Handle closing the delete modal
   const closeDeleteModal = () => {
     setDeleteModalVisible(false);
     setUserToDelete(null);
   };
 
-  // Handle closing the success modal
   const closeSuccessModal = () => {
     setSuccessModalVisible(false);
   };
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * itemsPerPage;
+  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="container mt-4">
@@ -201,7 +239,6 @@ function UserManagement() {
         </Button>
       </div>
 
-      {/* Search bar */}
       <InputGroup className="mb-3">
         <FormControl
           placeholder="Search users..."
@@ -210,7 +247,6 @@ function UserManagement() {
         />
       </InputGroup>
 
-      {/* Users table */}
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -223,7 +259,7 @@ function UserManagement() {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map((user) => (
+          {currentUsers.map((user) => (
             <tr key={user._id}>
               <td>{user.role}</td>
               <td>{user.firstname}</td>
@@ -252,9 +288,40 @@ function UserManagement() {
         </tbody>
       </Table>
 
+      {/* Pagination Controls */}
+      <div className="d-flex justify-content-center mt-3">
+        <nav>
+          <ul className="pagination">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+            </li>
+            {renderPageNumbers()}
+            <li
+              className={`page-item ${
+                currentPage === totalPages ? "disabled" : ""
+              }`}
+            >
+              <button
+                className="page-link"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
       {/* Delete confirmation modal */}
       <Modal show={deleteModalVisible} onHide={closeDeleteModal}>
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -273,7 +340,7 @@ function UserManagement() {
 
       {/* Success modal */}
       <Modal show={successModalVisible} onHide={closeSuccessModal}>
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title>Success!</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -340,24 +407,59 @@ function UserManagement() {
               <>
                 <Form.Group controlId="password">
                   <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
+                  <div className="position-relative">
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <div
+                      className="position-absolute"
+                      style={{
+                        top: "50%",
+                        right: "10px",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                      }}
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
                 </Form.Group>
+
                 <Form.Group controlId="confirmPassword">
                   <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                  />
+                  <div className="position-relative">
+                    <Form.Control
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                    <div
+                      className="position-absolute"
+                      style={{
+                        top: "50%",
+                        right: "10px",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                      }}
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
                 </Form.Group>
               </>
             )}
             {errorMessage && <p className="text-danger">{errorMessage}</p>}
-            <Button variant="primary" type="submit">
+            <Button
+              variant="primary"
+              type="submit"
+              style={{ marginTop: "10px" }} // Add your desired padding-top value here
+            >
               Save
             </Button>
           </Form>
