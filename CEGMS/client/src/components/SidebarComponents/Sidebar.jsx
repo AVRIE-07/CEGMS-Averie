@@ -32,7 +32,7 @@ const Sidebar = () => {
     { to: "/Sales", icon: "bi-bar-chart", label: "Sales" },
     { to: "/Storage", icon: "bi-box-seam", label: "Storage" },
     { to: "/Profile", icon: "bi-person-circle", label: "Profile" },
-    { to: "/Settings", icon: "bi-gear", label: "User Accounts" },
+    { to: "/Settings", icon: "bi-people-fill", label: "User Accounts" },
   ];
 
   return (

@@ -31,6 +31,7 @@ router.post("/login", async (req, res) => {
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
+      userId: user.userId,
     });
   } catch (err) {
     console.error(err);
@@ -158,6 +159,29 @@ router.post("/add-user", async (req, res) => {
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error(error); // Log error for debugging
+    res.status(500).json({ message: "Server error, please try again later" });
+  }
+});
+
+router.put("/profile/update-user/:userId", async (req, res) => {
+  console.log("Route hit with userId:", req.params.userId);
+  console.log("Request body:", req.body);
+
+  try {
+    // Match user by userId
+    const updatedUser = await UsersModel.findOneAndUpdate(
+      { userId: req.params.userId }, // Match userId, not _id
+      req.body,
+      { new: true } // Return updated user
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User updated successfully", updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
     res.status(500).json({ message: "Server error, please try again later" });
   }
 });

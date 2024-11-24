@@ -55,7 +55,8 @@ const Reports = () => {
   const fetchReports = async () => {
     try {
       const response = await axios.get("http://localhost:3001/api/report/");
-      setReports(response.data);
+      // Reverse the array so the newest reports appear at the top
+      setReports(response.data.reverse());
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
@@ -215,16 +216,26 @@ const Reports = () => {
 
               <tbody className="fs-6 align-middle table-group-divider">
                 {filteredReports.length > 0 ? (
-                  filteredReports.map((report) => (
-                    <tr
-                      key={report.id}
-                      onClick={() => handleReportRowClick(report)}
-                    >
-                      <td className="text-primary">{report.report_ID}</td>
-                      <td className="text-primary">{report.reportType}</td>
-                      <td className="text-primary">{report.generatedDate}</td>
-                    </tr>
-                  ))
+                  filteredReports.map((report) => {
+                    // Format the generatedDate to YYYY-MM-DD
+                    const formattedDate = new Date(report.generatedDate);
+                    const formattedDateString = `${formattedDate.getFullYear()}-${String(
+                      formattedDate.getMonth() + 1
+                    ).padStart(2, "0")}-${String(
+                      formattedDate.getDate()
+                    ).padStart(2, "0")}`;
+
+                    return (
+                      <tr
+                        key={report.id}
+                        onClick={() => handleReportRowClick(report)}
+                      >
+                        <td className="text-primary">{report.report_ID}</td>
+                        <td className="text-primary">{report.reportType}</td>
+                        <td className="text-primary">{formattedDateString}</td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="3" className="text-center text-muted">

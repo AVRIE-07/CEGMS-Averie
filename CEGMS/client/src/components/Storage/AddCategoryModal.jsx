@@ -16,7 +16,7 @@ const CategoryModal = ({ show, handleClose }) => {
   const fetchCategories = async () => {
     try {
       const response = await axios.get("http://localhost:3001/api/category");
-      setCategories(response.data);
+      setCategories(response.data.reverse());
     } catch (error) {
       console.error("Failed to fetch categories", error);
     }

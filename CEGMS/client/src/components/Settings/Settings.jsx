@@ -10,7 +10,7 @@ const Settings = () => {
       <Sidebar />
       <main className={styles.mainContent}>
         <div className={styles.header}>
-          <img src={icon} className={styles.icon} />
+          <i class="bi bi-people-fill"></i>
           User Accounts
         </div>
         <div className={styles.content}>

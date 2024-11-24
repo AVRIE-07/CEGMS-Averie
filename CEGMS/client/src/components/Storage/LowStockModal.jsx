@@ -74,8 +74,6 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
     // Add everything to the print content
     printContent.innerHTML = `
       <h1>Low Stock Products</h1>
-      <p><strong>Lowest Stock Level:</strong> ${earliest}</p>
-      <p><strong>Highest Stock Level:</strong> ${latest}</p>
       ${tableHeader}
       ${tableRows}
       ${tableFooter}
