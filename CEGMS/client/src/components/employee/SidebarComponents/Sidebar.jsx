@@ -46,7 +46,7 @@ const Sidebar = () => {
             className="bi bi-list fs-4 text-light toggle-btn rounded px-2"
             onClick={handleToggle}
           ></i>
-          <a className="navbar-brand" href="/Dashboard">
+          <a className="navbar-brand" href="/employee/Dashboard">
             <img
               src={Logo}
               alt="cegm-logo"
