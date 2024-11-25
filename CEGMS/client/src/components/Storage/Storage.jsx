@@ -26,6 +26,17 @@ const Storage = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // Unified search term
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successModalMessage, setSuccessModalMessage] = useState("");
+
+  const openSuccessModal = (message) => {
+    setSuccessModalMessage(message);
+    setSuccessModalVisible(true);
+  };
+
+  const closeSuccessModal = () => {
+    setSuccessModalVisible(false);
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -141,7 +152,6 @@ const Storage = () => {
           adj_Price: existingProduct.product_Price,
           adj_Adjustment_Type: "Added", // You can adjust this based on the operation
         });
-        alert("Product Successfully Saved");
       } else {
         // Create a new product
         response = await axios.post(
@@ -171,6 +181,11 @@ const Storage = () => {
           adj_Adjustment_Type: "Added",
         });
       }
+      openSuccessModal(
+        isEditMode
+          ? "Product successfully updated!"
+          : "Product successfully added!"
+      );
       handleModalClose();
       resetForm();
     } catch (error) {
@@ -291,8 +306,9 @@ const Storage = () => {
           (product) => !selectedProducts.includes(product._id)
         )
       );
-      setSelectedProducts([]); // Clear selection after deletion
-      setSelectAll(false); // Reset select all checkbox
+      setSelectedProducts([]);
+      setSelectAll(false);
+      openSuccessModal("Selected products deleted successfully.");
     } catch (error) {
       setError("Could not delete selected products. Please try again.");
     } finally {
@@ -501,20 +517,13 @@ const Storage = () => {
                 </strong>{" "}
                 {totalQuantity}
               </div>
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
-                  <i className="bi bi-cash" style={{ marginRight: "10px" }}></i>
-                  Total Price:
-                </strong>{" "}
-                ${totalPrice.toFixed(2)}
-              </div>
               <div className="me-4 px-3 py-2 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Low Stock:{lowStockCount}
+                  Low Stock: {lowStockCount}
                 </strong>{" "}
               </div>
               <div className="px-3 py-2 bg-warning rounded">
@@ -523,12 +532,32 @@ const Storage = () => {
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Over Stock:{overStockCount}
+                  Over Stock: {overStockCount}
                 </strong>{" "}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Success Modal */}
+        <Modal show={successModalVisible} onHide={closeSuccessModal} centered>
+          <Modal.Header>
+            <Modal.Title className="text-success">
+              <i className="bi bi-check-circle-fill me-2"></i> Success!
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-center">
+            <p>{successModalMessage}</p>
+            <div style={{ fontSize: "2em", color: "#28a745" }}>
+              <i className="bi bi-check-circle-fill"></i>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="justify-content-center">
+            <Button variant="success" onClick={closeSuccessModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
         <div className="card shadow-sm px-4 py-3 mb-4">
           {/* Product Table */}

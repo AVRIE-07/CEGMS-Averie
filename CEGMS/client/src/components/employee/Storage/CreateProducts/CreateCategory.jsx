@@ -18,6 +18,7 @@ const CreateProducts = () => {
   const [action, setAction] = useState(""); // To track whether it's an add, edit, or delete action
   const [deleteId, setDeleteId] = useState(null); // To track which category is being deleted
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,6 +77,7 @@ const CreateProducts = () => {
         setFilteredCategories([...filteredCategories, response.data.data]);
         setShowModal(false);
         setShowConfirmModal(false);
+        setShowSuccessModal(true);
       })
       .catch((error) => console.error("Error adding category:", error));
   };
@@ -93,6 +95,7 @@ const CreateProducts = () => {
         setFilteredCategories(updatedCategories);
         setShowModal(false);
         setShowConfirmModal(false);
+        setShowSuccessModal(true); // Show success modal
       })
       .catch((error) => console.error("Error updating category:", error));
   };
@@ -103,6 +106,7 @@ const CreateProducts = () => {
   };
 
   const confirmDeleteCategory = () => {
+    setAction("delete"); // Set action to "delete" before making the request
     axios
       .delete(`http://localhost:3001/api/category/${deleteId}`)
       .then(() => {
@@ -113,6 +117,7 @@ const CreateProducts = () => {
           filteredCategories.filter((category) => category._id !== deleteId)
         );
         setShowDeleteConfirmModal(false);
+        setShowSuccessModal(true); // Show success modal
       })
       .catch((error) => console.error("Error deleting category:", error));
   };
@@ -313,14 +318,14 @@ const CreateProducts = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Close
-            </Button>
             <Button
               variant="primary"
               onClick={isEditMode ? handleEditCategory : handleAddCategory}
             >
               {isEditMode ? "Update" : "Add"}
+            </Button>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
             </Button>
           </Modal.Footer>
         </Modal>
@@ -330,7 +335,7 @@ const CreateProducts = () => {
           show={showConfirmModal}
           onHide={() => setShowConfirmModal(false)}
         >
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>
               Confirm {action === "add" ? "Add" : "Edit"} Category
             </Modal.Title>
@@ -338,14 +343,11 @@ const CreateProducts = () => {
           <Modal.Body>
             Are you sure you want to{" "}
             {action === "add" ? "add this new category" : "edit this category"}?
+            <br />
+            <br />
+            <br />
           </Modal.Body>
           <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowConfirmModal(false)}
-            >
-              Cancel
-            </Button>
             <Button
               variant="primary"
               onClick={
@@ -353,6 +355,49 @@ const CreateProducts = () => {
               }
             >
               Yes, {action === "add" ? "Add" : "Edit"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Success Confirmation Modal */}
+        <Modal
+          show={showSuccessModal}
+          onHide={() => setShowSuccessModal(false)}
+          centered
+        >
+          <Modal.Header>
+            <Modal.Title className="text-success">
+              <i className="bi bi-check-circle-fill me-2"></i> Success!
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-center">
+            <p>
+              The category has been successfully{" "}
+              {action === "add"
+                ? "added"
+                : action === "edit"
+                ? "updated"
+                : action === "delete"
+                ? "deleted"
+                : ""}
+              .
+            </p>
+            <div style={{ fontSize: "2em", color: "#28a745" }}>
+              <i className="bi bi-check-circle-fill"></i>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="justify-content-center">
+            <Button
+              variant="success"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Close
             </Button>
           </Modal.Footer>
         </Modal>
@@ -369,14 +414,14 @@ const CreateProducts = () => {
             Are you sure you want to delete this category?
           </Modal.Body>
           <Modal.Footer>
+            <Button variant="danger" onClick={confirmDeleteCategory}>
+              Yes, Delete
+            </Button>
             <Button
               variant="secondary"
               onClick={() => setShowDeleteConfirmModal(false)}
             >
               Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDeleteCategory}>
-              Yes, Delete
             </Button>
           </Modal.Footer>
         </Modal>

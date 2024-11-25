@@ -106,10 +106,12 @@ const Sidebar = () => {
                 className="bi bi-box-arrow-right fs-5 me-4"
                 style={{ color: "red" }}
               ></i>
-              {/* Conditionally render the text based on sidebar expansion or hover */}
-              <span className="fs-6 logout-text" style={{ color: "red" }}>
-                Logout
-              </span>
+              {/* Conditionally render the text based on sidebar expansion */}
+              {isExpanded && (
+                <span className="fs-6 logout-text" style={{ color: "red" }}>
+                  Logout
+                </span>
+              )}
             </button>
           </li>
         </div>

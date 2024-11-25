@@ -207,7 +207,7 @@ const Storage = () => {
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   ></i>
-                  Added:{addedCount}
+                  Added: {addedCount}
                 </strong>{" "}
               </div>
               <div className="me-4 px-3 py-2 bg-danger rounded">
@@ -216,7 +216,7 @@ const Storage = () => {
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   ></i>
-                  Sold:{soldCount}
+                  Sold: {soldCount}
                 </strong>
               </div>
               <div className="me-4 px-3 py-2 bg-warning rounded">
@@ -225,7 +225,7 @@ const Storage = () => {
                     className="bi bi-box-fill"
                     style={{ marginRight: "10px" }}
                   />
-                  Returned:{returnedCount}
+                  Returned: {returnedCount}
                 </strong>{" "}
               </div>
             </div>

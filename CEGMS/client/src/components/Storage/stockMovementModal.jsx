@@ -250,11 +250,11 @@ const StockMovementModal = ({ show, handleClose, stockMovements }) => {
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
         <Button variant="primary" onClick={handlePrint}>
           Print
+        </Button>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
         </Button>
       </Modal.Footer>
     </Modal>

@@ -21,6 +21,8 @@ const CreateProducts = () => {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -153,7 +155,6 @@ const CreateProducts = () => {
       );
 
       if (response.status === 201) {
-        alert("Products created successfully!");
         const { insertedIds } = response.data;
 
         const manualAdjustments = productList.map((product, index) => ({
@@ -172,7 +173,6 @@ const CreateProducts = () => {
 
         if (manualAdjustmentResponse.status === 201) {
           await createStockMovements(manualAdjustmentResponse.data);
-          alert("Stock movements created successfully!");
           setProductList([]);
         }
       }
@@ -183,6 +183,8 @@ const CreateProducts = () => {
       console.error("Error details:", error.response?.data || error.message);
     }
     setShowModal(false);
+    setAction("add"); // Update the action based on what was done (e.g., "add")
+    setShowSuccessModal(true); // Show the success modal after saving
   };
 
   const createStockMovements = async (manualAdjustments) => {
@@ -257,7 +259,7 @@ const CreateProducts = () => {
         <div className="card shadow-sm py-3 px-5 mb-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
-              <i className="bi bi-bar-chart-fill fs-3 text-primary"></i>
+              <i className="bi bi-bar-chart-fill fs-3"></i>
               <h5 className="fw-semibold ms-3 mb-0">Storage</h5>
             </div>
             <button
@@ -351,20 +353,50 @@ const CreateProducts = () => {
           </form>
         </div>
 
+        {/* Success Confirmation Modal */}
+        <Modal
+          show={showSuccessModal}
+          onHide={() => setShowSuccessModal(false)}
+          centered
+        >
+          <Modal.Header>
+            <Modal.Title className="text-success">
+              <i className="bi bi-check-circle-fill me-2"></i> Success!
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-center">
+            <p>
+              The products have been successfully added to products and stock
+              movement.
+            </p>
+            <div style={{ fontSize: "2em", color: "#28a745" }}>
+              <i className="bi bi-check-circle-fill"></i>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="justify-content-center">
+            <Button
+              variant="success"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
         {/* Modal */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>Confirm Product Creation</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>Are you sure you want to create the selected products?</p>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
             <Button variant="primary" onClick={handleCreateProducts}>
               Confirm
+            </Button>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
             </Button>
           </Modal.Footer>
         </Modal>

@@ -98,157 +98,154 @@ const ProfileCard = () => {
   return (
     <div className={`container mt-5 ${styles.profileCard}`}>
       <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow-sm">
-            <div className="card-body text-center">
-              <div className="mb-4">
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className={`rounded-circle ${styles.profileImage} img-thumbnail`}
-                  style={{ width: "150px", height: "150px" }}
+        <div className="mb-4">
+          <img
+            src={profileImage}
+            alt="Profile"
+            className={`rounded-circle ${styles.profileImage} img-thumbnail`}
+          />
+        </div>
+
+        {isEditing ? (
+          <>
+            <form className="text-start">
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">First Name</p>
+                <input
+                  type="text"
+                  name="firstname"
+                  value={user.firstname}
+                  onChange={handleInputChange}
+                  placeholder="Enter your first name"
+                  className="form-control"
                 />
               </div>
-              {isEditing ? (
-                <>
-                  <form>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        name="firstname"
-                        value={user.firstname}
-                        onChange={handleInputChange}
-                        placeholder="First Name"
-                        className="form-control"
-                      />
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">Last Name</p>
+                <input
+                  type="text"
+                  name="lastname"
+                  value={user.lastname}
+                  onChange={handleInputChange}
+                  placeholder="Enter your last name"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">Email</p>
+                <input
+                  type="email"
+                  name="email"
+                  value={user.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">Username</p>
+                <input
+                  type="text"
+                  name="username"
+                  value={user.username}
+                  onChange={handleInputChange}
+                  placeholder="Enter your username"
+                  className="form-control"
+                />
+              </div>
+              <div className="d-flex justify-content-end buttonGroup">
+                <button
+                  type="button"
+                  className="btn btn-primary me-2"
+                  onClick={handleSaveChanges}
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+            {/* Modal */}
+            {showModal && (
+              <div
+                className="modal fade show"
+                style={{
+                  display: "block",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                }}
+                tabIndex="-1"
+              >
+                <div className="modal-dialog">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">Confirm Save</h5>
                     </div>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        name="lastname"
-                        value={user.lastname}
-                        onChange={handleInputChange}
-                        placeholder="Last Name"
-                        className="form-control"
-                      />
+                    <div className="modal-body">
+                      <p>Are you sure you want to save these changes?</p>
                     </div>
-                    <div className="mb-3">
-                      <input
-                        type="email"
-                        name="email"
-                        value={user.email}
-                        onChange={handleInputChange}
-                        placeholder="Email"
-                        className="form-control"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        name="username"
-                        value={user.username}
-                        onChange={handleInputChange}
-                        placeholder="Username"
-                        className="form-control"
-                      />
-                    </div>
-                    <div className="d-flex justify-content-center">
+                    <div className="modal-footer">
                       <button
                         type="button"
-                        className="btn btn-primary me-2"
-                        onClick={handleSaveChanges}
+                        className="btn btn-primary"
+                        onClick={handleSubmit}
                       >
                         Save Changes
                       </button>
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleModalClose}
                       >
                         Cancel
                       </button>
                     </div>
-                  </form>
-                  {/* Modal */}
-                  {showModal && (
-                    <div
-                      className="modal fade show"
-                      style={{
-                        display: "block",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                      }}
-                      tabIndex="-1"
-                    >
-                      <div className="modal-dialog">
-                        <div className="modal-content">
-                          <div className="modal-header">
-                            <h5 className="modal-title">Confirm Save</h5>
-                            <button
-                              type="button"
-                              className="btn-close"
-                              onClick={handleModalClose}
-                            ></button>
-                          </div>
-                          <div className="modal-body">
-                            <p>Are you sure you want to save these changes?</p>
-                          </div>
-                          <div className="modal-footer">
-                            <button
-                              type="button"
-                              className="btn btn-secondary"
-                              onClick={handleModalClose}
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-primary"
-                              onClick={handleSubmit}
-                            >
-                              Save Changes
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <h3 className="card-title">
-                    {user.firstname} {user.lastname}
-                  </h3>
-                  <p className="card-text">
-                    <strong>Username:</strong>{" "}
-                    {user.username || "Not available"}
-                  </p>
-                  <p className="card-text">
-                    <strong>Email:</strong> {user.email || "Not available"}
-                  </p>
-                  <p className="card-text">
-                    <strong>Role:</strong> {role}
-                  </p>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
-                </>
-              )}
-              {message && (
-                <div
-                  className={`alert mt-3 ${
-                    messageType === "error" ? "alert-danger" : "alert-success"
-                  }`}
-                  role="alert"
-                >
-                  {message}
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <h3 className={`card-title ${styles.profileTitle}`}>
+              {user.firstname} {user.lastname}
+            </h3>
+            <div className={styles.profileInfo}>
+              <p className="card-text">
+                <strong>Username:</strong> {user.username || "Not available"}
+              </p>
+              <p className="card-text">
+                <strong>Email:</strong> {user.email || "Not available"}
+              </p>
+              <p className="card-text">
+                <strong>Role:</strong> {role}
+              </p>
             </div>
+            <div className="buttonGroup">
+              <button
+                className="btn btn-primary"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </button>
+            </div>
+          </>
+        )}
+
+        {message && (
+          <div
+            className={`alert mt-3 ${
+              messageType === "error" ? "alert-danger" : "alert-success"
+            }`}
+            role="alert"
+          >
+            {message}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

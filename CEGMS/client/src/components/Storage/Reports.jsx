@@ -25,6 +25,17 @@ const Reports = () => {
 
   const handleCloseLowStockModal = () => setShowLowStockModal(false);
   const handleCloseStockMovementModal = () => setShowStockMovementsModal(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successModalMessage, setSuccessModalMessage] = useState("");
+
+  const openSuccessModal = (message) => {
+    setSuccessModalMessage(message);
+    setSuccessModalVisible(true);
+  };
+
+  const closeSuccessModal = () => {
+    setSuccessModalVisible(false);
+  };
 
   const handleReportSelection = (reportType) => {
     setSelectedReportType(reportType);
@@ -43,6 +54,7 @@ const Reports = () => {
         endDate: toDate || "/N/A",
       });
       fetchReports();
+      openSuccessModal(`${selectedReportType} report generated successfully.`);
     } catch (error) {
       console.error("Error generating report:", error);
     } finally {
@@ -141,7 +153,7 @@ const Reports = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports"
+                to="/employee/Storage/Reports"
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Reports
@@ -262,9 +274,29 @@ const Reports = () => {
           style={{ width: "100%", maxWidth: "1000px" }}
         />
 
+        {/* Success Modal */}
+        <Modal show={successModalVisible} onHide={closeSuccessModal} centered>
+          <Modal.Header>
+            <Modal.Title className="text-success">
+              <i className="bi bi-check-circle-fill me-2"></i> Success!
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-center">
+            <p>{successModalMessage}</p>
+            <div style={{ fontSize: "2em", color: "#28a745" }}>
+              <i className="bi bi-check-circle-fill"></i>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="justify-content-center">
+            <Button variant="success" onClick={closeSuccessModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
         {/* Modal for Date Range Selection */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>
               Select Date Range for {selectedReportType} Report
             </Modal.Title>
@@ -290,11 +322,11 @@ const Reports = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Close
-            </Button>
             <Button variant="primary" onClick={handleGenerateReport}>
               Generate Report
+            </Button>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
             </Button>
           </Modal.Footer>
         </Modal>

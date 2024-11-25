@@ -31,6 +31,8 @@ function UserManagement() {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteSuccessModalVisible, setDeleteSuccessModalVisible] =
+    useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -196,11 +198,17 @@ function UserManagement() {
       console.error("Error deleting user:", error);
       alert("Failed to delete user. Please try again later.");
     }
+    setDeleteModalVisible(false);
+    setDeleteSuccessModalVisible(true);
   };
 
   const closeDeleteModal = () => {
     setDeleteModalVisible(false);
     setUserToDelete(null);
+  };
+
+  const closeDeleteSuccessModal = () => {
+    setDeleteSuccessModalVisible(false);
   };
 
   const closeSuccessModal = () => {
@@ -319,9 +327,9 @@ function UserManagement() {
         </nav>
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete Confirmation Modal */}
       <Modal show={deleteModalVisible} onHide={closeDeleteModal}>
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -338,16 +346,45 @@ function UserManagement() {
         </Modal.Footer>
       </Modal>
 
-      {/* Success modal */}
-      <Modal show={successModalVisible} onHide={closeSuccessModal}>
+      {/* Success Confirmation Modal After Deleting */}
+      <Modal
+        show={deleteSuccessModalVisible}
+        onHide={closeDeleteSuccessModal}
+        centered
+      >
         <Modal.Header>
-          <Modal.Title>Success!</Modal.Title>
+          <Modal.Title className="text-success">
+            <i className="bi bi-check-circle-fill me-2"></i> Success!
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          User {editMode ? "updated" : "added"} successfully.
+        <Modal.Body className="text-center">
+          <p>User deleted successfully.</p>
+          <div style={{ fontSize: "2em", color: "#28a745" }}>
+            <i className="bi bi-check-circle-fill"></i>
+          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeSuccessModal}>
+        <Modal.Footer className="justify-content-center">
+          <Button variant="success" onClick={closeDeleteSuccessModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal show={successModalVisible} onHide={closeSuccessModal} centered>
+        <Modal.Header>
+          <Modal.Title className="text-success">
+            <i className="bi bi-check-circle-fill me-2"></i> Success!
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          <p>User {editMode ? "updated" : "added"} successfully.</p>
+          <div style={{ fontSize: "2em", color: "#28a745" }}>
+            <i className="bi bi-check-circle-fill"></i>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="justify-content-center">
+          <Button variant="success" onClick={closeSuccessModal}>
             Close
           </Button>
         </Modal.Footer>

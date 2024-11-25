@@ -91,41 +91,59 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
             integrity="sha384-DyZvNqH2BzU0HqUEUeChzj7H04pZ2dWQy1B3i29e6H7SvD8sPvL49Rim55G8Dq4m"
             crossorigin="anonymous"
           />
-          <style>
+         <style>
             body {
-              font-family: Arial, sans-serif;
+              font-family: 'Arial', sans-serif;
               margin: 20px;
-              padding: 10px;
-              background-color: #f9f9f9;
+              color: #333;
+              background-color: #f4f4f4;
             }
             h1 {
               text-align: center;
-              color: #333;
+              color: #007bff;
+              margin-bottom: 20px;
             }
             p {
               font-size: 16px;
-              margin: 5px 0;
-              color: #555;
+              margin: 10px 0;
+            }
+            .date-range {
+              margin-bottom: 20px;
+              text-align: center;
+              font-weight: bold;
+              color: #333;
+              background-color: #e9ecef;
+              padding: 10px;
+              border-radius: 5px;
             }
             table {
               width: 100%;
               border-collapse: collapse;
               margin-top: 20px;
+              background-color: #fff;
             }
             th, td {
-              border: 1px solid #000;
-              padding: 10px;
+              border: 1px solid #007bff;
+              padding: 12px;
               text-align: left;
             }
             th {
-              background-color: #007bff;
+              background-color: blue;
               color: white;
+              font-weight: bold;
             }
             tr:nth-child(even) {
-              background-color: #f2f2f2;
+              background-color: #f8f9fa;
             }
             tr:hover {
-              background-color: #e2e2e2;
+              background-color: #e2e6ea;
+            }
+            footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              font-style: italic;
             }
           </style>
         </head>
@@ -170,14 +188,6 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
           </tbody>
         </Table>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="primary" onClick={handlePrint}>
-          Print
-        </Button>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-      </Modal.Footer>
 
       {/* Pagination Controls */}
       <div className="d-flex justify-content-center mt-3">
@@ -221,6 +231,14 @@ const LowStockModal = ({ show, handleClose, lowStockItems }) => {
           </ul>
         </nav>
       </div>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handlePrint}>
+          Print
+        </Button>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };

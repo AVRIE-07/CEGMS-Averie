@@ -117,10 +117,7 @@ const ProductModal = ({
           {/* Conditionally display quantity input only in edit mode */}
           {isEditMode && (
             <div className="mb-3">
-              <h1>Add Product</h1>
-              <label htmlFor="product_Quantity" className="form-label">
-                Quantity
-              </label>
+              <h1>Add Quantity</h1>
               <input
                 type="text"
                 id="product_Quantity"
