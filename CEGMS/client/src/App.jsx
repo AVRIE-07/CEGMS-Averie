@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";
 import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+
+// Default imports
 import Login from "./components/Login";
 import Sidebar from "./components/SidebarNav/SidebarNav.jsx";
 import Home from "./components/Home";
@@ -9,11 +11,6 @@ import Dashboard from "./components/Dashboard/Dashboard.jsx";
 import Profile from "./components/Profile/Profile.jsx";
 import Sales from "./components/Sales/Sales.jsx";
 import Purchase from "./components/Purchase/Purchase.jsx";
-import Cancelled from "./components/Purchase/Cancelled.jsx";
-import PurchaseOrder from "./components/Purchase/PurchasOrder.jsx";
-import GRN from "./components/Purchase/GRN.jsx";
-import RMA from "./components/Purchase/RMA.jsx";
-import Backorder from "./components/Purchase/Backorder.jsx";
 import PaymentHistory from "./components/Purchase/PaymentHistory.jsx";
 import Storage from "./components/Storage/Storage.jsx";
 import Settings from "./components/Settings/Settings.jsx";
@@ -26,22 +23,41 @@ import ForgotPassword from "./components/ForgotPassword.jsx";
 import CreateProducts from "./components/Storage/CreateProducts/CreateProducts.jsx";
 import CreateCategory from "./components/Storage/CreateProducts/CreateCategory.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import StockMovement from "./components/Storage/StockMovement.jsx";
+import Reports from "./components/Storage/Reports.jsx";
 
-import StockMovement from "./components/Storage/StockMovement.jsx"; // Adjust the path if needed
-import Reports from "./components/Storage/Reports.jsx"; // Adjust the path if needed
+// Employee imports (replacing paths for employee components)
+import EmployeeSidebar from "./components/employee/SidebarNav/SidebarNav.jsx";
+import EmployeeDashboard from "./components/employee/Dashboard/Dashboard.jsx";
+import EmployeeProfile from "./components/employee/Profile/Profile.jsx";
+import EmployeeSales from "./components/employee/Sales/Sales.jsx";
+import EmployeePurchase from "./components/employee/Purchase/Purchase.jsx";
+import EmployeePaymentHistory from "./components/employee/Purchase/PaymentHistory.jsx";
+import EmployeeStorage from "./components/employee/Storage/Storage.jsx";
+import EmployeeSettings from "./components/employee/Settings/Settings.jsx";
+import EmployeePassword from "./components/employee/Password/Profile.jsx";
+import EmployeeEmail from "./components/employee/Email/Profile.jsx";
+import EmployeeRefunded from "./components/employee/Sales/Refunded.jsx";
+import EmployeeAnalysis from "./components/employee/Sales/Analysis.jsx";
+import EmployeeCreateTransaction from "./components/employee/Sales/CreateTransaction.jsx";
+import EmployeeCreateProducts from "./components/employee/Storage/CreateProducts/CreateProducts.jsx";
+import EmployeeCreateCategory from "./components/employee/Storage/CreateProducts/CreateCategory.jsx";
+import EmployeeStockMovement from "./components/employee/Storage/StockMovement.jsx";
+import EmployeeReports from "./components/employee/Storage/Reports.jsx";
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
+          {/* Default Routes */}
           <Route path="/sidebar" element={<Sidebar />}></Route>
           <Route path="/login" element={<Login />}></Route>
-          <Route path="/ForgotPassword" element={<ForgotPassword />}></Route>
+          <Route path="/forgotPassword" element={<ForgotPassword />}></Route>
           <Route path="/home" element={<Home />}></Route>
           <Route path="/" element={<Login />} />
           <Route
-            path="/Dashboard"
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
@@ -49,7 +65,7 @@ function App() {
             }
           />
           <Route
-            path="/Profile/Email"
+            path="/profile/email"
             element={
               <ProtectedRoute>
                 <Email />
@@ -57,16 +73,16 @@ function App() {
             }
           />
           <Route
-            path="/Profile"
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             }
           />
-          <Route path="/Profile/Password" element={<Password />} />
+          <Route path="/profile/password" element={<Password />} />
           <Route
-            path="/Purchase"
+            path="/purchase"
             element={
               <ProtectedRoute>
                 <Purchase />
@@ -74,47 +90,7 @@ function App() {
             }
           />
           <Route
-            path="/Purchase/Cancelled"
-            element={
-              <ProtectedRoute>
-                <Cancelled />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/Purchase/Purchase-Order"
-            element={
-              <ProtectedRoute>
-                <PurchaseOrder />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/Purchase/GRN"
-            element={
-              <ProtectedRoute>
-                <GRN />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/Purchase/RMA"
-            element={
-              <ProtectedRoute>
-                <RMA />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/Purchase/Backorder"
-            element={
-              <ProtectedRoute>
-                <Backorder />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/Payment-History"
+            path="/payment-history"
             element={
               <ProtectedRoute>
                 <PaymentHistory />
@@ -122,7 +98,7 @@ function App() {
             }
           />
           <Route
-            path="/Sales"
+            path="/sales"
             element={
               <ProtectedRoute>
                 <Sales />
@@ -130,7 +106,7 @@ function App() {
             }
           />
           <Route
-            path="/Settings"
+            path="/settings"
             element={
               <ProtectedRoute>
                 <Settings />
@@ -138,7 +114,7 @@ function App() {
             }
           />
           <Route
-            path="/Storage"
+            path="/storage"
             element={
               <ProtectedRoute>
                 <Storage />
@@ -146,7 +122,7 @@ function App() {
             }
           />
           <Route
-            path="/Storage/CreateProducts"
+            path="/storage/createProducts"
             element={
               <ProtectedRoute>
                 <CreateProducts />
@@ -154,7 +130,7 @@ function App() {
             }
           />
           <Route
-            path="/Storage/CreateCategory"
+            path="/storage/create-category"
             element={
               <ProtectedRoute>
                 <CreateCategory />
@@ -162,7 +138,7 @@ function App() {
             }
           />
           <Route
-            path="/Sales/Refunded"
+            path="/sales/refunded"
             element={
               <ProtectedRoute>
                 <Refunded />
@@ -170,7 +146,7 @@ function App() {
             }
           />
           <Route
-            path="/Sales/Analysis"
+            path="/sales/analysis"
             element={
               <ProtectedRoute>
                 <Analysis />
@@ -178,7 +154,7 @@ function App() {
             }
           />
           <Route
-            path="/Sales/CreateTransaction"
+            path="/sales/create-transaction"
             element={
               <ProtectedRoute>
                 <CreateTransaction />
@@ -186,16 +162,7 @@ function App() {
             }
           />
           <Route
-            path="/Storage"
-            element={
-              <ProtectedRoute>
-                <Storage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/Storage/StockMovement"
+            path="/storage/stockmovement"
             element={
               <ProtectedRoute>
                 <StockMovement />
@@ -203,10 +170,137 @@ function App() {
             }
           />
           <Route
-            path="/Storage/Reports"
+            path="/storage/reports"
             element={
               <ProtectedRoute>
                 <Reports />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Employee Routes */}
+          <Route path="/employee/sidebar" element={<EmployeeSidebar />}></Route>
+          <Route
+            path="/employee/dashboard"
+            element={
+              <ProtectedRoute>
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/profile/email"
+            element={
+              <ProtectedRoute>
+                <EmployeeEmail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/profile"
+            element={
+              <ProtectedRoute>
+                <EmployeeProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/profile/password"
+            element={<EmployeePassword />}
+          />
+          <Route
+            path="/employee/Purchase"
+            element={
+              <ProtectedRoute>
+                <EmployeePurchase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/payment-history"
+            element={
+              <ProtectedRoute>
+                <EmployeePaymentHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/sales"
+            element={
+              <ProtectedRoute>
+                <EmployeeSales />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/settings"
+            element={
+              <ProtectedRoute>
+                <EmployeeSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage"
+            element={
+              <ProtectedRoute>
+                <EmployeeStorage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage/createProducts"
+            element={
+              <ProtectedRoute>
+                <EmployeeCreateProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage/createCategory"
+            element={
+              <ProtectedRoute>
+                <EmployeeCreateCategory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/sales/refunded"
+            element={
+              <ProtectedRoute>
+                <EmployeeRefunded />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/sales/analysis"
+            element={
+              <ProtectedRoute>
+                <EmployeeAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/sales/create-transaction"
+            element={
+              <ProtectedRoute>
+                <EmployeeCreateTransaction />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage/stockmovement"
+            element={
+              <ProtectedRoute>
+                <EmployeeStockMovement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage/reports"
+            element={
+              <ProtectedRoute>
+                <EmployeeReports />
               </ProtectedRoute>
             }
           />

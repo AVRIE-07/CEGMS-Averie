@@ -70,7 +70,12 @@ const Login = () => {
       localStorage.setItem("lastname", lastname);
       localStorage.setItem("role", role);
 
-      navigate("/dashboard");
+      // Redirect to different dashboards based on the role
+      if (role === "Employee") {
+        navigate("/employee/dashboard"); // Redirect to employee dashboard
+      } else {
+        navigate("/dashboard"); // Redirect to general dashboard
+      }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setError("Unauthorized. Please check your credentials.");
