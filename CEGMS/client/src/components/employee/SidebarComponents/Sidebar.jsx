@@ -36,11 +36,6 @@ const Sidebar = () => {
     { to: "/employee/Sales", icon: "bi-bar-chart", label: "Sales" },
     { to: "/employee/Storage", icon: "bi-box-seam", label: "Storage" },
     { to: "/employee/Profile", icon: "bi-person-circle", label: "Profile" },
-    {
-      to: "/employee/Settings",
-      icon: "bi-people-fill",
-      label: "User Accounts",
-    },
   ];
 
   return (

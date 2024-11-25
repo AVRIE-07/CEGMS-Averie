@@ -130,7 +130,7 @@ function App() {
             }
           />
           <Route
-            path="/storage/create-category"
+            path="/storage/createCategory"
             element={
               <ProtectedRoute>
                 <CreateCategory />

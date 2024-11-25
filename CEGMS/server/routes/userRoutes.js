@@ -7,10 +7,14 @@ const router = express.Router();
 
 // Route to handle user login with session
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body;
 
   try {
-    const user = await UsersModel.findOne({ email });
+    // Match user by email or username
+    const user = await UsersModel.findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+    });
+
     if (!user) {
       return res.status(400).json({ msg: "User does not exist" });
     }
@@ -183,6 +187,29 @@ router.put("/profile/update-user/:userId", async (req, res) => {
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Server error, please try again later" });
+  }
+});
+
+router.put("/profile/change-password/:id", async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch)
+      return res
+        .status(400)
+        .json({ message: "Current password is incorrect." });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error." });
   }
 });
 
