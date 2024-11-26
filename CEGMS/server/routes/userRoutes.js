@@ -206,27 +206,40 @@ router.put("/profile/update-user/:userId", async (req, res) => {
   }
 });
 
-router.put("/profile/change-password/:id", async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  const userId = req.params.id;
+// Update user profile
+// Route for changing the user's password
+router.put("/profile/change-password/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const { currentPassword, newPassword, confirmPassword } = req.body;
 
   try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found." });
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
 
+    // Find the user by the custom userId
+    const user = await UsersModel.findOne({ userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Compare the current password with the stored hash
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch)
-      return res
-        .status(400)
-        .json({ message: "Current password is incorrect." });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    // Hash the new password and save it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
     await user.save();
 
-    res.status(200).json({ message: "Password updated successfully." });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error." });
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
-
 module.exports = router;
