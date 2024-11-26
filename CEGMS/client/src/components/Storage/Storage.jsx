@@ -333,8 +333,18 @@ const Storage = () => {
         let overStock = 0;
 
         fetchedProducts.forEach((product) => {
-          quantitySum += product.product_Quantity;
-          priceSum += product.product_Quantity * product.product_Price;
+          // Ensure product_Quantity is a valid number
+          const quantity = parseInt(product.product_Quantity, 10);
+          const price = parseFloat(product.product_Price);
+
+          if (!isNaN(quantity)) {
+            quantitySum += quantity; // Only add valid numbers
+          }
+
+          if (!isNaN(price) && !isNaN(quantity)) {
+            priceSum += quantity * price; // Only calculate price if quantity is valid
+          }
+
           if (
             product.product_Current_Stock < product.product_Minimum_Stock_Level
           ) {

@@ -8,10 +8,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const CreateProducts = () => {
   const [newProduct, setNewProduct] = useState({
-    product_Name: "",
     product_Description: "",
     product_Category: "",
-    product_Quantity: "",
     product_Price: "",
     product_Current_Stock: "",
     product_Minimum_Stock_Level: "",
@@ -50,14 +48,6 @@ const CreateProducts = () => {
     // Example regex for validating fields
     let validValue = value;
     switch (name) {
-      case "product_Name":
-        const nameRegex = /^[A-Za-z\s]+$/;
-        if (!nameRegex.test(value)) {
-          setError("Product name can only contain letters and spaces.");
-          return;
-        }
-        break;
-
       case "product_Description":
         const descriptionRegex = /^[A-Za-z\s]+$/;
         if (!descriptionRegex.test(value)) {
@@ -72,14 +62,6 @@ const CreateProducts = () => {
           setError(
             "Price must be a positive number with up to two decimal places."
           );
-          return;
-        }
-        break;
-
-      case "product_Quantity":
-        const quantityRegex = /^[1-9][0-9]*$/;
-        if (!quantityRegex.test(value)) {
-          setError("Quantity must be a positive integer.");
           return;
         }
         break;
@@ -161,7 +143,7 @@ const CreateProducts = () => {
           product_ID: insertedIds[index],
           adj_Description: product.product_Description,
           adj_Category: product.product_Category,
-          adj_Quantity: product.product_Quantity,
+          adj_Quantity: product.product_Current_Stock,
           adj_Price: product.product_Price,
           adj_Adjustment_Type: "Added",
         }));
@@ -193,7 +175,7 @@ const CreateProducts = () => {
         product_ID: adjustment.product_ID,
         movement_ID: adjustment.manualAdjust_ID,
         adj_Description: adjustment.adj_Description,
-        adj_Category: adjustment.adj_Price,
+        adj_Category: adjustment.adj_Category,
         adj_Quantity: adjustment.adj_Quantity,
         adj_Price: adjustment.adj_Price,
         adj_Adjustment_Type: "Added",
@@ -210,10 +192,8 @@ const CreateProducts = () => {
 
   const resetForm = () => {
     setNewProduct({
-      product_Name: "",
       product_Description: "",
       product_Category: "",
-      product_Quantity: "",
       product_Price: "",
       product_Current_Stock: "",
       product_Minimum_Stock_Level: "",
@@ -279,9 +259,7 @@ const CreateProducts = () => {
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
-                { name: "product_Name", placeholder: "Product Name" },
                 { name: "product_Description", placeholder: "Description" },
-                { name: "product_Quantity", placeholder: "Quantity" },
                 { name: "product_Price", placeholder: "Price" },
                 { name: "product_Current_Stock", placeholder: "Current Stock" },
                 {
@@ -407,20 +385,18 @@ const CreateProducts = () => {
           <table className="table table-bordered mt-3">
             <thead>
               <tr>
-                <th>Product Name</th>
                 <th>Category</th>
-                <th>Quantity</th>
                 <th>Price</th>
+                <th>Current Stock</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {productList.map((product, index) => (
                 <tr key={index}>
-                  <td>{product.product_Name}</td>
                   <td>{product.product_Category}</td>
-                  <td>{product.product_Quantity}</td>
                   <td>{product.product_Price}</td>
+                  <td>{product.product_Current_Stock}</td>
                   <td>
                     <button
                       className="btn btn-danger btn-sm"

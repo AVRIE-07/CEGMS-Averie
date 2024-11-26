@@ -17,7 +17,7 @@ const Reports = () => {
   const [showModal, setShowModal] = useState(false);
   const [showStockMovementsModal, setShowStockMovementsModal] = useState(false);
   const [showLowStockModal, setShowLowStockModal] = useState(false);
-  const [selectedReportType, setSelectedReportType] = useState("");
+  const [selectedReportType, setSelectedReportType] = useState(""); // Ensure this is set correctly
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [stockSummaryMovements, setStockSummaryMovements] = useState([]);
@@ -38,16 +38,22 @@ const Reports = () => {
   };
 
   const handleReportSelection = (reportType) => {
-    setSelectedReportType(reportType);
+    setSelectedReportType(reportType); // Set selected report type
     if (reportType === "Low Stock Levels") {
       handleGenerateReport();
     } else if (reportType === "Stock Movement") {
-      setShowModal(true);
+      setShowModal(true); // Show date range modal for Stock Movement
     }
   };
 
   const handleGenerateReport = async () => {
+    if (!selectedReportType) {
+      openSuccessModal("Please select a report type before generating.");
+      return;
+    }
+
     try {
+      // Send the selected reportType in the API request
       await axios.post("http://localhost:3001/api/report/", {
         reportType: selectedReportType,
         startDate: fromDate || "/N/A",

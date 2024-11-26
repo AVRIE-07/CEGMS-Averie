@@ -20,7 +20,6 @@ const StockMovementSchema = new mongoose.Schema(
     },
     adj_Quantity: {
       type: Number,
-      required: true,
     },
     adj_Price: {
       type: Number,
