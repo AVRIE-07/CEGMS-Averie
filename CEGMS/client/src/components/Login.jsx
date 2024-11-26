@@ -62,7 +62,7 @@ const Login = () => {
         loginData
       );
 
-      const { token, username, firstname, email, lastname, role } =
+      const { token, username, firstname, email, lastname, role, userId } =
         response.data;
 
       localStorage.setItem("token", token);
@@ -71,6 +71,7 @@ const Login = () => {
       localStorage.setItem("email", email);
       localStorage.setItem("lastname", lastname);
       localStorage.setItem("role", role);
+      localStorage.setItem("userId", userId);
 
       if (role === "Employee") {
         navigate("/employee/dashboard");

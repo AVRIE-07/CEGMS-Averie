@@ -6,7 +6,10 @@ const ReportModel = require("../models/Inventory/InventoryReports");
 // Endpoint to create a new report
 router.post("/", async (req, res) => {
   const { reportType, startDate, endDate } = req.body;
-  const report_ID = `R${Math.floor(Math.random() * 10000)}`; // Generate a random report ID
+  const report_ID = `RI${String(Math.floor(Math.random() * 100000)).padStart(
+    5,
+    "0"
+  )}`; // Generate a random report ID with 5 digits
 
   try {
     const newReport = new ReportModel({

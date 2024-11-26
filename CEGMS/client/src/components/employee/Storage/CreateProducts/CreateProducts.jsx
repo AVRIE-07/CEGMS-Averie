@@ -192,7 +192,7 @@ const CreateProducts = () => {
       const stockMovements = manualAdjustments.map((adjustment) => ({
         product_ID: adjustment.product_ID,
         movement_ID: adjustment.manualAdjust_ID,
-        adj_Description: adjustment.adj_Quantity,
+        adj_Description: adjustment.adj_Description,
         adj_Category: adjustment.adj_Price,
         adj_Quantity: adjustment.adj_Quantity,
         adj_Price: adjustment.adj_Price,

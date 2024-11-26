@@ -18,20 +18,29 @@ const Storage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // Number of items per page
 
+  // Fetch stock movements and calculate totals
   const fetchStockMovements = async () => {
     try {
       const response = await axios.get(
         "http://localhost:3001/api/stockMovement"
       );
-      setStockMovements(response.data);
-      setFilteredMovements(response.data);
+      let movements = response.data;
+
+      // Sort stock movements by date (most recent first)
+      movements = movements.sort(
+        (a, b) => new Date(b.adj_Date) - new Date(a.adj_Date)
+      );
+
+      // Set state with sorted movements
+      setStockMovements(movements);
+      setFilteredMovements(movements);
 
       // Calculate totals
       let added = 0;
       let sold = 0;
       let returned = 0;
 
-      response.data.forEach((movement) => {
+      movements.forEach((movement) => {
         switch (movement.adj_Adjustment_Type) {
           case "Added":
             added += 1;
@@ -60,22 +69,25 @@ const Storage = () => {
     fetchStockMovements();
   }, []);
 
-  // Function to handle search
+  // Handle search input
   const handleSearch = (event) => {
     const value = event.target.value.toLowerCase();
     setSearchQuery(value);
     filterMovements(value, selectedAction);
   };
 
-  // Function to handle dropdown selection
+  // Handle action selection from dropdown
   const handleSelectAction = (action) => {
     setSelectedAction(action);
     filterMovements(searchQuery, action);
   };
 
-  // Function to filter stock movements
+  // Filter stock movements based on search query and action
   const filterMovements = (search, action) => {
-    const filtered = stockMovements.filter((movement) => {
+    let filtered = stockMovements;
+
+    // Filter based on search query
+    filtered = filtered.filter((movement) => {
       const matchesSearch =
         movement.movement_ID.toString().toLowerCase().includes(search) ||
         movement.product_ID.toString().toLowerCase().includes(search) ||
@@ -83,17 +95,21 @@ const Storage = () => {
         movement.adj_Adjustment_Type.toLowerCase().includes(search) ||
         new Date(movement.adj_Date).toLocaleDateString().includes(search);
 
-      const matchesAction = action
-        ? movement.adj_Adjustment_Type === action
-        : true;
-
-      return matchesSearch && matchesAction;
+      return matchesSearch;
     });
 
+    // Filter based on selected action
+    if (action) {
+      filtered = filtered.filter(
+        (movement) => movement.adj_Adjustment_Type === action
+      );
+    }
+
+    // Update filtered movements
     setFilteredMovements(filtered);
   };
 
-  // Pagination logic to get current items for the page
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredMovements.slice(
@@ -103,7 +119,6 @@ const Storage = () => {
 
   // Pagination controls
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
 
   const getRowColor = (action) => {

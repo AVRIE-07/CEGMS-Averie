@@ -168,25 +168,41 @@ router.post("/add-user", async (req, res) => {
 });
 
 router.put("/profile/update-user/:userId", async (req, res) => {
-  console.log("Route hit with userId:", req.params.userId);
-  console.log("Request body:", req.body);
-
   try {
-    // Match user by userId
-    const updatedUser = await UsersModel.findOneAndUpdate(
-      { userId: req.params.userId }, // Match userId, not _id
-      req.body,
-      { new: true } // Return updated user
-    );
+    const { userId } = req.params;
+    const { firstname, lastname, email, username } = req.body;
 
-    if (!updatedUser) {
+    // Check if the user exists
+    const user = await UsersModel.findOne({ userId });
+
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "User updated successfully", updatedUser });
+    // Update user details
+    user.firstname = firstname || user.firstname;
+    user.lastname = lastname || user.lastname;
+    user.email = email || user.email;
+    user.username = username || user.username;
+
+    // Save the updated user to the database
+    const updatedUser = await user.save();
+
+    // Send back updated user data
+    res.status(200).json({
+      message: "Profile updated successfully!",
+      updatedUser: {
+        userId: updatedUser.userId,
+        firstname: updatedUser.firstname,
+        lastname: updatedUser.lastname,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        role: updatedUser.role,
+      },
+    });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ message: "Server error, please try again later" });
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again." });
   }
 });
 
