@@ -7,6 +7,8 @@ import { Modal, Button, Dropdown } from "react-bootstrap";
 import ProductTable from "./ProductTable";
 import ProductModal from "./ProductModal";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Storage = () => {
   const [products, setProducts] = useState([]);
@@ -29,6 +31,57 @@ const Storage = () => {
   const [successModalMessage, setSuccessModalMessage] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  const handleGeneratePDF = () => {
+    if (filteredProducts.length === 0) {
+      alert("No products to generate a report for.");
+      return;
+    }
+
+    // Create a new jsPDF instance with landscape orientation
+    const doc = new jsPDF({
+      orientation: "landscape", // Set orientation to landscape
+    });
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Filtered Products Report", 14, 20);
+
+    // Define table headers and data
+    const tableColumn = [
+      "Product ID",
+      "Name",
+      "Description",
+      "Category",
+
+      "Current Stock",
+      "Price",
+      "Status",
+    ];
+    const tableRows = filteredProducts.map((product) => [
+      product.product_Id,
+      product.product_Name,
+      product.product_Description,
+      product.product_Category,
+
+      product.product_Current_Stock,
+      product.product_Price,
+      product.product_Status,
+    ]);
+
+    // Add table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30, // Adjust the start position
+      theme: "grid", // Optional: Set a table theme
+      headStyles: { fillColor: [22, 160, 133] }, // Optional: Customize header styles
+      styles: { fontSize: 10 }, // Adjust font size for better fit
+    });
+
+    // Save the PDF
+    doc.save("filtered_products_report_landscape.pdf");
+  };
 
   const openSuccessModal = (message) => {
     setSuccessModalMessage(message);
@@ -552,7 +605,9 @@ const Storage = () => {
                   onChange={(e) => setDateTo(e.target.value)}
                 />
               </div>
-
+              <Button onClick={handleGeneratePDF} className="btn btn-primary">
+                Generate PDF
+              </Button>
               <div className="me-4 px-3 py-2 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
