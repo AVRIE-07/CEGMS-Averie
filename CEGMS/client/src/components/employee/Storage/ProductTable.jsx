@@ -136,21 +136,39 @@ const ProductTable = ({
                       onChange={() => handleSelectProduct(product._id)}
                     />
                   </td>
-                  <td className="text-primary">{product.product_Id}</td>
-                  <td className="text-primary">{product.product_Category}</td>
-                  <td className="text-primary">
-                    {product.product_Description}
+                  <td className="text-dark">{product.product_Id}</td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      {/* Display Product Name and Description side by side */}
+                      <div style={{ flex: "1", fontWeight: "bold" }}>
+                        {product.product_Name}
+                      </div>
+                      <div style={{ flex: "2", fontStyle: "italic" }}>
+                        {product.product_Description}
+                      </div>
+                    </div>
                   </td>
-                  <td className="text-primary">
+                  <td className="text-dark">{product.product_Category}</td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">
                     {product.product_Current_Stock}
-                  </td>
-                  <td className="text-primary">₱ {product.product_Price}</td>
-                  <td className="text-primary">
+                  </td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">₱ {product.product_Price}</td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">
                     {product.product_Minimum_Stock_Level}
-                  </td>
-                  <td className="text-primary">
+                  </td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">
                     {product.product_Maximum_Stock_Level}
-                  </td>
+                  </td>{" "}
+                  {/* Changed to black */}
+                  <td className="text-dark">
+                    {new Date(product.product_Date).toLocaleDateString()}
+                  </td>{" "}
+                  {/* Changed to black */}
                   <td>
                     <Button
                       variant="secondary"

@@ -589,39 +589,59 @@ const Storage = () => {
 
             {/* Statistics */}
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
-              <div className="date-filter">
-                <label htmlFor="dateFrom">From: </label>
-                <input
-                  type="date"
-                  id="dateFrom"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-                <label htmlFor="dateTo">To: </label>
-                <input
-                  type="date"
-                  id="dateTo"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleGeneratePDF} className="btn btn-primary">
+              <label htmlFor="dateFrom" className="me-2">
+                From:{" "}
+              </label>
+              <input
+                type="date"
+                id="dateFrom"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                style={{
+                  backgroundColor: "#9df1fa",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "5px",
+                  color: "#343a40",
+                }}
+              />
+              <label htmlFor="dateTo" className="ms-3 me-2">
+                To:{" "}
+              </label>
+              <input
+                type="date"
+                id="dateTo"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                style={{
+                  backgroundColor: "#9df1fa",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "5px",
+                  color: "#343a40",
+                }}
+              />
+              <Button
+                onClick={handleGeneratePDF}
+                className="me-2 ms-2 px-2 py-1 btn btn-primary"
+              >
                 Generate PDF
               </Button>
-              <div className="me-4 px-3 py-2 bg-danger rounded">
+
+              <div className="me-2 px-2 py-1 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
-                    style={{ marginRight: "10px" }}
+                    style={{ marginRight: "5px" }}
                   />
                   Low Stock: {lowStockCount}
                 </strong>{" "}
               </div>
-              <div className="px-3 py-2 bg-warning rounded">
+              <div className="px-2 py-1 bg-warning rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
-                    style={{ marginRight: "10px" }}
+                    style={{ marginRight: "5px" }}
                   />
                   Over Stock: {overStockCount}
                 </strong>{" "}

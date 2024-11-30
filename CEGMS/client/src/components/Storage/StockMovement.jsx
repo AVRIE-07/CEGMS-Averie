@@ -152,7 +152,7 @@ const Storage = () => {
             <li className="nav-item pe-3">
               <Link
                 to="/Storage/StockMovement"
-                className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
+                className="nav-link fw-semibold text-decoration-none border-bottom border-dark border-2"
               >
                 Stock Movement
               </Link>
@@ -278,14 +278,14 @@ const Storage = () => {
                     key={movement.movement_ID}
                     className={getRowColor(movement.adj_Adjustment_Type)}
                   >
-                    <td className="text-primary">{movement.movement_ID}</td>
-                    <td className="text-primary">{movement.product_ID}</td>
-                    <td className="text-primary">{movement.adj_Description}</td>
-                    <td className="text-primary">
+                    <td className="text-dark">{movement.movement_ID}</td>
+                    <td className="text-dark">{movement.product_ID}</td>
+                    <td className="text-dark">{movement.adj_Description}</td>
+                    <td className="text-dark">
                       {movement.adj_Adjustment_Type}
                     </td>
-                    <td className="text-primary">{movement.adj_Quantity}</td>
-                    <td className="text-primary">
+                    <td className="text-dark">{movement.adj_Quantity}</td>
+                    <td className="text-dark">
                       {new Date(movement.adj_Date).toLocaleDateString()}
                     </td>
                   </tr>
