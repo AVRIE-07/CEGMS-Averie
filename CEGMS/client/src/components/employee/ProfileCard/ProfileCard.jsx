@@ -13,10 +13,9 @@ const ProfileCard = () => {
   });
   const [role, setRole] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false); // New state for forgot password form
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // Track success or error
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -100,9 +99,6 @@ const ProfileCard = () => {
         confirmPassword: "",
       }); // Clear the password fields after success
 
-      // Close the modal after success
-      setIsPasswordModalVisible(false);
-
       // Optionally, you could auto-close the confirmation after a delay
       setTimeout(() => setPasswordChangeConfirmed(false), 5000); // Hide confirmation after 5 seconds
     } catch (error) {
@@ -160,12 +156,15 @@ const ProfileCard = () => {
   const handleModalClose = () => setShowModal(false);
 
   const handleSaveChanges = () => {
-    // This just opens the form for editing; it doesn't trigger profile update yet.
     setIsEditing(true);
   };
 
   const togglePasswordModal = () => {
     setIsPasswordModalVisible((prevState) => !prevState);
+  };
+
+  const handleForgotPassword = () => {
+    setIsForgotPassword(true); // Show the Forgot Password form
   };
 
   return (
@@ -179,65 +178,81 @@ const ProfileCard = () => {
           />
         </div>
 
-        {isEditing ? (
+        {isEditing || isForgotPassword ? (
           <>
             <form className="text-start">
-              <div className="mb-3">
-                <p className="fw-bold mb-1 text-start">First Name</p>
-                <input
-                  type="text"
-                  name="firstname"
-                  value={user.firstname}
-                  onChange={handleInputChange}
-                  placeholder="Enter your first name"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <p className="fw-bold mb-1 text-start">Last Name</p>
-                <input
-                  type="text"
-                  name="lastname"
-                  value={user.lastname}
-                  onChange={handleInputChange}
-                  placeholder="Enter your last name"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <p className="fw-bold mb-1 text-start">Email</p>
-                <input
-                  type="email"
-                  name="email"
-                  value={user.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <p className="fw-bold mb-1 text-start">Username</p>
-                <input
-                  type="text"
-                  name="username"
-                  value={user.username}
-                  onChange={handleInputChange}
-                  placeholder="Enter your username"
-                  className="form-control"
-                />
-              </div>
+              {/* Only show the Email field when editing profile, not when changing password */}
+              {!isForgotPassword && (
+                <div className="mb-3">
+                  <p className="fw-bold mb-1 text-start">Email</p>
+                  <input
+                    type="email"
+                    name="email"
+                    value={user.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    className="form-control"
+                  />
+                </div>
+              )}
+
+              {isForgotPassword && (
+                <>
+                  <div className="mb-3">
+                    <p className="fw-bold mb-1 text-start">Current Password</p>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Enter current password"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <p className="fw-bold mb-1 text-start">New Password</p>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Enter new password"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <p className="fw-bold mb-1 text-start">
+                      Confirm New Password
+                    </p>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Confirm new password"
+                      className="form-control"
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="d-flex justify-content-end buttonGroup">
                 <button
                   type="button"
                   className="btn btn-primary me-2"
-                  onClick={handleSubmit} // Trigger the form submission
+                  onClick={
+                    isForgotPassword ? handlePasswordSubmit : handleSubmit
+                  } // Trigger the correct form submission
                 >
-                  Save Changes
+                  {isForgotPassword ? "Reset Password" : "Save Changes"}
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setIsForgotPassword(false);
+                  }}
                 >
                   Cancel
                 </button>
@@ -251,9 +266,6 @@ const ProfileCard = () => {
             </h3>
             <div className={styles.profileInfo}>
               <p className="card-text">
-                <strong>Username:</strong> {user.username || "Not available"}
-              </p>
-              <p className="card-text">
                 <strong>Email:</strong> {user.email || "Not available"}
               </p>
               <p className="card-text">
@@ -262,10 +274,17 @@ const ProfileCard = () => {
             </div>
             <div className="buttonGroup">
               <button
-                className="btn btn-primary"
+                className="btn btn-primary me-3"
                 onClick={() => setIsEditing(true)}
               >
                 Edit Profile
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleForgotPassword} // Trigger the forgot password form
+              >
+                Forgot Password
               </button>
             </div>
           </>
@@ -283,17 +302,6 @@ const ProfileCard = () => {
             {profileUpdateMessage}
           </div>
         )}
-
-        {/* Change Password Button */}
-        <div className="mt-4">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={togglePasswordModal}
-          >
-            Change Password
-          </button>
-        </div>
 
         {/* Success or Error message */}
         {message && (
@@ -313,86 +321,6 @@ const ProfileCard = () => {
           </div>
         )}
       </div>
-
-      {/* Change Password Modal */}
-      {isPasswordModalVisible && (
-        <div className="modal show d-block" role="dialog">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Change Password</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={togglePasswordModal}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Current Password"
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="newPassword"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="New Password"
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Confirm New Password"
-                    className="form-control"
-                  />
-                </div>
-
-                {/* Password Change Error or Success Message */}
-                {passwordMessage && (
-                  <div
-                    className={`alert ${
-                      passwordMessageType === "error"
-                        ? "alert-danger"
-                        : "alert-success"
-                    }`}
-                  >
-                    {passwordMessage}
-                  </div>
-                )}
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handlePasswordSubmit}
-                >
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={togglePasswordModal}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

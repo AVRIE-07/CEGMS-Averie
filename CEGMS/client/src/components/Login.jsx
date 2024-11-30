@@ -17,7 +17,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Validate email format
-  const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/; // Validate username format
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,18 +27,14 @@ const Login = () => {
     setPasswordError(false);
 
     let hasError = false;
-
-    // Validate identifier (email or username)
+    // Validate email
     if (!identifier) {
       setIdentifierError(true);
-      setError("Please enter your email or username.");
+      setError("Please enter your email.");
       hasError = true;
-    } else if (
-      !emailRegex.test(identifier) &&
-      !usernameRegex.test(identifier)
-    ) {
+    } else if (!emailRegex.test(identifier)) {
       setIdentifierError(true);
-      setError("Please enter a valid email or username.");
+      setError("Please enter a valid email address.");
       hasError = true;
     }
 
@@ -82,7 +77,7 @@ const Login = () => {
       if (error.response && error.response.status === 401) {
         setError("Unauthorized. Please check your credentials.");
       } else {
-        setError("Incorrect Email/Username or Password. Please try again.");
+        setError("Incorrect Email or Password. Please try again.");
       }
     }
   };
@@ -99,13 +94,13 @@ const Login = () => {
           <div className="col-6 text-center d-flex flex-column justify-content-center align-items-center">
             <div className={styles.w}>
               <h1 className="mb-1 fw-semibold">Welcome</h1>
-              <p className="lead mb-5">Login with your email or username</p>
+              <p className="lead mb-5">Login with your email</p>
               <form onSubmit={handleSubmit}>
                 <div className={styles.inputContainer}>
                   <FaUser className={styles.icon} />
                   <input
                     type="text"
-                    placeholder="Email or Username"
+                    placeholder="Email"
                     className={`form-control mb-3 ${
                       identifierError ? styles.errorBorder : ""
                     }`}

@@ -259,8 +259,7 @@ function UserManagement() {
         <thead>
           <tr>
             <th>Role</th>
-            <th>First Name</th>
-            <th>Last Name</th>
+            <th>Name</th>
             <th>Email</th>
             <th>Username</th>
             <th>Actions</th>
@@ -270,8 +269,9 @@ function UserManagement() {
           {currentUsers.map((user) => (
             <tr key={user._id}>
               <td>{user.role}</td>
-              <td>{user.firstname}</td>
-              <td>{user.lastname}</td>
+              <td>
+                {user.firstname} {user.lastname}
+              </td>
               <td>{user.email}</td>
               <td>{user.username}</td>
               <td>
@@ -409,18 +409,10 @@ function UserManagement() {
               </Form.Control>
             </Form.Group>
             <Form.Group controlId="firstName">
-              <Form.Label>First Name</Form.Label>
+              <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
                 value={formData.firstName}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="lastName">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.lastName}
                 onChange={handleChange}
               />
             </Form.Group>

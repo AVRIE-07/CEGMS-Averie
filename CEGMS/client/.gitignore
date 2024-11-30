@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore the .env file to protect sensitive information
+.env
+
+# Ignore node_modules folder
+node_modules/
+
+# Ignore logs
+*.log
+
+# Ignore build files
+dist/
+build/

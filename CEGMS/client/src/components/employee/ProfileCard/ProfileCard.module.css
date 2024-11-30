@@ -49,3 +49,6 @@
   margin-top: 20px;
   gap: 10px;
 }
+.buttonGroup button {
+  margin-right: 10px; /* Adjust this value as needed */
+}

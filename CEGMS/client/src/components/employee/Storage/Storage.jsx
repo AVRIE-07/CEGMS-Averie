@@ -381,7 +381,7 @@ const Storage = () => {
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/Storage" // Link to Products component
+                to="/employee/Storage" // Link to Products component
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Products
@@ -389,7 +389,7 @@ const Storage = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/StockMovement" // Link to Inventory Approvals component
+                to="/employee/Storage/StockMovement" // Link to Inventory Approvals component
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -398,7 +398,7 @@ const Storage = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports" // Link to Reports component
+                to="/employee/Storage/Reports" // Link to Reports component
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
