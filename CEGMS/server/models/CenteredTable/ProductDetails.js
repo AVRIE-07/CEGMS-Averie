@@ -13,6 +13,7 @@ const ProductDetailsSchema = new mongoose.Schema(
     product_Price: { type: Number, required: true },
     product_Minimum_Stock_Level: { type: Number, required: true },
     product_Maximum_Stock_Level: { type: Number, required: true },
+    product_Date: { type: Date, default: Date.now }, // Automatically set the current date
     product_Status: { type: String },
   },
   {

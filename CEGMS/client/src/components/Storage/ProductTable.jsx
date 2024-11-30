@@ -122,6 +122,9 @@ const ProductTable = ({
                   Max Stock Level
                 </th>
                 <th scope="col" className="fw-semibold">
+                  Date Added
+                </th>
+                <th scope="col" className="fw-semibold">
                   Edit
                 </th>
               </tr>
@@ -158,6 +161,9 @@ const ProductTable = ({
                   </td>
                   <td className="text-primary">
                     {product.product_Maximum_Stock_Level}
+                  </td>
+                  <td className="text-primary">
+                    {new Date(product.product_Date).toLocaleDateString()}
                   </td>
                   <td>
                     <Button

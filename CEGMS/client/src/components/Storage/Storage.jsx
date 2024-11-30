@@ -19,7 +19,6 @@ const Storage = () => {
   const [searchCategory, setSearchCategory] = useState(""); // For Category search
   const [selectedProducts, setSelectedProducts] = useState([]); // State for Selected Products that will be deleted
   const [totalQuantity, setTotalQuantity] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [overStockCount, setOverStockCount] = useState(0);
   const [selectAll, setSelectAll] = useState(false);
@@ -360,7 +359,6 @@ const Storage = () => {
         // Update products and totals
         setProducts(fetchedProducts);
         setTotalQuantity(quantitySum);
-        setTotalPrice(priceSum);
         setLowStockCount(lowStock);
         setOverStockCount(overStock);
       } catch (error) {
@@ -520,13 +518,6 @@ const Storage = () => {
 
             {/* Statistics */}
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
-              <div className="me-4 px-3 py-2 bg-dark rounded">
-                <strong style={{ fontWeight: "normal" }}>
-                  <i class="bi bi-activity" style={{ marginRight: "10px" }}></i>
-                  Total Quantity:
-                </strong>{" "}
-                {totalQuantity}
-              </div>
               <div className="me-4 px-3 py-2 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
