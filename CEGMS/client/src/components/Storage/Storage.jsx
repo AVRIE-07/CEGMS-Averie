@@ -27,6 +27,8 @@ const Storage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [successModalMessage, setSuccessModalMessage] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const openSuccessModal = (message) => {
     setSuccessModalMessage(message);
@@ -262,14 +264,30 @@ const Storage = () => {
             product.product_Current_Stock > product.product_Maximum_Stock_Level
           );
         default:
-          return true; // No status filter applied
+          return true;
       }
     };
+
+    // Normalize the date comparison (set to midnight)
+    const productDate = new Date(product.product_Date);
+    const normalizedProductDate = new Date(productDate.setHours(0, 0, 0, 0)); // Normalize product date to midnight
+
+    const normalizedDateFrom = new Date(dateFrom);
+    normalizedDateFrom.setHours(0, 0, 0, 0); // Normalize dateFrom to midnight
+
+    const normalizedDateTo = new Date(dateTo);
+    normalizedDateTo.setHours(23, 59, 59, 999); // Normalize dateTo to end of the day
+
+    // Apply date range filter
+    const isWithinDateRange =
+      (!dateFrom || normalizedProductDate >= normalizedDateFrom) &&
+      (!dateTo || normalizedProductDate <= normalizedDateTo);
 
     return (
       matchesCategory &&
       (matchesId || matchesDescription) &&
-      matchesStatus(statusFilter)
+      matchesStatus(statusFilter) &&
+      isWithinDateRange
     );
   });
 
@@ -518,6 +536,23 @@ const Storage = () => {
 
             {/* Statistics */}
             <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
+              <div className="date-filter">
+                <label htmlFor="dateFrom">From: </label>
+                <input
+                  type="date"
+                  id="dateFrom"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+                <label htmlFor="dateTo">To: </label>
+                <input
+                  type="date"
+                  id="dateTo"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
+
               <div className="me-4 px-3 py-2 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
