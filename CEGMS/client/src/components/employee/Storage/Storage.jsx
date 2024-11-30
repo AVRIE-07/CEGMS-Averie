@@ -152,7 +152,6 @@ const Storage = () => {
           adj_Price: existingProduct.product_Price,
           adj_Adjustment_Type: "Added", // You can adjust this based on the operation
         });
-        alert("Product Successfully Saved");
       } else {
         // Create a new product
         response = await axios.post(
@@ -184,8 +183,8 @@ const Storage = () => {
       }
       openSuccessModal(
         isEditMode
-          ? "Product updated successfully."
-          : "Product added successfully."
+          ? "Product successfully updated!"
+          : "Product successfully added!"
       );
       handleModalClose();
       resetForm();
@@ -334,8 +333,18 @@ const Storage = () => {
         let overStock = 0;
 
         fetchedProducts.forEach((product) => {
-          quantitySum += product.product_Quantity;
-          priceSum += product.product_Quantity * product.product_Price;
+          // Ensure product_Quantity is a valid number
+          const quantity = parseInt(product.product_Quantity, 10);
+          const price = parseFloat(product.product_Price);
+
+          if (!isNaN(quantity)) {
+            quantitySum += quantity; // Only add valid numbers
+          }
+
+          if (!isNaN(price) && !isNaN(quantity)) {
+            priceSum += quantity * price; // Only calculate price if quantity is valid
+          }
+
           if (
             product.product_Current_Stock < product.product_Minimum_Stock_Level
           ) {
@@ -372,7 +381,7 @@ const Storage = () => {
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/employee/Storage" // Link to Products component
+                to="/Storage" // Link to Products component
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Products
@@ -380,7 +389,7 @@ const Storage = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/employee/Storage/StockMovement" // Link to Inventory Approvals component
+                to="/Storage/StockMovement" // Link to Inventory Approvals component
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -389,7 +398,7 @@ const Storage = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/employee/Storage/Reports" // Link to Reports component
+                to="/Storage/Reports" // Link to Reports component
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -419,18 +428,12 @@ const Storage = () => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item
-                    as={Link}
-                    to="/employee/Storage/CreateProducts"
-                  >
+                  <Dropdown.Item as={Link} to="/Storage/CreateProducts">
                     {" "}
                     {/* Updated here */}
-                    Product
+                    Add Product
                   </Dropdown.Item>
-                  <Dropdown.Item
-                    as={Link}
-                    to="/employee/Storage/CreateCategory"
-                  >
+                  <Dropdown.Item as={Link} to="/Storage/CreateCategory">
                     Category
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -524,7 +527,6 @@ const Storage = () => {
                 </strong>{" "}
                 {totalQuantity}
               </div>
-
               <div className="me-4 px-3 py-2 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i

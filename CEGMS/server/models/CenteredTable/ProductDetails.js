@@ -5,6 +5,7 @@ const CounterModel = require("./Counter"); // Import the Counter model
 const ProductDetailsSchema = new mongoose.Schema(
   {
     product_Id: { type: String, unique: true }, // Custom Product ID
+    product_Name: { type: String, required: true },
     product_Category: { type: String, required: true },
     product_Description: { type: String, required: true },
     product_Current_Stock: { type: Number, required: true },

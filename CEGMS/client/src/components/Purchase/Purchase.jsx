@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Sidebar from "../SidebarComponents/Sidebar";
 import styles from "./Purchase.module.css";
 import SelectSupplier from "./Components/SelectSupplier";
-import AddCompany from "./Components/AddCompany";
 import { Link } from "react-router-dom";
 
 const Purchase = () => {
@@ -229,9 +228,6 @@ const Purchase = () => {
 
       {/* Modal create document */}
       <SelectSupplier />
-
-      {/* Modal add company */}
-      <AddCompany />
     </div>
   );
 };

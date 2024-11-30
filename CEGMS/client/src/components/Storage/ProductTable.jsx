@@ -104,10 +104,10 @@ const ProductTable = ({
                   Product ID
                 </th>
                 <th scope="col" className="fw-semibold">
-                  Category
+                  Product Name & Description
                 </th>
                 <th scope="col" className="fw-semibold">
-                  Description
+                  Category
                 </th>
                 <th scope="col" className="fw-semibold">
                   Current Stock Level
@@ -137,14 +137,22 @@ const ProductTable = ({
                     />
                   </td>
                   <td className="text-primary">{product.product_Id}</td>
-                  <td className="text-primary">{product.product_Category}</td>
                   <td className="text-primary">
-                    {product.product_Description}
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      {/* Display Product Name and Description side by side */}
+                      <div style={{ flex: "1", fontWeight: "bold" }}>
+                        {product.product_Name}
+                      </div>
+                      <div style={{ flex: "2", fontStyle: "italic" }}>
+                        {product.product_Description}
+                      </div>
+                    </div>
                   </td>
+                  <td className="text-primary">{product.product_Category}</td>
                   <td className="text-primary">
                     {product.product_Current_Stock}
                   </td>
-                  <td className="text-primary">P{product.product_Price}</td>
+                  <td className="text-primary">₱ {product.product_Price}</td>
                   <td className="text-primary">
                     {product.product_Minimum_Stock_Level}
                   </td>

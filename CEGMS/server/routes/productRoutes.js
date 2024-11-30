@@ -65,13 +65,14 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Route to add multiple products at once
+// Route to add multiple products at once or update existing ones
 router.post("/bulk", async (req, res) => {
   try {
-    if (!Array.isArray(req.body)) {
+    // Check if req.body is an array and contains data
+    if (!Array.isArray(req.body) || req.body.length === 0) {
       return res
         .status(400)
-        .json({ message: "Data should be an array of products" });
+        .json({ message: "Data should be a non-empty array of products" });
     }
 
     // Fetch the current counter and initialize unique IDs
@@ -89,22 +90,65 @@ router.post("/bulk", async (req, res) => {
       return { ...product, product_Id: formattedId };
     });
 
-    // Execute bulk write with unique IDs already set
-    const result = await ProductDetailsModel.bulkWrite(
-      productsWithId.map((product) => ({
-        insertOne: { document: product },
-      }))
+    // Prepare bulk operations
+    const bulkOps = [];
+    for (const product of productsWithId) {
+      const existingProduct = await ProductDetailsModel.findOne({
+        product_Category: product.product_Category,
+        product_Description: product.product_Description,
+      });
+
+      if (existingProduct) {
+        // If the product exists, update stock and optionally quantity/price
+        const updateData = {
+          $inc: {
+            product_Current_Stock: product.product_Current_Stock || 0,
+          },
+        };
+
+        // Ensure product_Name is updated or preserved
+        if (product.product_Name) {
+          updateData.product_Name = product.product_Name; // Update or add product_Name
+        }
+
+        if (product.product_Quantity) {
+          updateData.$inc.product_Quantity = product.product_Quantity;
+        }
+        if (product.product_Price) {
+          updateData.product_Price = product.product_Price;
+        }
+
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: existingProduct._id },
+            update: updateData,
+          },
+        });
+      } else {
+        // If the product doesn't exist, insert a new one
+        bulkOps.push({
+          insertOne: {
+            document: product,
+          },
+        });
+      }
+    }
+
+    // Execute bulk write
+    const result = await ProductDetailsModel.bulkWrite(bulkOps);
+
+    // Retrieve updated and inserted products
+    const insertedOrUpdatedProducts = productsWithId.map(
+      (product) => product.product_Id
     );
 
-    // Retrieve inserted IDs
-    const insertedIds = productsWithId.map((product) => product.product_Id);
-
-    res
-      .status(201)
-      .json({ message: "Products added successfully", insertedIds });
+    res.status(201).json({
+      message: "Products processed successfully",
+      insertedOrUpdatedProducts,
+    });
   } catch (error) {
-    console.error("Error adding multiple products:", error);
-    res.status(500).json({ message: "Error adding products" });
+    console.error("Error processing products:", error);
+    res.status(500).json({ message: "Error processing products" });
   }
 });
 

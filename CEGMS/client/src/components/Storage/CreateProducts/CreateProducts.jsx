@@ -8,6 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const CreateProducts = () => {
   const [newProduct, setNewProduct] = useState({
+    product_Name: "", // New field for product name
     product_Description: "",
     product_Category: "",
     product_Price: "",
@@ -15,6 +16,7 @@ const CreateProducts = () => {
     product_Minimum_Stock_Level: "",
     product_Maximum_Stock_Level: "",
   });
+
   const [productList, setProductList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
@@ -48,10 +50,25 @@ const CreateProducts = () => {
     // Example regex for validating fields
     let validValue = value;
     switch (name) {
+      case "product_Name":
+        const nameRegex = /^[A-Za-z0-9\s]+$/;
+        if (!nameRegex.test(value)) {
+          setError(
+            "Product Name can only contain letters, numbers, and spaces."
+          );
+          return;
+        }
+        break;
+
       case "product_Description":
-        const descriptionRegex = /^[A-Za-z\s]+$/;
+        // Updated regex for product description
+        const descriptionRegex =
+          /^[A-Za-z][A-Za-z0-9\s\-\_\#\$\%\&\!\+\=\(\)]*$/;
+
         if (!descriptionRegex.test(value)) {
-          setError("Description can only contain letters and spaces.");
+          setError(
+            "Description must start with a letter and may contain numbers and symbols."
+          );
           return;
         }
         break;
@@ -131,42 +148,53 @@ const CreateProducts = () => {
 
   const handleCreateProducts = async () => {
     try {
+      // Sending the productList to the backend for bulk creation or update
       const response = await axios.post(
         "http://localhost:3001/api/products/bulk",
         productList
       );
 
       if (response.status === 201) {
-        const { insertedIds } = response.data;
+        const { insertedOrUpdatedProducts } = response.data;
 
-        const manualAdjustments = productList.map((product, index) => ({
-          product_ID: insertedIds[index],
-          adj_Description: product.product_Description,
-          adj_Category: product.product_Category,
-          adj_Quantity: product.product_Current_Stock,
-          adj_Price: product.product_Price,
-          adj_Adjustment_Type: "Added",
-        }));
+        // Map through the products and prepare manual adjustments
+        const manualAdjustments = productList.map((product, index) => {
+          // Get the product ID (whether it was inserted or updated)
+          const product_ID = insertedOrUpdatedProducts[index];
+          return {
+            product_ID,
+            adj_Description: product.product_Description,
+            adj_Category: product.product_Category,
+            adj_Quantity: product.product_Current_Stock, // Adjusting the stock quantity
+            adj_Price: product.product_Price,
+            adj_Adjustment_Type: insertedOrUpdatedProducts[index]
+              ? "Updated"
+              : "Added", // Determine if the product was updated or added
+          };
+        });
 
+        // Send the manual adjustments to the backend
         const manualAdjustmentResponse = await axios.post(
           "http://localhost:3001/api/manualAdjustment",
           manualAdjustments
         );
 
         if (manualAdjustmentResponse.status === 201) {
+          // Create stock movements after successful manual adjustments
           await createStockMovements(manualAdjustmentResponse.data);
-          setProductList([]);
+          setProductList([]); // Clear the product list after successful creation and update
+          setShowModal(false); // Close the modal
+          setAction("add"); // Update the action type
+          setShowSuccessModal(true); // Show success modal after completion
         }
       }
     } catch (error) {
+      // Display error message if something goes wrong
       setError(
         "Could not create products or stock movements. Please try again."
       );
       console.error("Error details:", error.response?.data || error.message);
     }
-    setShowModal(false);
-    setAction("add"); // Update the action based on what was done (e.g., "add")
-    setShowSuccessModal(true); // Show the success modal after saving
   };
 
   const createStockMovements = async (manualAdjustments) => {
@@ -192,6 +220,7 @@ const CreateProducts = () => {
 
   const resetForm = () => {
     setNewProduct({
+      product_Name: "",
       product_Description: "",
       product_Category: "",
       product_Price: "",
@@ -259,6 +288,7 @@ const CreateProducts = () => {
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
+                { name: "product_Name", placeholder: "Product Name" }, // New field
                 { name: "product_Description", placeholder: "Description" },
                 { name: "product_Price", placeholder: "Price" },
                 { name: "product_Current_Stock", placeholder: "Current Stock" },
@@ -279,7 +309,7 @@ const CreateProducts = () => {
                     value={newProduct[field.name]}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
-                    required // Ensure this field is required
+                    required
                   />
                 </div>
               ))}
@@ -290,7 +320,7 @@ const CreateProducts = () => {
                   className="form-control"
                   value={newProduct.product_Category}
                   onChange={handleInputChange}
-                  required // Ensure category selection is required
+                  required
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (

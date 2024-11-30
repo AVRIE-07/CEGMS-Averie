@@ -74,7 +74,7 @@ const ProductModal = ({
 
           <div className="mb-3">
             <label htmlFor="product_Price" className="form-label">
-              Unit Price(P)
+              Unit Price(₱)
             </label>
             <input
               type="text"

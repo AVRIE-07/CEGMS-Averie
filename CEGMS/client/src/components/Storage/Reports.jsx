@@ -247,6 +247,7 @@ const Reports = () => {
                       <tr
                         key={report.id}
                         onClick={() => handleReportRowClick(report)}
+                        style={{ cursor: "pointer" }} // Add this inline style to make it clickable
                       >
                         <td className="text-primary">{report.report_ID}</td>
                         <td className="text-primary">{report.reportType}</td>

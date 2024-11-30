@@ -24,6 +24,8 @@ const ProfileCard = () => {
   });
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordMessageType, setPasswordMessageType] = useState("");
+  const [profileUpdateMessage, setProfileUpdateMessage] = useState("");
+  const [profileUpdateMessageType, setProfileUpdateMessageType] = useState("");
 
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false); // For toggling the change password modal
   const [passwordChangeConfirmed, setPasswordChangeConfirmed] = useState(false); // For tracking if password change was successful
@@ -116,8 +118,8 @@ const ProfileCard = () => {
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        setMessage("User ID not found in localStorage.");
-        setMessageType("error");
+        setProfileUpdateMessage("User ID not found in localStorage.");
+        setProfileUpdateMessageType("error");
         return;
       }
 
@@ -135,24 +137,32 @@ const ProfileCard = () => {
       localStorage.setItem("firstname", updatedUser.firstname);
       localStorage.setItem("lastname", updatedUser.lastname);
       localStorage.setItem("email", updatedUser.email);
+      // Show success message
+      setProfileUpdateMessage("Profile updated successfully!");
+      setProfileUpdateMessageType("success");
 
-      setMessage(response.data.message);
-      setMessageType("success");
+      // Close the edit form
       setIsEditing(false);
-      setShowModal(false); // Close modal after successful submission
+
+      // Optionally, hide the success message after 3 seconds
+      setTimeout(() => {
+        setProfileUpdateMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating user:", error);
-      setMessage(
+      setProfileUpdateMessage(
         error.response?.data?.message || "Failed to update profile. Try again."
       );
-      setMessageType("error");
-      setShowModal(false); // Close modal on error
+      setProfileUpdateMessageType("error");
     }
   };
 
   const handleModalClose = () => setShowModal(false);
 
-  const handleSaveChanges = () => setShowModal(true);
+  const handleSaveChanges = () => {
+    // This just opens the form for editing; it doesn't trigger profile update yet.
+    setIsEditing(true);
+  };
 
   const togglePasswordModal = () => {
     setIsPasswordModalVisible((prevState) => !prevState);
@@ -220,7 +230,7 @@ const ProfileCard = () => {
                 <button
                   type="button"
                   className="btn btn-primary me-2"
-                  onClick={handleSaveChanges}
+                  onClick={handleSubmit} // Trigger the form submission
                 >
                   Save Changes
                 </button>
@@ -259,6 +269,19 @@ const ProfileCard = () => {
               </button>
             </div>
           </>
+        )}
+
+        {/* Display success or error message after submitting the form */}
+        {profileUpdateMessage && (
+          <div
+            className={`alert ${
+              profileUpdateMessageType === "error"
+                ? "alert-danger"
+                : "alert-success"
+            } mt-3`}
+          >
+            {profileUpdateMessage}
+          </div>
         )}
 
         {/* Change Password Button */}
@@ -353,17 +376,17 @@ const ProfileCard = () => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
-                  onClick={togglePasswordModal}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
                   className="btn btn-primary"
                   onClick={handlePasswordSubmit}
                 >
                   Save Changes
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={togglePasswordModal}
+                >
+                  Close
                 </button>
               </div>
             </div>

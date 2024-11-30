@@ -431,7 +431,7 @@ const Storage = () => {
                   <Dropdown.Item as={Link} to="/Storage/CreateProducts">
                     {" "}
                     {/* Updated here */}
-                    Product
+                    Add Product
                   </Dropdown.Item>
                   <Dropdown.Item as={Link} to="/Storage/CreateCategory">
                     Category
