@@ -33,6 +33,9 @@ const StockMovementSchema = new mongoose.Schema(
       type: Date, // Change to Date type
       default: Date.now, // Automatically set to current date
     },
+    adj_Comment: {
+      type: String,
+    },
   },
   {
     collection: "stockMovement", // Specify the collection name explicitly
