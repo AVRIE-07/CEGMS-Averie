@@ -20,7 +20,6 @@ function UserManagement() {
     firstName: "",
     lastName: "",
     email: "",
-    username: "",
     password: "",
     confirmPassword: "",
   });
@@ -97,7 +96,6 @@ function UserManagement() {
         user.firstname.toLowerCase().includes(lowercasedSearchTerm) ||
         user.lastname.toLowerCase().includes(lowercasedSearchTerm) ||
         user.email.toLowerCase().includes(lowercasedSearchTerm) ||
-        user.username.toLowerCase().includes(lowercasedSearchTerm) ||
         user.role.toLowerCase().includes(lowercasedSearchTerm)
     );
     setFilteredUsers(filtered);
@@ -110,7 +108,6 @@ function UserManagement() {
       firstName: "",
       lastName: "",
       email: "",
-      username: "",
       password: "",
       confirmPassword: "",
     });
@@ -143,7 +140,6 @@ function UserManagement() {
       firstname: formData.firstName.trim(),
       lastname: formData.lastName.trim(),
       email: formData.email.trim(),
-      username: formData.username.trim(),
       password: formData.password.trim(),
     };
 
@@ -175,7 +171,6 @@ function UserManagement() {
       firstName: user.firstname,
       lastName: user.lastname,
       email: user.email,
-      username: user.username,
       password: "",
       confirmPassword: "",
     });
@@ -261,7 +256,6 @@ function UserManagement() {
             <th>Role</th>
             <th>Name</th>
             <th>Email</th>
-            <th>Username</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -273,7 +267,6 @@ function UserManagement() {
                 {user.firstname} {user.lastname}
               </td>
               <td>{user.email}</td>
-              <td>{user.username}</td>
               <td>
                 <Button
                   variant="info"
@@ -409,26 +402,28 @@ function UserManagement() {
               </Form.Control>
             </Form.Group>
             <Form.Group controlId="firstName">
-              <Form.Label>Name</Form.Label>
+              <Form.Label>First Name</Form.Label>
               <Form.Control
                 type="text"
                 value={formData.firstName}
                 onChange={handleChange}
               />
             </Form.Group>
+            <Form.Group controlId="lastName">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Enter last name"
+              />
+            </Form.Group>
+
             <Form.Group controlId="email">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
                 value={formData.email}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="username">
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.username}
                 onChange={handleChange}
               />
             </Form.Group>

@@ -22,6 +22,7 @@ import CreateTransaction from "./components/Sales/CreateTransaction.jsx";
 import ForgotPassword from "./components/ForgotPassword.jsx";
 import CreateProducts from "./components/Storage/CreateProducts/CreateProducts.jsx";
 import CreateCategory from "./components/Storage/CreateProducts/CreateCategory.jsx";
+import CreateSupplier from "./components/Storage/CreateProducts/CreateSupplier.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import StockMovement from "./components/Storage/StockMovement.jsx";
 import Reports from "./components/Storage/Reports.jsx";
@@ -44,6 +45,7 @@ import EmployeeCreateProducts from "./components/employee/Storage/CreateProducts
 import EmployeeCreateCategory from "./components/employee/Storage/CreateProducts/CreateCategory.jsx";
 import EmployeeStockMovement from "./components/employee/Storage/StockMovement.jsx";
 import EmployeeReports from "./components/employee/Storage/Reports.jsx";
+import EmployeeCreateSupplier from "./components/employee/Storage/CreateProducts/CreateSupplier.jsx";
 
 function App() {
   return (
@@ -134,6 +136,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateCategory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/storage/createSupplier"
+            element={
+              <ProtectedRoute>
+                <CreateSupplier />
               </ProtectedRoute>
             }
           />
@@ -261,6 +271,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <EmployeeCreateCategory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/storage/createSupplier"
+            element={
+              <ProtectedRoute>
+                <EmployeeCreateSupplier />
               </ProtectedRoute>
             }
           />

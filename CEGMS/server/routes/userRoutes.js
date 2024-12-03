@@ -10,9 +10,9 @@ router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-    // Match user by email or username
+    // Match user by email
     const user = await UsersModel.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+      $or: [{ email: identifier }],
     });
 
     if (!user) {
@@ -31,7 +31,6 @@ router.post("/login", async (req, res) => {
     res.json({
       token,
       email: user.email,
-      username: user.username,
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
@@ -57,7 +56,7 @@ router.get("/get-users", async (req, res) => {
 router.put("/update-user/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, firstname, lastname, email, username, password } = req.body;
+    const { role, firstname, lastname, email, password } = req.body;
 
     // No password hashing, so we directly use the password from the request
     const updatedUser = await UsersModel.findByIdAndUpdate(
@@ -67,7 +66,6 @@ router.put("/update-user/:id", async (req, res) => {
         firstname,
         lastname,
         email,
-        username,
         password, // Use the password directly
       },
       { new: true }
@@ -102,10 +100,10 @@ router.delete("/delete-user/:id", async (req, res) => {
 // Add user route
 router.post("/add-user", async (req, res) => {
   console.log("Request body:", req.body); // Log the request body for debugging
-  const { role, firstname, lastname, email, username, password } = req.body;
+  const { role, firstname, lastname, email, password } = req.body;
 
   // Check if all required fields are provided
-  if (!firstname || !lastname || !email || !username || !password) {
+  if (!firstname || !lastname || !email | !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -113,15 +111,6 @@ router.post("/add-user", async (req, res) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: "Invalid email format" });
-  }
-
-  // Validate username format
-  const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
-  if (!usernameRegex.test(username)) {
-    return res.status(400).json({
-      message:
-        "Username must be 4-20 characters and contain only letters, numbers, or underscores.",
-    });
   }
 
   // Validate password format
@@ -134,14 +123,14 @@ router.post("/add-user", async (req, res) => {
   }
 
   try {
-    // Check if a user with the same email or username already exists
+    // Check if a user with the same emailalready exists
     const existingUser = await UsersModel.findOne({
-      $or: [{ email }, { username }],
+      $or: [{ email }],
     });
 
     if (existingUser) {
       return res.status(400).json({
-        message: "A user with this email or username already exists.",
+        message: "A user with this email already exists.",
       });
     }
 
@@ -154,7 +143,6 @@ router.post("/add-user", async (req, res) => {
       firstname,
       lastname,
       email,
-      username,
       password: hashedPassword, // Store the hashed password
     });
 
@@ -170,7 +158,6 @@ router.post("/add-user", async (req, res) => {
 router.put("/profile/update-user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const { firstname, lastname, email, username } = req.body;
 
     // Check if the user exists
     const user = await UsersModel.findOne({ userId });
@@ -183,7 +170,6 @@ router.put("/profile/update-user/:userId", async (req, res) => {
     user.firstname = firstname || user.firstname;
     user.lastname = lastname || user.lastname;
     user.email = email || user.email;
-    user.username = username || user.username;
 
     // Save the updated user to the database
     const updatedUser = await user.save();
@@ -196,7 +182,6 @@ router.put("/profile/update-user/:userId", async (req, res) => {
         firstname: updatedUser.firstname,
         lastname: updatedUser.lastname,
         email: updatedUser.email,
-        username: updatedUser.username,
         role: updatedUser.role,
       },
     });

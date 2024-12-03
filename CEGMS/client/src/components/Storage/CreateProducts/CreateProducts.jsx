@@ -8,13 +8,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const CreateProducts = () => {
   const [newProduct, setNewProduct] = useState({
-    product_Name: "", // New field for product name
+    product_Name: "",
     product_Description: "",
     product_Category: "",
     product_Price: "",
     product_Current_Stock: "",
     product_Minimum_Stock_Level: "",
     product_Maximum_Stock_Level: "",
+    product_Supplier: "", // New field for selected supplier
   });
 
   const [productList, setProductList] = useState([]);
@@ -23,7 +24,21 @@ const CreateProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
+  const [suppliers, setSuppliers] = useState([]);
 
+  // Fetch suppliers data on component mount
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/supplier/");
+        setSuppliers(response.data); // Populate suppliers state
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -133,12 +148,21 @@ const CreateProducts = () => {
       productStatus = "In Stock";
     }
 
+    // Add the new product to the product list
     setProductList((prevList) => [
       ...prevList,
       { ...newProduct, product_Status: productStatus },
     ]);
 
+    // Reset the form after adding the product
     resetForm();
+
+    // Clear the selected supplier (reset the value in the product state)
+    setNewProduct((prevProduct) => ({
+      ...prevProduct,
+      product_Supplier: "", // Clear the selected supplier
+    }));
+
     setError(""); // Clear the error if product is added
   };
 
@@ -148,7 +172,6 @@ const CreateProducts = () => {
 
   const handleCreateProducts = async () => {
     try {
-      // Sending the productList to the backend for bulk creation or update
       const response = await axios.post(
         "http://localhost:3001/api/products/bulk",
         productList
@@ -157,39 +180,35 @@ const CreateProducts = () => {
       if (response.status === 201) {
         const { insertedOrUpdatedProducts } = response.data;
 
-        // Map through the products and prepare manual adjustments
         const manualAdjustments = productList.map((product, index) => {
-          // Get the product ID (whether it was inserted or updated)
           const product_ID = insertedOrUpdatedProducts[index];
           return {
             product_ID,
             adj_Description: product.product_Description,
             adj_Category: product.product_Category,
-            adj_Quantity: product.product_Current_Stock, // Adjusting the stock quantity
+            adj_Quantity: product.product_Current_Stock,
             adj_Price: product.product_Price,
+            adj_Supplier: product.product_Supplier, // Include supplier information
             adj_Adjustment_Type: insertedOrUpdatedProducts[index]
               ? "Updated"
-              : "Added", // Determine if the product was updated or added
+              : "Added",
           };
         });
 
-        // Send the manual adjustments to the backend
         const manualAdjustmentResponse = await axios.post(
           "http://localhost:3001/api/manualAdjustment",
           manualAdjustments
         );
 
         if (manualAdjustmentResponse.status === 201) {
-          // Create stock movements after successful manual adjustments
           await createStockMovements(manualAdjustmentResponse.data);
-          setProductList([]); // Clear the product list after successful creation and update
-          setShowModal(false); // Close the modal
-          setAction("add"); // Update the action type
-          setShowSuccessModal(true); // Show success modal after completion
+          setProductList([]);
+          setShowModal(false);
+          setAction("add");
+          setShowSuccessModal(true);
         }
       }
     } catch (error) {
-      // Display error message if something goes wrong
       setError(
         "Could not create products or stock movements. Please try again."
       );
@@ -313,7 +332,6 @@ const CreateProducts = () => {
                   />
                 </div>
               ))}
-
               <div className="col-md-6">
                 <select
                   name="product_Category"
@@ -329,6 +347,21 @@ const CreateProducts = () => {
                       value={category.product_Category}
                     >
                       {category.product_Category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-6 mb-3">
+                <select
+                  name="product_Supplier"
+                  className="form-select"
+                  value={newProduct.product_Supplier}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Supplier</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier._id} value={supplier.name}>
+                      {supplier.name}
                     </option>
                   ))}
                 </select>

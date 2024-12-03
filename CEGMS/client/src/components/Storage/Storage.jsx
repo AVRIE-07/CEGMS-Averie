@@ -532,6 +532,9 @@ const Storage = () => {
                   <Dropdown.Item as={Link} to="/Storage/CreateCategory">
                     Category
                   </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/Storage/CreateSupplier">
+                    Supplier
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </div>

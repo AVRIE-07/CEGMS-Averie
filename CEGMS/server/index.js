@@ -8,6 +8,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const manualAdjustmentRoutes = require("./routes/manualAdjustmentRoutes");
 const stockMovement = require("./routes/stockMovement");
 const reportRoutes = require("./routes/reportRoutes");
+const supplierRoutes = require("./routes/supplierRoutes");
 
 const app = express();
 const PORT = 3001;
@@ -30,6 +31,8 @@ app.use("/api/category", categoryRoutes); // Prefix for category routes
 app.use("/api/manualAdjustment", manualAdjustmentRoutes); // Prefix for manual adjustment routes
 app.use("/api/stockMovement", stockMovement); // Prefix for stock movement routes
 app.use("/api/report", reportRoutes); // Prefix for report routes (fixed)
+// Register routes
+app.use("/api/supplier", supplierRoutes);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
