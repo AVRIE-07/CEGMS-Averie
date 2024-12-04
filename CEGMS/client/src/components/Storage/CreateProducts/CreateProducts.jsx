@@ -8,37 +8,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const CreateProducts = () => {
   const [newProduct, setNewProduct] = useState({
-    product_Name: "",
     product_Description: "",
     product_Category: "",
     product_Price: "",
     product_Current_Stock: "",
     product_Minimum_Stock_Level: "",
     product_Maximum_Stock_Level: "",
-    product_Supplier: "", // New field for selected supplier
   });
-
   const [productList, setProductList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
-  const [suppliers, setSuppliers] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Fetch suppliers data on component mount
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/supplier/");
-        setSuppliers(response.data); // Populate suppliers state
-      } catch (error) {
-        console.error("Error fetching suppliers:", error);
-      }
-    };
-
-    fetchSuppliers();
-  }, []);
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -65,25 +49,10 @@ const CreateProducts = () => {
     // Example regex for validating fields
     let validValue = value;
     switch (name) {
-      case "product_Name":
-        const nameRegex = /^[A-Za-z0-9\s]+$/;
-        if (!nameRegex.test(value)) {
-          setError(
-            "Product Name can only contain letters, numbers, and spaces."
-          );
-          return;
-        }
-        break;
-
       case "product_Description":
-        // Updated regex for product description
-        const descriptionRegex =
-          /^[A-Za-z][A-Za-z0-9\s\-\_\#\$\%\&\!\+\=\(\)]*$/;
-
+        const descriptionRegex = /^(?!\d+$)[A-Za-z\s]+$/;
         if (!descriptionRegex.test(value)) {
-          setError(
-            "Description must start with a letter and may contain numbers and symbols."
-          );
+          setError("Description can only contain letters and spaces.");
           return;
         }
         break;
@@ -112,58 +81,78 @@ const CreateProducts = () => {
         break;
     }
 
-    // If validation passed, update the state
-    setNewProduct((prev) => ({ ...prev, [name]: validValue }));
-    setError(""); // Clear error if validation passes
-  };
+    // Check if the product_Maximum_Stock_Level is less than the product_Minimum_Stock_Level
+    if (
+      name === "product_Maximum_Stock_Level" &&
+      parseInt(value) < parseInt(newProduct.product_Minimum_Stock_Level)
+    ) {
+      setError("Maximum Stock Level cannot be less than Minimum Stock Level.");
+      return;
+    }
 
+    // Update product data
+    setNewProduct((prevProduct) => {
+      let updatedProduct = { ...prevProduct, [name]: value };
+
+      // If the 'product_Minimum_Stock_Level' field is updated, also set 'product_Maximum_Stock_Level'
+      if (name === "product_Minimum_Stock_Level") {
+        // Automatically set product_Maximum_Stock_Level based on the new minimum stock level
+        updatedProduct.product_Maximum_Stock_Level = value; // You can add custom logic here if needed
+      }
+
+      return updatedProduct;
+    });
+
+    // Clear error if everything is valid
+    setError("");
+  };
   const handleAddProduct = () => {
+    setIsSubmitted(true); // Mark form as submitted
+
     // Check if any required fields are empty
     for (const key in newProduct) {
-      if (newProduct[key] === "" || newProduct[key] === undefined) {
+      if (
+        newProduct.product_Description === "" ||
+        newProduct.product_Category === "" ||
+        newProduct.product_Price === ""
+      ) {
         setError("All fields are required!");
         return;
       }
     }
 
-    // Check if Minimum Stock Level is lower than Maximum Stock Level
-    if (
-      parseInt(newProduct.product_Minimum_Stock_Level) >=
-      parseInt(newProduct.product_Maximum_Stock_Level)
-    ) {
-      setError("Minimum Stock Level must be lower than Maximum Stock Level.");
+    // Convert the stock levels to integers before comparing
+    const minStockLevel = parseInt(newProduct.product_Minimum_Stock_Level);
+    const maxStockLevel = parseInt(newProduct.product_Maximum_Stock_Level);
+
+    // Check if Minimum Stock Level is greater than or equal to Maximum Stock Level
+    if (minStockLevel < maxStockLevel) {
+      setError(
+        "Minimum Stock Level must be greater than or equal to Maximum Stock Level."
+      );
       return;
     }
 
     let productStatus;
-    if (
-      newProduct.product_Current_Stock < newProduct.product_Minimum_Stock_Level
-    ) {
+    if (newProduct.product_Current_Stock < minStockLevel) {
       productStatus = "Low Stock";
-    } else if (
-      newProduct.product_Current_Stock > newProduct.product_Maximum_Stock_Level
-    ) {
+    } else if (newProduct.product_Current_Stock > maxStockLevel) {
       productStatus = "Overstocked";
     } else {
       productStatus = "In Stock";
     }
 
-    // Add the new product to the product list
+    // Add the new product to the list
     setProductList((prevList) => [
       ...prevList,
       { ...newProduct, product_Status: productStatus },
     ]);
 
-    // Reset the form after adding the product
     resetForm();
+    setError(""); // Clear any errors after adding the product
 
-    // Clear the selected supplier (reset the value in the product state)
-    setNewProduct((prevProduct) => ({
-      ...prevProduct,
-      product_Supplier: "", // Clear the selected supplier
-    }));
-
-    setError(""); // Clear the error if product is added
+    // Reset isSubmitted to remove the validation borders
+    setIsSubmitted(false);
   };
 
   const handleRemoveProduct = (index) => {
@@ -178,22 +167,16 @@ const CreateProducts = () => {
       );
 
       if (response.status === 201) {
-        const { insertedOrUpdatedProducts } = response.data;
+        const { insertedIds } = response.data;
 
-        const manualAdjustments = productList.map((product, index) => {
-          const product_ID = insertedOrUpdatedProducts[index];
-          return {
-            product_ID,
-            adj_Description: product.product_Description,
-            adj_Category: product.product_Category,
-            adj_Quantity: product.product_Current_Stock,
-            adj_Price: product.product_Price,
-            adj_Supplier: product.product_Supplier, // Include supplier information
-            adj_Adjustment_Type: insertedOrUpdatedProducts[index]
-              ? "Updated"
-              : "Added",
-          };
-        });
+        const manualAdjustments = productList.map((product, index) => ({
+          product_ID: insertedIds[index],
+          adj_Description: product.product_Description,
+          adj_Category: product.product_Category,
+          adj_Quantity: product.product_Current_Stock,
+          adj_Price: product.product_Price,
+          adj_Adjustment_Type: "Added",
+        }));
 
         const manualAdjustmentResponse = await axios.post(
           "http://localhost:3001/api/manualAdjustment",
@@ -203,9 +186,6 @@ const CreateProducts = () => {
         if (manualAdjustmentResponse.status === 201) {
           await createStockMovements(manualAdjustmentResponse.data);
           setProductList([]);
-          setShowModal(false);
-          setAction("add");
-          setShowSuccessModal(true);
         }
       }
     } catch (error) {
@@ -214,6 +194,9 @@ const CreateProducts = () => {
       );
       console.error("Error details:", error.response?.data || error.message);
     }
+    setShowModal(false);
+    setAction("add"); // Update the action based on what was done (e.g., "add")
+    setShowSuccessModal(true); // Show the success modal after saving
   };
 
   const createStockMovements = async (manualAdjustments) => {
@@ -241,11 +224,11 @@ const CreateProducts = () => {
     setNewProduct({
       product_Name: "",
       product_Description: "",
-      product_Category: "",
       product_Price: "",
       product_Current_Stock: "",
       product_Minimum_Stock_Level: "",
       product_Maximum_Stock_Level: "",
+      product_Category: "",
     });
   };
 
@@ -257,7 +240,7 @@ const CreateProducts = () => {
           <ul className="nav nav-underline fs-6 me-3">
             <li className="nav-item pe-3">
               <Link
-                to="/Storage"
+                to="/employee/Storage"
                 className="nav-link fw-semibold text-decoration-none border-bottom border-primary border-2"
               >
                 Products
@@ -265,7 +248,7 @@ const CreateProducts = () => {
             </li>
             <li className="nav-item pe-3">
               <Link
-                to="/Storage/StockMovement"
+                to="/employee/Storage/StockMovement"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -274,7 +257,7 @@ const CreateProducts = () => {
             </li>
             <li className="nav-item">
               <Link
-                to="/Storage/Reports"
+                to="/employee/Storage/Reports"
                 className="nav-link fw-semibold text-decoration-none"
                 style={{ color: "#6a6d71" }}
               >
@@ -307,7 +290,7 @@ const CreateProducts = () => {
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
-                { name: "product_Name", placeholder: "Product Name" }, // New field
+                { name: "product_Name", placeholder: "Product Name" },
                 { name: "product_Description", placeholder: "Description" },
                 { name: "product_Price", placeholder: "Price" },
                 { name: "product_Current_Stock", placeholder: "Current Stock" },
@@ -315,23 +298,66 @@ const CreateProducts = () => {
                   name: "product_Minimum_Stock_Level",
                   placeholder: "Minimum Stock Level",
                 },
-                {
-                  name: "product_Maximum_Stock_Level",
-                  placeholder: "Maximum Stock Level",
-                },
               ].map((field, index) => (
                 <div key={index} className="col-md-6">
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="form-control"
-                    value={newProduct[field.name]}
-                    onChange={handleInputChange}
-                    placeholder={field.placeholder}
-                    required
-                  />
+                  <div className="form-floating">
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="form-control"
+                      id={field.name}
+                      value={newProduct[field.name]}
+                      onChange={handleInputChange}
+                      required
+                      placeholder={field.placeholder}
+                      style={{
+                        border:
+                          isSubmitted && !newProduct[field.name]
+                            ? "1px solid red"
+                            : "",
+                      }}
+                    />
+                    <label
+                      htmlFor={field.name}
+                      className={newProduct[field.name] ? "active" : ""}
+                    >
+                      {field.placeholder}
+                    </label>
+                  </div>
                 </div>
               ))}
+
+              {/* Maximum Stock Level with Increment Button */}
+              <div className="col-md-6">
+                <div className="form-floating">
+                  <input
+                    type="number"
+                    name="product_Maximum_Stock_Level"
+                    className="form-control"
+                    id="product_Maximum_Stock_Level"
+                    value={newProduct.product_Maximum_Stock_Level}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Maximum Stock Level"
+                    style={{
+                      border:
+                        isSubmitted && !newProduct.product_Maximum_Stock_Level
+                          ? "1px solid red"
+                          : "",
+                    }}
+                  />
+                  <label
+                    htmlFor="product_Maximum_Stock_Level"
+                    className={
+                      newProduct.product_Maximum_Stock_Level ? "active" : ""
+                    }
+                  >
+                    Maximum Stock Level
+                  </label>
+                </div>
+              </div>
+
+              {/* Category Dropdown */}
               <div className="col-md-6">
                 <select
                   name="product_Category"
@@ -339,6 +365,13 @@ const CreateProducts = () => {
                   value={newProduct.product_Category}
                   onChange={handleInputChange}
                   required
+                  style={{
+                    border:
+                      isSubmitted && !newProduct.product_Category
+                        ? "1px solid red"
+                        : "",
+                    height: "55px", // Increase the height here
+                  }}
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
@@ -347,21 +380,6 @@ const CreateProducts = () => {
                       value={category.product_Category}
                     >
                       {category.product_Category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-6 mb-3">
-                <select
-                  name="product_Supplier"
-                  className="form-select"
-                  value={newProduct.product_Supplier}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Supplier</option>
-                  {suppliers.map((supplier) => (
-                    <option key={supplier._id} value={supplier.name}>
-                      {supplier.name}
                     </option>
                   ))}
                 </select>

@@ -21,6 +21,7 @@ const CreateProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -50,7 +51,6 @@ const CreateProducts = () => {
     switch (name) {
       case "product_Description":
         const descriptionRegex = /^(?!\d+$)[A-Za-z\s]+$/;
-
         if (!descriptionRegex.test(value)) {
           setError("Description can only contain letters and spaces.");
           return;
@@ -81,49 +81,78 @@ const CreateProducts = () => {
         break;
     }
 
-    // If validation passed, update the state
-    setNewProduct((prev) => ({ ...prev, [name]: validValue }));
-    setError(""); // Clear error if validation passes
-  };
+    // Check if the product_Maximum_Stock_Level is less than the product_Minimum_Stock_Level
+    if (
+      name === "product_Maximum_Stock_Level" &&
+      parseInt(value) < parseInt(newProduct.product_Minimum_Stock_Level)
+    ) {
+      setError("Maximum Stock Level cannot be less than Minimum Stock Level.");
+      return;
+    }
 
+    // Update product data
+    setNewProduct((prevProduct) => {
+      let updatedProduct = { ...prevProduct, [name]: value };
+
+      // If the 'product_Minimum_Stock_Level' field is updated, also set 'product_Maximum_Stock_Level'
+      if (name === "product_Minimum_Stock_Level") {
+        // Automatically set product_Maximum_Stock_Level based on the new minimum stock level
+        updatedProduct.product_Maximum_Stock_Level = value; // You can add custom logic here if needed
+      }
+
+      return updatedProduct;
+    });
+
+    // Clear error if everything is valid
+    setError("");
+  };
   const handleAddProduct = () => {
+    setIsSubmitted(true); // Mark form as submitted
+
     // Check if any required fields are empty
     for (const key in newProduct) {
-      if (newProduct[key] === "" || newProduct[key] === undefined) {
+      if (
+        newProduct.product_Description === "" ||
+        newProduct.product_Category === "" ||
+        newProduct.product_Price === ""
+      ) {
         setError("All fields are required!");
         return;
       }
     }
 
-    // Check if Minimum Stock Level is lower than Maximum Stock Level
-    if (
-      parseInt(newProduct.product_Minimum_Stock_Level) >=
-      parseInt(newProduct.product_Maximum_Stock_Level)
-    ) {
-      setError("Minimum Stock Level must be lower than Maximum Stock Level.");
+    // Convert the stock levels to integers before comparing
+    const minStockLevel = parseInt(newProduct.product_Minimum_Stock_Level);
+    const maxStockLevel = parseInt(newProduct.product_Maximum_Stock_Level);
+
+    // Check if Minimum Stock Level is greater than or equal to Maximum Stock Level
+    if (minStockLevel < maxStockLevel) {
+      setError(
+        "Minimum Stock Level must be greater than or equal to Maximum Stock Level."
+      );
       return;
     }
 
     let productStatus;
-    if (
-      newProduct.product_Current_Stock < newProduct.product_Minimum_Stock_Level
-    ) {
+    if (newProduct.product_Current_Stock < minStockLevel) {
       productStatus = "Low Stock";
-    } else if (
-      newProduct.product_Current_Stock > newProduct.product_Maximum_Stock_Level
-    ) {
+    } else if (newProduct.product_Current_Stock > maxStockLevel) {
       productStatus = "Overstocked";
     } else {
       productStatus = "In Stock";
     }
 
+    // Add the new product to the list
     setProductList((prevList) => [
       ...prevList,
       { ...newProduct, product_Status: productStatus },
     ]);
 
     resetForm();
-    setError(""); // Clear the error if product is added
+    setError(""); // Clear any errors after adding the product
+
+    // Reset isSubmitted to remove the validation borders
+    setIsSubmitted(false);
   };
 
   const handleRemoveProduct = (index) => {
@@ -193,12 +222,13 @@ const CreateProducts = () => {
 
   const resetForm = () => {
     setNewProduct({
+      product_Name: "",
       product_Description: "",
-      product_Category: "",
       product_Price: "",
       product_Current_Stock: "",
       product_Minimum_Stock_Level: "",
       product_Maximum_Stock_Level: "",
+      product_Category: "",
     });
   };
 
@@ -260,38 +290,88 @@ const CreateProducts = () => {
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
+                { name: "product_Name", placeholder: "Product Name" },
                 { name: "product_Description", placeholder: "Description" },
                 { name: "product_Price", placeholder: "Price" },
-                { name: "product_Current_Stock", placeholder: "Stock" },
+                { name: "product_Current_Stock", placeholder: "Current Stock" },
                 {
                   name: "product_Minimum_Stock_Level",
                   placeholder: "Minimum Stock Level",
                 },
-                {
-                  name: "product_Maximum_Stock_Level",
-                  placeholder: "Maximum Stock Level",
-                },
               ].map((field, index) => (
                 <div key={index} className="col-md-6">
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="form-control"
-                    value={newProduct[field.name]}
-                    onChange={handleInputChange}
-                    placeholder={field.placeholder}
-                    required // Ensure this field is required
-                  />
+                  <div className="form-floating">
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="form-control"
+                      id={field.name}
+                      value={newProduct[field.name]}
+                      onChange={handleInputChange}
+                      required
+                      placeholder={field.placeholder}
+                      style={{
+                        border:
+                          isSubmitted && !newProduct[field.name]
+                            ? "1px solid red"
+                            : "",
+                      }}
+                    />
+                    <label
+                      htmlFor={field.name}
+                      className={newProduct[field.name] ? "active" : ""}
+                    >
+                      {field.placeholder}
+                    </label>
+                  </div>
                 </div>
               ))}
 
+              {/* Maximum Stock Level with Increment Button */}
+              <div className="col-md-6">
+                <div className="form-floating">
+                  <input
+                    type="number"
+                    name="product_Maximum_Stock_Level"
+                    className="form-control"
+                    id="product_Maximum_Stock_Level"
+                    value={newProduct.product_Maximum_Stock_Level}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Maximum Stock Level"
+                    style={{
+                      border:
+                        isSubmitted && !newProduct.product_Maximum_Stock_Level
+                          ? "1px solid red"
+                          : "",
+                    }}
+                  />
+                  <label
+                    htmlFor="product_Maximum_Stock_Level"
+                    className={
+                      newProduct.product_Maximum_Stock_Level ? "active" : ""
+                    }
+                  >
+                    Maximum Stock Level
+                  </label>
+                </div>
+              </div>
+
+              {/* Category Dropdown */}
               <div className="col-md-6">
                 <select
                   name="product_Category"
                   className="form-control"
                   value={newProduct.product_Category}
                   onChange={handleInputChange}
-                  required // Ensure category selection is required
+                  required
+                  style={{
+                    border:
+                      isSubmitted && !newProduct.product_Category
+                        ? "1px solid red"
+                        : "",
+                    height: "55px", // Increase the height here
+                  }}
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (

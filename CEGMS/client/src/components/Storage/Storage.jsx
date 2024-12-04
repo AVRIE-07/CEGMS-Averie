@@ -680,6 +680,19 @@ const Storage = () => {
           </div>
         </div>
 
+        <div className="card shadow-sm px-4 py-3 mb-4">
+          {/* Product Table */}
+          <ProductTable
+            filteredProducts={filteredProducts}
+            loading={loading}
+            error={error}
+            selectAll={selectAll}
+            handleSelectAll={handleSelectAll}
+            handleSelectProduct={handleSelectProduct}
+            handleModalShow={handleModalShow}
+            selectedProducts={selectedProducts}
+          />
+        </div>
         {/* Success Modal */}
         <Modal show={successModalVisible} onHide={closeSuccessModal} centered>
           <Modal.Header>
@@ -699,20 +712,6 @@ const Storage = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-
-        <div className="card shadow-sm px-4 py-3 mb-4">
-          {/* Product Table */}
-          <ProductTable
-            filteredProducts={filteredProducts}
-            loading={loading}
-            error={error}
-            selectAll={selectAll}
-            handleSelectAll={handleSelectAll}
-            handleSelectProduct={handleSelectProduct}
-            handleModalShow={handleModalShow}
-            selectedProducts={selectedProducts}
-          />
-        </div>
 
         {/* Product Modal */}
         <ProductModal

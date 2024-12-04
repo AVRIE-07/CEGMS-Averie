@@ -75,3 +75,14 @@
 table {
   text-align: center;
 }
+.form-floating .form-control:focus {
+  padding-top: 1rem; /* To give space for the floating label */
+}
+
+.form-floating .form-control:valid ~ label,
+.form-floating .form-control:not(:placeholder-shown) ~ label {
+  top: 0;
+  left: 0;
+  font-size: 1px;
+  color: black;
+}
