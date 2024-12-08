@@ -4,7 +4,7 @@ const CounterModel = require("./Counter"); // Import the Counter model
 // Define the schema for productDetails
 const ProductDetailsSchema = new mongoose.Schema(
   {
-    product_Id: { type: String, unique: true }, // Custom Product ID
+    product_Id: { type: String, unique: true },
     product_Name: { type: String, required: true },
     product_Category: { type: String, required: true },
     product_Supplier: { type: String, required: true },
@@ -14,13 +14,25 @@ const ProductDetailsSchema = new mongoose.Schema(
     product_Price: { type: Number, required: true },
     product_Minimum_Stock_Level: { type: Number, required: true },
     product_Maximum_Stock_Level: { type: Number, required: true },
-    product_Date: { type: Date, default: Date.now }, // Automatically set the current date
+    product_Date: { type: Date, default: Date.now },
     product_Status: { type: String },
+    product_Shelf_Life: { type: String, required: true },
   },
   {
-    collection: "productDetails", // Specify the collection name explicitly
+    collection: "productDetails",
   }
 );
+
+// Pre-save hook to calculate expiry date based on shelf life
+ProductDetailsSchema.pre("save", function (next) {
+  if (this.product_Shelf_Life) {
+    this.expiry_Date = new Date(
+      this.product_Date.getTime() +
+        this.product_Shelf_Life * 24 * 60 * 60 * 1000
+    );
+  }
+  next();
+});
 
 // Pre-save hook to generate custom product ID
 ProductDetailsSchema.pre("save", async function (next) {

@@ -123,10 +123,12 @@ const ProductTable = ({
                 </th>
                 <th scope="col" className="fw-semibold">
                   Supplier
-                </th>{" "}
-                {/* Add Supplier column */}
+                </th>
                 <th scope="col" className="fw-semibold">
                   Date Added
+                </th>
+                <th scope="col" className="fw-semibold">
+                  Shelf Life (Days)
                 </th>
                 <th scope="col" className="fw-semibold">
                   Edit
@@ -163,11 +165,11 @@ const ProductTable = ({
                   <td className="text-dark">
                     {product.product_Maximum_Stock_Level}
                   </td>
-                  <td className="text-dark">{product.product_Supplier}</td>{" "}
-                  {/* Display Supplier */}
+                  <td className="text-dark">{product.product_Supplier}</td>
                   <td className="text-dark">
                     {new Date(product.product_Date).toLocaleDateString()}
                   </td>
+                  <td className="text-dark">{product.product_Shelf_Life}</td>
                   <td>
                     <Button
                       variant="secondary"
