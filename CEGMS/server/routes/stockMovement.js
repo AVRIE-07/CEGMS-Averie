@@ -60,4 +60,32 @@ router.post("/bulk", async (req, res) => {
   }
 });
 
+// New route for reconciliation
+router.post("/reconcile", async (req, res) => {
+  try {
+    const { movements } = req.body;
+
+    // Iterate through each movement and update the adj_Quantity (physical count)
+    for (let movement of movements) {
+      // Find the corresponding stock movement document
+      const updatedMovement = await StockMovementModel.findOneAndUpdate(
+        { movement_ID: movement.movement_ID },
+        { adj_Quantity: movement.adj_Quantity },
+        { new: true } // Return the updated document
+      );
+      if (!updatedMovement) {
+        return res.status(404).json({ message: "Movement not found" });
+      }
+    }
+
+    res.status(200).json({ message: "Reconciliation completed successfully!" });
+  } catch (error) {
+    console.error("Error during reconciliation:", error);
+    res.status(500).json({
+      message: "Error completing reconciliation",
+      error,
+    });
+  }
+});
+
 module.exports = router;

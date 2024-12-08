@@ -17,6 +17,8 @@ const Storage = () => {
   const [returnedCount, setReturnedCount] = useState(0);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [physicalCounts, setPhysicalCounts] = useState({});
+  const [discrepancies, setDiscrepancies] = useState({});
 
   const [user, setUser] = useState({
     firstname: "",
@@ -24,6 +26,65 @@ const Storage = () => {
     email: "",
     username: "",
   });
+
+  const reconcileCounts = async () => {
+    const updatedMovements = stockMovements.map((movement) => {
+      const physicalCount =
+        physicalCounts[movement.product_ID] || movement.adj_Quantity;
+      return {
+        ...movement,
+        adj_Quantity: physicalCount,
+      };
+    });
+
+    setStockMovements(updatedMovements);
+    setFilteredMovements(updatedMovements);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/api/stockmovement/reconcile",
+        {
+          movements: updatedMovements,
+        }
+      );
+      if (response.status === 200) {
+        alert("Reconciliation completed and saved to the database!");
+        setPhysicalCounts({}); // Reset physical counts input
+      } else {
+        alert("Failed to save reconciliation data.");
+      }
+    } catch (error) {
+      console.error("Error while saving reconciliation data:", error);
+      alert("An error occurred while saving the reconciliation data.");
+    }
+  };
+
+  const handlePhysicalCountChange = (productId, value) => {
+    // Parse the value input, defaulting to 0 if invalid (NaN or empty)
+    const updatedCounts = {
+      ...physicalCounts,
+      [productId]: parseInt(value, 10) || 0,
+    };
+
+    setPhysicalCounts(updatedCounts);
+
+    // Update the discrepancies for this product
+    const updatedDiscrepancies = { ...discrepancies };
+    const movement = stockMovements.find(
+      (movement) => movement.product_ID === productId
+    );
+
+    if (movement) {
+      const systemCount = movement.adj_Quantity; // The system's current count
+      const discrepancy = updatedCounts[productId] - systemCount; // Calculate the difference
+      updatedDiscrepancies[productId] = discrepancy; // Store the discrepancy for this product
+    } else {
+      // If no movement found, ensure the discrepancy is set to zero
+      updatedDiscrepancies[productId] = 0;
+    }
+
+    setDiscrepancies(updatedDiscrepancies);
+  };
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -414,7 +475,12 @@ const Storage = () => {
                   <th scope="col" className="fw-semibold">
                     Comments
                   </th>{" "}
-                  {/* Add this */}
+                  <th scope="col" className="fw-semibold">
+                    Physical Count
+                  </th>
+                  <th scope="col" className="fw-semibold">
+                    Discrepancy
+                  </th>
                 </tr>
               </thead>
 
@@ -435,11 +501,37 @@ const Storage = () => {
                       {new Date(movement.adj_Date).toLocaleDateString()}
                     </td>
                     <td className="text-dark">{movement.adj_Comment || " "}</td>{" "}
-                    {/* Add this */}
+                    <td>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={physicalCounts[movement.product_ID] || ""}
+                        onChange={(e) =>
+                          handlePhysicalCountChange(
+                            movement.product_ID,
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                    <td
+                      className={
+                        discrepancies[movement.product_ID] !== 0
+                          ? "text-danger"
+                          : "text-success"
+                      }
+                    >
+                      {discrepancies[movement.product_ID] || 0}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="d-flex justify-content-end mt-3">
+            <button className="btn btn-warning" onClick={reconcileCounts}>
+              Reconcile Counts
+            </button>
           </div>
 
           {/* Pagination Controls */}
