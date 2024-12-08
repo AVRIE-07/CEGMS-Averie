@@ -15,19 +15,29 @@
 }
 
 .profileTitle {
-  font-size: 40px; /* Increased font size */
+  font-size: 40px;
   font-weight: bold;
   color: black;
-  margin-top: 20px; /* Adjust margin for better spacing */
 }
-
+.p.profileInfo {
+  font-size: 24px; /* Increased font size */
+  font-weight: bold;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping of items */
+  gap: 20px; /* Space between items */
+  align-items: center;
+  border-bottom: 1px solid #e2e6ea; /* Add line separator */
+  padding-bottom: 15px; /* Space between text and the line */
+}
 .profileInfo {
   font-size: 24px; /* Increased font size */
   font-weight: bold;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping of items */
+  gap: 20px; /* Space between items */
+  align-items: center;
   border-bottom: 1px solid #e2e6ea; /* Add line separator */
   padding-bottom: 15px; /* Space between text and the line */
 }
@@ -39,16 +49,18 @@
   display: flex;
   justify-content: flex-start; /* Align content to the left */
   gap: 10px; /* Space between label and value */
-  font-size: 24px;
+  width: 48%; /* Ensure each item takes up 50% of the container */
+  box-sizing: border-box; /* Prevents overflow */
   margin-bottom: 10px; /* Space between info sections */
+}
+
+.profileText strong {
+  font-weight: bold;
 }
 
 .buttonGroup {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   margin-top: 20px;
   gap: 10px;
-}
-.buttonGroup button {
-  margin-right: 10px; /* Adjust this value as needed */
 }

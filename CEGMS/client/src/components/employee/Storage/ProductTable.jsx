@@ -104,10 +104,10 @@ const ProductTable = ({
                   Product ID
                 </th>
                 <th scope="col" className="fw-semibold">
-                  Category
+                  Product Name & Description
                 </th>
                 <th scope="col" className="fw-semibold">
-                  Description
+                  Category
                 </th>
                 <th scope="col" className="fw-semibold">
                   Current Stock Level
@@ -120,6 +120,15 @@ const ProductTable = ({
                 </th>
                 <th scope="col" className="fw-semibold">
                   Max Stock Level
+                </th>
+                <th scope="col" className="fw-semibold">
+                  Supplier
+                </th>
+                <th scope="col" className="fw-semibold">
+                  Date Added
+                </th>
+                <th scope="col" className="fw-semibold">
+                  Shelf Life (Days)
                 </th>
                 <th scope="col" className="fw-semibold">
                   Edit
@@ -136,11 +145,9 @@ const ProductTable = ({
                       onChange={() => handleSelectProduct(product._id)}
                     />
                   </td>
-                  <td className="text-dark">{product.product_Id}</td>{" "}
-                  {/* Changed to black */}
+                  <td className="text-dark">{product.product_Id}</td>
                   <td className="text-dark">
                     <div style={{ display: "flex", gap: "10px" }}>
-                      {/* Display Product Name and Description side by side */}
                       <div style={{ flex: "1", fontWeight: "bold" }}>
                         {product.product_Name}
                       </div>
@@ -149,26 +156,20 @@ const ProductTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="text-dark">{product.product_Category}</td>{" "}
-                  {/* Changed to black */}
-                  <td className="text-dark">
-                    {product.product_Current_Stock}
-                  </td>{" "}
-                  {/* Changed to black */}
-                  <td className="text-dark">₱ {product.product_Price}</td>{" "}
-                  {/* Changed to black */}
+                  <td className="text-dark">{product.product_Category}</td>
+                  <td className="text-dark">{product.product_Current_Stock}</td>
+                  <td className="text-dark">₱ {product.product_Price}</td>
                   <td className="text-dark">
                     {product.product_Minimum_Stock_Level}
-                  </td>{" "}
-                  {/* Changed to black */}
+                  </td>
                   <td className="text-dark">
                     {product.product_Maximum_Stock_Level}
-                  </td>{" "}
-                  {/* Changed to black */}
+                  </td>
+                  <td className="text-dark">{product.product_Supplier}</td>
                   <td className="text-dark">
                     {new Date(product.product_Date).toLocaleDateString()}
-                  </td>{" "}
-                  {/* Changed to black */}
+                  </td>
+                  <td className="text-dark">{product.product_Shelf_Life}</td>
                   <td>
                     <Button
                       variant="secondary"

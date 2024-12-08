@@ -7,7 +7,11 @@
 .border {
   border-radius: 30px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 20px;
+  /* Added shadow for border */
+}
+
+.w {
+  width: 80%;
 }
 
 .inputContainer {
@@ -50,91 +54,41 @@
   font-size: 1.5em;
 }
 
-.input-group button {
-  border-radius: 0 5px 5px 0; /* Make the increment button rounded on the right */
+/* Add this to login.module.css */
+
+.loginButton {
+  padding: 10px;
+  background: linear-gradient(90deg, #331373 0%, #0773dc 50%);
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background 0.3s ease;
 }
 
-/* Mobile First */
-@media (max-width: 768px) {
-  .container {
-    padding: 10px;
-  }
-
-  .row.g-3 {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .col-md-6 {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-
-  .inputContainer {
-    margin-bottom: 1rem;
-  }
-
-  .form-control {
-    font-size: 14px;
-    padding-left: 35px;
-  }
-
-  .loginButton,
-  .googleButton {
-    width: 100%; /* Full width buttons for mobile */
-    padding: 12px;
-  }
-
-  .input-group {
-    width: 100%;
-  }
-
-  .input-group button {
-    width: 40px; /* Control the width of the increment button */
-  }
-
-  .row.g-3 .col-md-6 {
-    padding-left: 0;
-    padding-right: 0;
-  }
+.loginButton:hover {
+  background: linear-gradient(90deg, #0773dc 0%, #331373 50%);
+}
+.inputContainer {
+  position: relative;
 }
 
-/* Tablet Devices */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .container {
-    padding: 20px;
-  }
-
-  .form-control {
-    font-size: 16px;
-  }
-
-  .loginButton,
-  .googleButton {
-    width: 100%;
-  }
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  pointer-events: none; /* Prevents clicking on the icon */
+  z-index: 2; /* Ensure the icon stays above the input */
 }
 
-/* Desktop and Large Screens */
-@media (min-width: 1024px) {
-  .container {
-    padding: 40px;
-  }
+.lockIcon {
+  left: 12px; /* Adjust this value to fit the icon inside */
+}
 
-  .w {
-    width: 80%;
-  }
-
-  .col-md-6 {
-    width: 48%;
-    margin-bottom: 20px;
-  }
-
-  .form-control {
-    font-size: 16px;
-  }
-
-  .input-group {
-    width: 100%;
-  }
+input {
+  padding-left: 40px; /* Keep enough space for the icon */
+  padding-right: 40px; /* Space for the eye icon */
+  position: relative;
+  z-index: 1; /* Ensure the input field is below the icon */
 }

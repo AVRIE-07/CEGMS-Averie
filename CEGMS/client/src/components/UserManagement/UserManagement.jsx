@@ -10,7 +10,7 @@ import {
   FormControl,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import { FaEdit, FaTrash } from "react-icons/fa"; // Importing the icons
 function UserManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -283,21 +283,22 @@ function UserManagement() {
               <td>{user.emergencyContactNumber}</td>{" "}
               {/* New column for Emergency Contact Number */}
               <td>
-                <Button
-                  variant="info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleEditUser(user)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => showDeleteModal(user._id)}
-                >
-                  Delete
-                </Button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleEditUser(user)}
+                  >
+                    <FaEdit />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => showDeleteModal(user._id)}
+                  >
+                    <FaTrash />
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}

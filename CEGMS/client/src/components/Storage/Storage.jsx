@@ -651,14 +651,8 @@ const Storage = () => {
                   color: "#343a40",
                 }}
               />
-              <Button
-                onClick={handleGeneratePDF}
-                className="me-2 ms-2 px-2 py-1 btn btn-primary"
-              >
-                Generate PDF
-              </Button>
 
-              <div className="me-2 px-2 py-1 bg-danger rounded">
+              <div className="me-2 ms-2 px-2 py-1 bg-danger rounded">
                 <strong style={{ fontWeight: "normal", color: "black" }}>
                   <i
                     className="bi bi-box-fill"
@@ -676,6 +670,12 @@ const Storage = () => {
                   Over Stock: {overStockCount}
                 </strong>{" "}
               </div>
+              <Button
+                onClick={handleGeneratePDF}
+                className="me-1 ms-2 px-2 py-1 btn btn-primary"
+              >
+                Generate PDF
+              </Button>
             </div>
           </div>
         </div>

@@ -8,21 +8,39 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const CreateProducts = () => {
   const [newProduct, setNewProduct] = useState({
+    product_Name: "",
     product_Description: "",
     product_Category: "",
     product_Price: "",
     product_Current_Stock: "",
     product_Minimum_Stock_Level: "",
     product_Maximum_Stock_Level: "",
+    product_Supplier: "", // Existing supplier field
+    product_Shelf_Life: "", // New shelf life field
   });
+
   const [productList, setProductList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
+  const [suppliers, setSuppliers] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // Fetch suppliers data on component mount
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/supplier/");
+        setSuppliers(response.data); // Populate suppliers state
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -49,10 +67,24 @@ const CreateProducts = () => {
     // Example regex for validating fields
     let validValue = value;
     switch (name) {
+      case "product_Name":
+        const nameRegex = /^[A-Za-z0-9\s]+$/;
+        if (!nameRegex.test(value)) {
+          setError(
+            "Product Name can only contain letters, numbers, and spaces."
+          );
+          return;
+        }
+        break;
+
       case "product_Description":
-        const descriptionRegex = /^(?!\d+$)[A-Za-z\s]+$/;
+        const descriptionRegex =
+          /^[A-Za-z][A-Za-z0-9\s\-\_\#\$\%\&\!\+\=\(\)]*$/;
+
         if (!descriptionRegex.test(value)) {
-          setError("Description can only contain letters and spaces.");
+          setError(
+            "Description must start with a letter and may contain numbers and symbols."
+          );
           return;
         }
         break;
@@ -81,78 +113,85 @@ const CreateProducts = () => {
         break;
     }
 
-    // Check if the product_Maximum_Stock_Level is less than the product_Minimum_Stock_Level
-    if (
-      name === "product_Maximum_Stock_Level" &&
-      parseInt(value) < parseInt(newProduct.product_Minimum_Stock_Level)
-    ) {
-      setError("Maximum Stock Level cannot be less than Minimum Stock Level.");
-      return;
-    }
+    // If validation passed, update the state
+    setNewProduct((prev) => {
+      const updatedProduct = { ...prev, [name]: validValue };
 
-    // Update product data
-    setNewProduct((prevProduct) => {
-      let updatedProduct = { ...prevProduct, [name]: value };
-
-      // If the 'product_Minimum_Stock_Level' field is updated, also set 'product_Maximum_Stock_Level'
+      // Automatically update Maximum Stock Level based on Minimum Stock Level
       if (name === "product_Minimum_Stock_Level") {
-        // Automatically set product_Maximum_Stock_Level based on the new minimum stock level
-        updatedProduct.product_Maximum_Stock_Level = value; // You can add custom logic here if needed
+        updatedProduct.product_Maximum_Stock_Level = value;
+      }
+
+      // Prevent Maximum Stock Level from going below Minimum Stock Level
+      if (name === "product_Maximum_Stock_Level") {
+        const minimumStockLevel =
+          parseInt(updatedProduct.product_Minimum_Stock_Level) || 0;
+        const maximumStockLevel = parseInt(value) || 0;
+
+        // Check if max stock level is less than min stock level
+        if (maximumStockLevel < minimumStockLevel) {
+          setError(
+            "Maximum Stock Level cannot be less than Minimum Stock Level."
+          );
+          return prev; // Return previous state to prevent the update
+        } else {
+          updatedProduct.product_Maximum_Stock_Level = maximumStockLevel;
+          setError(""); // Clear the error if the value is valid
+        }
       }
 
       return updatedProduct;
     });
-
-    // Clear error if everything is valid
-    setError("");
   };
+
   const handleAddProduct = () => {
     setIsSubmitted(true); // Mark form as submitted
-
     // Check if any required fields are empty
     for (const key in newProduct) {
-      if (
-        newProduct.product_Description === "" ||
-        newProduct.product_Category === "" ||
-        newProduct.product_Price === ""
-      ) {
+      if (newProduct[key] === "" || newProduct[key] === undefined) {
         setError("All fields are required!");
         return;
       }
     }
 
-    // Convert the stock levels to integers before comparing
-    const minStockLevel = parseInt(newProduct.product_Minimum_Stock_Level);
-    const maxStockLevel = parseInt(newProduct.product_Maximum_Stock_Level);
-
-    // Check if Minimum Stock Level is greater than or equal to Maximum Stock Level
-    if (minStockLevel < maxStockLevel) {
-      setError(
-        "Minimum Stock Level must be greater than or equal to Maximum Stock Level."
-      );
+    // Check if Minimum Stock Level is lower than Maximum Stock Level
+    if (
+      parseInt(newProduct.product_Minimum_Stock_Level) >=
+      parseInt(newProduct.product_Maximum_Stock_Level)
+    ) {
+      setError("Minimum Stock Level must be lower than Maximum Stock Level.");
       return;
     }
 
     let productStatus;
-    if (newProduct.product_Current_Stock < minStockLevel) {
+    if (
+      newProduct.product_Current_Stock < newProduct.product_Minimum_Stock_Level
+    ) {
       productStatus = "Low Stock";
-    } else if (newProduct.product_Current_Stock > maxStockLevel) {
+    } else if (
+      newProduct.product_Current_Stock > newProduct.product_Maximum_Stock_Level
+    ) {
       productStatus = "Overstocked";
     } else {
       productStatus = "In Stock";
     }
 
-    // Add the new product to the list
+    // Add the new product to the product list
     setProductList((prevList) => [
       ...prevList,
       { ...newProduct, product_Status: productStatus },
     ]);
 
+    // Reset the form after adding the product
     resetForm();
-    setError(""); // Clear any errors after adding the product
 
-    // Reset isSubmitted to remove the validation borders
-    setIsSubmitted(false);
+    // Clear the selected supplier (reset the value in the product state)
+    setNewProduct((prevProduct) => ({
+      ...prevProduct,
+      product_Supplier: "", // Clear the selected supplier
+    }));
+
+    setError(""); // Clear the error if product is added
   };
 
   const handleRemoveProduct = (index) => {
@@ -167,16 +206,23 @@ const CreateProducts = () => {
       );
 
       if (response.status === 201) {
-        const { insertedIds } = response.data;
+        const { insertedOrUpdatedProducts } = response.data;
 
-        const manualAdjustments = productList.map((product, index) => ({
-          product_ID: insertedIds[index],
-          adj_Description: product.product_Description,
-          adj_Category: product.product_Category,
-          adj_Quantity: product.product_Current_Stock,
-          adj_Price: product.product_Price,
-          adj_Adjustment_Type: "Added",
-        }));
+        const manualAdjustments = productList.map((product, index) => {
+          const product_ID = insertedOrUpdatedProducts[index];
+          return {
+            product_ID,
+            adj_Description: product.product_Description,
+            adj_Category: product.product_Category,
+            adj_Quantity: product.product_Current_Stock,
+            adj_Price: product.product_Price,
+            adj_Supplier: product.product_Supplier,
+            adj_Shelf_Life: product.product_Shelf_Life, // Ensure shelf life is included
+            adj_Adjustment_Type: insertedOrUpdatedProducts[index]
+              ? "Updated"
+              : "Added",
+          };
+        });
 
         const manualAdjustmentResponse = await axios.post(
           "http://localhost:3001/api/manualAdjustment",
@@ -186,6 +232,9 @@ const CreateProducts = () => {
         if (manualAdjustmentResponse.status === 201) {
           await createStockMovements(manualAdjustmentResponse.data);
           setProductList([]);
+          setShowModal(false);
+          setAction("add");
+          setShowSuccessModal(true);
         }
       }
     } catch (error) {
@@ -194,9 +243,6 @@ const CreateProducts = () => {
       );
       console.error("Error details:", error.response?.data || error.message);
     }
-    setShowModal(false);
-    setAction("add"); // Update the action based on what was done (e.g., "add")
-    setShowSuccessModal(true); // Show the success modal after saving
   };
 
   const createStockMovements = async (manualAdjustments) => {
@@ -224,12 +270,15 @@ const CreateProducts = () => {
     setNewProduct({
       product_Name: "",
       product_Description: "",
+      product_Category: "",
       product_Price: "",
       product_Current_Stock: "",
       product_Minimum_Stock_Level: "",
       product_Maximum_Stock_Level: "",
-      product_Category: "",
+      product_Supplier: "", // Existing supplier field
+      product_Shelf_Life: "", // New shelf life field
     });
+    setIsSubmitted(false); // Reset the submitted state
   };
 
   return (
@@ -298,99 +347,120 @@ const CreateProducts = () => {
                   name: "product_Minimum_Stock_Level",
                   placeholder: "Minimum Stock Level",
                 },
+                {
+                  name: "product_Maximum_Stock_Level",
+                  placeholder: "Maximum Stock Level",
+                },
               ].map((field, index) => (
-                <div key={index} className="col-md-6">
+                <div key={index} className="col-md-6 position-relative">
                   <div className="form-floating">
                     <input
-                      type="text"
+                      id={field.name}
+                      type={
+                        field.name === "product_Maximum_Stock_Level"
+                          ? "number"
+                          : "text"
+                      }
                       name={field.name}
                       className="form-control"
-                      id={field.name}
                       value={newProduct[field.name]}
                       onChange={handleInputChange}
-                      required
                       placeholder={field.placeholder}
-                      style={{
-                        border:
-                          isSubmitted && !newProduct[field.name]
-                            ? "1px solid red"
-                            : "",
-                      }}
+                      required
                     />
-                    <label
-                      htmlFor={field.name}
-                      className={newProduct[field.name] ? "active" : ""}
-                    >
-                      {field.placeholder}
+                    <label htmlFor={field.name}>
+                      {field.placeholder}{" "}
+                      {isSubmitted && !newProduct[field.name] && (
+                        <span className="text-danger">*</span>
+                      )}
                     </label>
                   </div>
                 </div>
               ))}
 
-              {/* Maximum Stock Level with Increment Button */}
-              <div className="col-md-6">
+              {/* Supplier Field */}
+              <div className="col-md-6 mb-3">
                 <div className="form-floating">
-                  <input
-                    type="number"
-                    name="product_Maximum_Stock_Level"
+                  <select
+                    name="product_Supplier"
                     className="form-control"
-                    id="product_Maximum_Stock_Level"
-                    value={newProduct.product_Maximum_Stock_Level}
+                    value={newProduct.product_Supplier}
                     onChange={handleInputChange}
                     required
-                    placeholder="Maximum Stock Level"
-                    style={{
-                      border:
-                        isSubmitted && !newProduct.product_Maximum_Stock_Level
-                          ? "1px solid red"
-                          : "",
-                    }}
-                  />
-                  <label
-                    htmlFor="product_Maximum_Stock_Level"
-                    className={
-                      newProduct.product_Maximum_Stock_Level ? "active" : ""
-                    }
                   >
-                    Maximum Stock Level
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier._id} value={supplier.name}>
+                        {supplier.name}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="product_Supplier">
+                    Select Supplier{" "}
+                    {isSubmitted && !newProduct.product_Supplier && (
+                      <span className="text-danger">*</span>
+                    )}
                   </label>
                 </div>
               </div>
 
-              {/* Category Dropdown */}
-              <div className="col-md-6">
-                <select
-                  name="product_Category"
-                  className="form-control"
-                  value={newProduct.product_Category}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    border:
-                      isSubmitted && !newProduct.product_Category
-                        ? "1px solid red"
-                        : "",
-                    height: "55px", // Increase the height here
-                  }}
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option
-                      key={category._id}
-                      value={category.product_Category}
-                    >
-                      {category.product_Category}
-                    </option>
-                  ))}
-                </select>
+              {/* Category Field */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <select
+                    name="product_Category"
+                    className="form-control"
+                    value={newProduct.product_Category}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option
+                        key={category._id}
+                        value={category.product_Category}
+                      >
+                        {category.product_Category}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="product_Category">
+                    Select Category{" "}
+                    {isSubmitted && !newProduct.product_Category && (
+                      <span className="text-danger">*</span>
+                    )}
+                  </label>
+                </div>
               </div>
-            </div>
 
-            {error && (
-              <div className="text-danger mt-2">
-                <i className="bi bi-exclamation-triangle"></i> {error}
+              {/* Shelf Life Field */}
+              <div className="col-md-6">
+                <div className="form-floating">
+                  <input
+                    type="text"
+                    name="product_Shelf_Life"
+                    className="form-control"
+                    value={newProduct.product_Shelf_Life}
+                    onChange={handleInputChange}
+                    placeholder="Shelf Life (in days, months, etc.)"
+                    required
+                  />
+                  <label htmlFor="product_Shelf_Life">
+                    Shelf Life (in days, months, etc.){" "}
+                    {isSubmitted && newProduct.product_Shelf_Life === "" && (
+                      <span className="text-danger">*</span>
+                    )}
+                  </label>
+                </div>
               </div>
-            )}
+
+              {/* Display Error Message */}
+              {error && (
+                <div className="text-danger mt-2">
+                  <i className="bi bi-exclamation-triangle"></i> {error}
+                </div>
+              )}
+            </div>
 
             <div className="d-flex justify-content-end mt-3">
               <button

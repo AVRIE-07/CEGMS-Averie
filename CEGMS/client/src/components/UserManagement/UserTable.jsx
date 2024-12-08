@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MdMoreVert, MdArrowBack } from "react-icons/md";
 import styles from "./UserManagement.module.css";
 import axios from "axios"; // Ensure axios is installed
-
+import { FaEdit, FaTrash } from "react-icons/fa"; // Importing the icons
 function UserTable() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -138,8 +138,26 @@ function UserTable() {
                       zIndex: 1000,
                     }}
                   >
-                    <div onClick={handleEdit}>Edit</div>
-                    <div onClick={handleDelete}>Delete</div>
+                    <div
+                      onClick={handleEdit}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <FaEdit style={{ marginRight: "8px" }} /> Edit
+                    </div>
+                    <div
+                      onClick={handleDelete}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <FaTrash style={{ marginRight: "8px" }} /> Delete
+                    </div>
                   </div>
                 )}
               </td>

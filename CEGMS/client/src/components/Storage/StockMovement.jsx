@@ -374,22 +374,27 @@ const Storage = () => {
               className="form-control"
               style={{ width: "300px" }}
             />
-            <Dropdown className="ms-3" onSelect={handleSelectAction}>
+            <Dropdown className="ms-1" onSelect={handleSelectAction}>
               <Dropdown.Toggle
                 style={{
                   backgroundColor: "#343a40", // Dark background for the toggle button
                   color: "#ffffff", // White text color
                   border: "none", // Remove border if needed
+                  width: "150px", // Fixed width for the toggle button
+                  textOverflow: "ellipsis", // Ensures long text doesn't overflow
+                  whiteSpace: "nowrap", // Prevent text wrapping
+                  overflow: "hidden", // Prevent overflow of text
                 }}
                 variant="secondary"
                 id="dropdown-basic"
               >
-                {selectedAction || "Stock Action Filter"}
+                {selectedAction || "Stock Filter"}
               </Dropdown.Toggle>
               <Dropdown.Menu
                 style={{
                   backgroundColor: "#9df1fa", // Background for dropdown items
                   border: "none", // Optional: remove border
+                  width: "150px", // Fixed width for the dropdown menu
                 }}
               >
                 <Dropdown.Item eventKey="">All Actions</Dropdown.Item>
@@ -398,40 +403,81 @@ const Storage = () => {
                 <Dropdown.Item eventKey="Returned">Returned</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <div className="d-flex align-items-center justify-content-between text-white p-3 rounded">
-              <div className="me-4 px-3 py-2 bg-success rounded">
-                <strong style={{ fontWeight: "normal", color: "black" }}>
+
+            <div className="d-flex align-items-center justify-content-between text-white p-1 rounded">
+              <div
+                className="me-1 px-4 py-2 bg-success rounded d-flex align-items-center"
+                style={{
+                  maxWidth: "33%",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <strong
+                  style={{
+                    fontWeight: "normal",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <i
                     className="bi bi-box-fill"
-                    style={{ marginRight: "10px" }}
+                    style={{ marginRight: "10px", marginLeft: "-10px" }}
                   ></i>
                   Added: {addedCount}
-                </strong>{" "}
+                </strong>
               </div>
-              <div className="me-4 px-3 py-2 bg-danger rounded">
-                <strong style={{ fontWeight: "normal", color: "black" }}>
+              <div
+                className="me-1 px-4 py-2 bg-danger rounded d-flex align-items-center"
+                style={{
+                  maxWidth: "33%",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <strong
+                  style={{
+                    fontWeight: "normal",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <i
                     className="bi bi-box-fill"
-                    style={{ marginRight: "10px" }}
+                    style={{ marginRight: "10px", marginLeft: "-10px" }}
                   ></i>
                   Sold: {soldCount}
                 </strong>
               </div>
-              <div className="me-4 px-3 py-2 bg-warning rounded">
-                <strong style={{ fontWeight: "normal", color: "black" }}>
+              <div
+                className="me-1 px-4 py-2 bg-warning rounded d-flex align-items-center"
+                style={{
+                  maxWidth: "33%",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <strong
+                  style={{
+                    fontWeight: "normal",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <i
                     className="bi bi-box-fill"
-                    style={{ marginRight: "10px" }}
-                  />
+                    style={{ marginRight: "10px", marginLeft: "-10px" }}
+                  ></i>
                   Returned: {returnedCount}
-                </strong>{" "}
+                </strong>
               </div>
-              <div className="d-flex align-items-center mb-3">
+
+              <div className="d-flex align-items-center">
                 <input
                   type="date"
                   value={fromDate}
                   onChange={(e) => handleDateChange("from", e.target.value)}
-                  className="form-control me-2"
+                  className="form-control me-1"
                   placeholder="From Date"
                 />
                 <input
@@ -442,7 +488,15 @@ const Storage = () => {
                   placeholder="To Date"
                 />
               </div>
-              <button className="btn btn-primary mb-3" onClick={generateReport}>
+              <button
+                className="btn btn-primary mb-1"
+                onClick={generateReport}
+                style={{
+                  padding: "0px 10px", // Reduces the button height by adjusting padding
+                  marginTop: "5px",
+                  marginLeft: "5px", // Adds a top margin
+                }}
+              >
                 Generate Report
               </button>
             </div>

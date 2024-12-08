@@ -27,6 +27,7 @@ const Login = () => {
     setPasswordError(false);
 
     let hasError = false;
+
     // Validate email
     if (!identifier) {
       setIdentifierError(true);
@@ -49,7 +50,7 @@ const Login = () => {
       return;
     }
 
-    const loginData = { identifier, password }; // Send identifier instead of email
+    const loginData = { identifier, password };
 
     try {
       const response = await axios.post(
@@ -71,25 +72,25 @@ const Login = () => {
         personalContactNumber,
       } = response.data;
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("username", response.data.username);
-      localStorage.setItem("firstname", response.data.firstname);
-      localStorage.setItem("lastname", response.data.lastname);
-      localStorage.setItem("email", response.data.email);
-      localStorage.setItem("role", response.data.role);
-      localStorage.setItem("userId", response.data.userId); // userId should be user._id from backend
-      localStorage.setItem("address", response.data.address || "");
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", username);
+      localStorage.setItem("firstname", firstname);
+      localStorage.setItem("lastname", lastname);
+      localStorage.setItem("email", email);
+      localStorage.setItem("role", role);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("address", address || "");
       localStorage.setItem(
         "emergencyContactPerson",
-        response.data.emergencyContactPerson || ""
+        emergencyContactPerson || ""
       );
       localStorage.setItem(
         "emergencyContactNumber",
-        response.data.emergencyContactNumber || ""
+        emergencyContactNumber || ""
       );
       localStorage.setItem(
         "personalContactNumber",
-        response.data.personalContactNumber || ""
+        personalContactNumber || ""
       );
 
       if (role === "Employee") {
@@ -98,10 +99,22 @@ const Login = () => {
         navigate("/dashboard");
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setError("Unauthorized. Please check your credentials.");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        const message = error.response.data.message;
+
+        if (message.toLowerCase().includes("email not found")) {
+          setError("Email not found. Please register or use a valid email.");
+        } else if (message.toLowerCase().includes("incorrect password")) {
+          setError("Incorrect password. Please try again.");
+        } else {
+          setError("Email or Password is incorrect. Please try again.");
+        }
       } else {
-        setError("Incorrect Email or Password. Please try again.");
+        setError("Email or Password is incorrect. Please try again.");
       }
     }
   };
@@ -167,6 +180,7 @@ const Login = () => {
                         right: "10px",
                         transform: "translateY(-50%)",
                         cursor: "pointer",
+                        zIndex: "3",
                       }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
@@ -180,11 +194,6 @@ const Login = () => {
                   {passwordError && (
                     <AiOutlineExclamationCircle className={styles.dangerIcon} />
                   )}
-                </div>
-                <div className="text-end mb-3">
-                  <a href="/ForgotPassword" className="text-primary">
-                    Forgot Password?
-                  </a>
                 </div>
                 {error && <p className={styles.errorMessage}>{error}</p>}
                 <button className={`${styles.loginButton} w-100`} type="submit">

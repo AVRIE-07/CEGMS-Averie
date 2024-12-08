@@ -26,6 +26,7 @@ const CreateProducts = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [action, setAction] = useState(""); // This will store the action type (add, edit, delete)
   const [suppliers, setSuppliers] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Fetch suppliers data on component mount
   useEffect(() => {
@@ -77,7 +78,6 @@ const CreateProducts = () => {
         break;
 
       case "product_Description":
-        // Updated regex for product description
         const descriptionRegex =
           /^[A-Za-z][A-Za-z0-9\s\-\_\#\$\%\&\!\+\=\(\)]*$/;
 
@@ -114,11 +114,38 @@ const CreateProducts = () => {
     }
 
     // If validation passed, update the state
-    setNewProduct((prev) => ({ ...prev, [name]: validValue }));
-    setError(""); // Clear error if validation passes
+    setNewProduct((prev) => {
+      const updatedProduct = { ...prev, [name]: validValue };
+
+      // Automatically update Maximum Stock Level based on Minimum Stock Level
+      if (name === "product_Minimum_Stock_Level") {
+        updatedProduct.product_Maximum_Stock_Level = value;
+      }
+
+      // Prevent Maximum Stock Level from going below Minimum Stock Level
+      if (name === "product_Maximum_Stock_Level") {
+        const minimumStockLevel =
+          parseInt(updatedProduct.product_Minimum_Stock_Level) || 0;
+        const maximumStockLevel = parseInt(value) || 0;
+
+        // Check if max stock level is less than min stock level
+        if (maximumStockLevel < minimumStockLevel) {
+          setError(
+            "Maximum Stock Level cannot be less than Minimum Stock Level."
+          );
+          return prev; // Return previous state to prevent the update
+        } else {
+          updatedProduct.product_Maximum_Stock_Level = maximumStockLevel;
+          setError(""); // Clear the error if the value is valid
+        }
+      }
+
+      return updatedProduct;
+    });
   };
 
   const handleAddProduct = () => {
+    setIsSubmitted(true); // Mark form as submitted
     // Check if any required fields are empty
     for (const key in newProduct) {
       if (newProduct[key] === "" || newProduct[key] === undefined) {
@@ -248,7 +275,10 @@ const CreateProducts = () => {
       product_Current_Stock: "",
       product_Minimum_Stock_Level: "",
       product_Maximum_Stock_Level: "",
+      product_Supplier: "", // Existing supplier field
+      product_Shelf_Life: "", // New shelf life field
     });
+    setIsSubmitted(false); // Reset the submitted state
   };
 
   return (
@@ -309,7 +339,7 @@ const CreateProducts = () => {
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="row g-3">
               {[
-                { name: "product_Name", placeholder: "Product Name" }, // New field
+                { name: "product_Name", placeholder: "Product Name" },
                 { name: "product_Description", placeholder: "Description" },
                 { name: "product_Price", placeholder: "Price" },
                 { name: "product_Current_Stock", placeholder: "Current Stock" },
@@ -322,69 +352,115 @@ const CreateProducts = () => {
                   placeholder: "Maximum Stock Level",
                 },
               ].map((field, index) => (
-                <div key={index} className="col-md-6">
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="form-control"
-                    value={newProduct[field.name]}
-                    onChange={handleInputChange}
-                    placeholder={field.placeholder}
-                    required
-                  />
+                <div key={index} className="col-md-6 position-relative">
+                  <div className="form-floating">
+                    <input
+                      id={field.name}
+                      type={
+                        field.name === "product_Maximum_Stock_Level"
+                          ? "number"
+                          : "text"
+                      }
+                      name={field.name}
+                      className="form-control"
+                      value={newProduct[field.name]}
+                      onChange={handleInputChange}
+                      placeholder={field.placeholder}
+                      required
+                    />
+                    <label htmlFor={field.name}>
+                      {field.placeholder}{" "}
+                      {isSubmitted && !newProduct[field.name] && (
+                        <span className="text-danger">*</span>
+                      )}
+                    </label>
+                  </div>
                 </div>
               ))}
-              <div className="col-md-6">
-                <select
-                  name="product_Category"
-                  className="form-control"
-                  value={newProduct.product_Category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option
-                      key={category._id}
-                      value={category.product_Category}
-                    >
-                      {category.product_Category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-6 mb-3">
-                <select
-                  name="product_Supplier"
-                  className="form-select"
-                  value={newProduct.product_Supplier}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Supplier</option>
-                  {suppliers.map((supplier) => (
-                    <option key={supplier._id} value={supplier.name}>
-                      {supplier.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-6">
-                <input
-                  type="text"
-                  name="product_Shelf_Life"
-                  className="form-control"
-                  value={newProduct.product_Shelf_Life}
-                  onChange={handleInputChange}
-                  placeholder="Shelf Life (in days, months, etc.)"
-                />
-              </div>
-            </div>
 
-            {error && (
-              <div className="text-danger mt-2">
-                <i className="bi bi-exclamation-triangle"></i> {error}
+              {/* Supplier Field */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <select
+                    name="product_Supplier"
+                    className="form-control"
+                    value={newProduct.product_Supplier}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier._id} value={supplier.name}>
+                        {supplier.name}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="product_Supplier">
+                    Select Supplier{" "}
+                    {isSubmitted && !newProduct.product_Supplier && (
+                      <span className="text-danger">*</span>
+                    )}
+                  </label>
+                </div>
               </div>
-            )}
+
+              {/* Category Field */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <select
+                    name="product_Category"
+                    className="form-control"
+                    value={newProduct.product_Category}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option
+                        key={category._id}
+                        value={category.product_Category}
+                      >
+                        {category.product_Category}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="product_Category">
+                    Select Category{" "}
+                    {isSubmitted && !newProduct.product_Category && (
+                      <span className="text-danger">*</span>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* Shelf Life Field */}
+              <div className="col-md-6">
+                <div className="form-floating">
+                  <input
+                    type="text"
+                    name="product_Shelf_Life"
+                    className="form-control"
+                    value={newProduct.product_Shelf_Life}
+                    onChange={handleInputChange}
+                    placeholder="Shelf Life (in days, months, etc.)"
+                    required
+                  />
+                  <label htmlFor="product_Shelf_Life">
+                    Shelf Life (in days, months, etc.){" "}
+                    {isSubmitted && newProduct.product_Shelf_Life === "" && (
+                      <span className="text-danger">*</span>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* Display Error Message */}
+              {error && (
+                <div className="text-danger mt-2">
+                  <i className="bi bi-exclamation-triangle"></i> {error}
+                </div>
+              )}
+            </div>
 
             <div className="d-flex justify-content-end mt-3">
               <button
