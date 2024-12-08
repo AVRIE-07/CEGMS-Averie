@@ -35,7 +35,7 @@ router.post("/login", async (req, res) => {
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
-      userId: user._id, // Correcting to user._id
+      userId: user.userId, // Correcting to user._id
       address: user.address || "", // Default empty string if address is not set
       emergencyContactPerson: user.emergencyContactPerson || "", // Same for emergency contact person
       emergencyContactNumber: user.emergencyContactNumber || "", // Same for emergency contact number
@@ -74,33 +74,38 @@ router.put("/update-user/:id", async (req, res) => {
       emergencyContactNumber,
     } = req.body;
 
-    // No password hashing, so we directly use the password from the request
-    const updatedUser = await UsersModel.findByIdAndUpdate(
-      id,
-      {
-        role,
-        firstname,
-        lastname,
-        email,
-        password, // Use the password directly
-        address, // Added field
-        personalContactNumber, // Added field
-        emergencyContactPerson, // Added field
-        emergencyContactNumber, // Added field
-      },
-      { new: true }
-    );
+    let updatedData = {
+      role,
+      firstname,
+      lastname,
+      email,
+      address,
+      personalContactNumber,
+      emergencyContactPerson,
+      emergencyContactNumber,
+    };
+
+    // Hash the password if it's provided in the request
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updatedData.password = await bcrypt.hash(password, salt);
+    }
+
+    const updatedUser = await UsersModel.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "User updated successfully" });
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
     res.status(500).json({ message: "Server error, please try again later" });
   }
 });
-
 // Delete User route
 router.delete("/delete-user/:id", async (req, res) => {
   try {
@@ -201,6 +206,16 @@ router.post("/add-user", async (req, res) => {
 router.put("/profile/update-user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
+    const {
+      firstname,
+      lastname,
+      email,
+      username,
+      address,
+      personalContactNumber,
+      emergencyContactNumber,
+      emergencyContactPerson,
+    } = req.body;
 
     // Check if the user exists
     const user = await UsersModel.findOne({ userId });
@@ -213,6 +228,14 @@ router.put("/profile/update-user/:userId", async (req, res) => {
     user.firstname = firstname || user.firstname;
     user.lastname = lastname || user.lastname;
     user.email = email || user.email;
+    user.username = username || user.username;
+    user.address = address || user.address;
+    user.personalContactNumber =
+      personalContactNumber || user.personalContactNumber;
+    user.emergencyContactNumber =
+      emergencyContactNumber || user.emergencyContactNumber;
+    user.emergencyContactPerson =
+      emergencyContactPerson || user.emergencyContactPerson;
 
     // Save the updated user to the database
     const updatedUser = await user.save();
@@ -225,7 +248,12 @@ router.put("/profile/update-user/:userId", async (req, res) => {
         firstname: updatedUser.firstname,
         lastname: updatedUser.lastname,
         email: updatedUser.email,
+        username: updatedUser.username,
         role: updatedUser.role,
+        address: updatedUser.address,
+        personalContactNumber: updatedUser.personalContactNumber,
+        emergencyContactNumber: updatedUser.emergencyContactNumber,
+        emergencyContactPerson: updatedUser.emergencyContactPerson,
       },
     });
   } catch (error) {

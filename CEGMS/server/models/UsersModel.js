@@ -15,15 +15,15 @@ const UsersSchema = new mongoose.Schema(
       default: generateCustomId, // Set the custom ID generator as the default value
       unique: true,
     },
-    email: { type: String, required: true, unique: true }, // User's email
-    password: { type: String, required: true }, // User's password
-    firstname: { type: String, required: true }, // User's first name
-    lastname: { type: String, required: true }, // User's last name
-    address: { type: String, required: true }, // User's address
+    email: { type: String, unique: true }, // User's email
+    password: { type: String }, // User's password
+    firstname: { type: String }, // User's first name
+    lastname: { type: String }, // User's last name
+    address: { type: String }, // User's address
     personalContactNumber: { type: String }, // Personal contact number
-    emergencyContactPerson: { type: String, required: true }, // Emergency contact person
-    emergencyContactNumber: { type: String, required: true }, // Emergency contact number
-    role: { type: String, required: true }, // User's role (e.g., Admin, Employee)
+    emergencyContactPerson: { type: String }, // Emergency contact person
+    emergencyContactNumber: { type: String }, // Emergency contact number
+    role: { type: String }, // User's role (e.g., Admin, Employee)
   },
   {
     collection: "users", // Specify the collection name explicitly

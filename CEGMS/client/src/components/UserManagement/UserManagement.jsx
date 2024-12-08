@@ -134,21 +134,16 @@ function UserManagement() {
   const handleSaveUser = async (e) => {
     e.preventDefault();
 
-    if (!editMode && formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords do not match.");
-      return;
-    }
-
     const payload = {
       role: formData.role,
-      firstname: formData.firstName.trim(),
-      lastname: formData.lastName.trim(),
+      firstname: " ",
+      lastname: " ",
       email: formData.email.trim(),
-      password: formData.password.trim(),
-      address: formData.address.trim(),
-      personalContactNumber: formData.personalContact.trim(),
-      emergencyContactPerson: formData.emergencyContactPerson.trim(),
-      emergencyContactNumber: formData.emergencyContactNumber.trim(),
+      password: "Password1",
+      address: " ",
+      personalContactNumber: " ",
+      emergencyContactPerson: " ",
+      emergencyContactNumber: " ",
     };
 
     try {
@@ -264,9 +259,14 @@ function UserManagement() {
             <th>Role</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Address</th>
+            <th>Personal Contact</th>
+            <th>Emergency Contact Person</th>
+            <th>Emergency Contact Number</th>
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {currentUsers.map((user) => (
             <tr key={user._id}>
@@ -275,7 +275,13 @@ function UserManagement() {
                 {user.firstname} {user.lastname}
               </td>
               <td>{user.email}</td>
-              <td>{user.email}</td>
+              <td>{user.address}</td> {/* New column for Address */}
+              <td>{user.personalContactNumber}</td>{" "}
+              {/* New column for Personal Contact */}
+              <td>{user.emergencyContactPerson}</td>{" "}
+              {/* New column for Emergency Contact Person */}
+              <td>{user.emergencyContactNumber}</td>{" "}
+              {/* New column for Emergency Contact Number */}
               <td>
                 <Button
                   variant="info"
@@ -392,106 +398,66 @@ function UserManagement() {
         </Modal.Footer>
       </Modal>
 
-      {/* Add/Edit User Modal */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>{editMode ? "Edit User" : "Add User"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSaveUser}>
+            {/* Role Field */}
             <Form.Group controlId="role">
               <Form.Label>Role</Form.Label>
               <Form.Control
                 as="select"
                 value={formData.role}
                 onChange={handleChange}
+                required
               >
                 <option>Admin</option>
                 <option>Employee</option>
               </Form.Control>
             </Form.Group>
-            <Form.Group controlId="firstName">
-              <Form.Label>First Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="lastName">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Enter last name"
-              />
-            </Form.Group>
 
+            {/* Email Field */}
             <Form.Group controlId="email">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
+                required
               />
             </Form.Group>
-            {!editMode && (
+
+            {/* Additional Fields for Edit Mode */}
+            {editMode && (
               <>
-                <Form.Group controlId="password">
-                  <Form.Label>Password</Form.Label>
-                  <div className="position-relative">
-                    <Form.Control
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                    <div
-                      className="position-absolute"
-                      style={{
-                        top: "50%",
-                        right: "10px",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={togglePasswordVisibility}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </div>
-                  </div>
+                <Form.Group controlId="firstName">
+                  <Form.Label>First Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                  />
                 </Form.Group>
 
-                <Form.Group controlId="confirmPassword">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <div className="position-relative">
-                    <Form.Control
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                    <div
-                      className="position-absolute"
-                      style={{
-                        top: "50%",
-                        right: "10px",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={toggleConfirmPasswordVisibility}
-                    >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </div>
-                  </div>
+                <Form.Group controlId="lastName">
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                  />
                 </Form.Group>
+
                 <Form.Group controlId="address">
                   <Form.Label>Address</Form.Label>
                   <Form.Control
                     type="text"
                     value={formData.address}
                     onChange={handleChange}
-                    required
                   />
                 </Form.Group>
 
@@ -501,7 +467,6 @@ function UserManagement() {
                     type="text"
                     value={formData.personalContact}
                     onChange={handleChange}
-                    required
                   />
                 </Form.Group>
 
@@ -511,7 +476,6 @@ function UserManagement() {
                     type="text"
                     value={formData.emergencyContactPerson}
                     onChange={handleChange}
-                    required
                   />
                 </Form.Group>
 
@@ -521,16 +485,19 @@ function UserManagement() {
                     type="text"
                     value={formData.emergencyContactNumber}
                     onChange={handleChange}
-                    required
                   />
                 </Form.Group>
               </>
             )}
+
+            {/* Error Message */}
             {errorMessage && <p className="text-danger">{errorMessage}</p>}
+
+            {/* Submit Button */}
             <Button
               variant="primary"
               type="submit"
-              style={{ marginTop: "10px" }} // Add your desired padding-top value here
+              style={{ marginTop: "10px" }}
             >
               Save
             </Button>
