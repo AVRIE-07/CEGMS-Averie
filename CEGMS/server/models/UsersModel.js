@@ -1,5 +1,3 @@
-// models/UsersModel.js
-
 const mongoose = require("mongoose");
 
 // Helper function to generate the custom ID
@@ -19,9 +17,12 @@ const UsersSchema = new mongoose.Schema(
     },
     email: { type: String, required: true, unique: true }, // User's email
     password: { type: String, required: true }, // User's password
-
     firstname: { type: String, required: true }, // User's first name
     lastname: { type: String, required: true }, // User's last name
+    address: { type: String, required: true }, // User's address
+    personalContactNumber: { type: String }, // Personal contact number
+    emergencyContactPerson: { type: String, required: true }, // Emergency contact person
+    emergencyContactNumber: { type: String, required: true }, // Emergency contact number
     role: { type: String, required: true }, // User's role (e.g., Admin, Employee)
   },
   {

@@ -22,6 +22,10 @@ function UserManagement() {
     email: "",
     password: "",
     confirmPassword: "",
+    address: "", // New field
+    personalContact: "", // New field
+    emergencyContactPerson: "", // New field
+    emergencyContactNumber: "", // New field
   });
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -141,6 +145,10 @@ function UserManagement() {
       lastname: formData.lastName.trim(),
       email: formData.email.trim(),
       password: formData.password.trim(),
+      address: formData.address.trim(),
+      personalContactNumber: formData.personalContact.trim(),
+      emergencyContactPerson: formData.emergencyContactPerson.trim(),
+      emergencyContactNumber: formData.emergencyContactNumber.trim(),
     };
 
     try {
@@ -475,6 +483,45 @@ function UserManagement() {
                       {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                     </div>
                   </div>
+                </Form.Group>
+                <Form.Group controlId="address">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="personalContact">
+                  <Form.Label>Personal Contact Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.personalContact}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="emergencyContactPerson">
+                  <Form.Label>Emergency Contact Person</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.emergencyContactPerson}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="emergencyContactNumber">
+                  <Form.Label>Emergency Contact Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.emergencyContactNumber}
+                    onChange={handleChange}
+                    required
+                  />
                 </Form.Group>
               </>
             )}

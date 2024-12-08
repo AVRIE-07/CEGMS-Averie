@@ -53,10 +53,21 @@ router.get("/get-users", async (req, res) => {
 });
 
 // Update User route
+// Update User route
 router.put("/update-user/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, firstname, lastname, email, password } = req.body;
+    const {
+      role,
+      firstname,
+      lastname,
+      email,
+      password,
+      address,
+      personalContactNumber,
+      emergencyContactPerson,
+      emergencyContactNumber,
+    } = req.body;
 
     // No password hashing, so we directly use the password from the request
     const updatedUser = await UsersModel.findByIdAndUpdate(
@@ -67,6 +78,10 @@ router.put("/update-user/:id", async (req, res) => {
         lastname,
         email,
         password, // Use the password directly
+        address, // Added field
+        personalContactNumber, // Added field
+        emergencyContactPerson, // Added field
+        emergencyContactNumber, // Added field
       },
       { new: true }
     );
@@ -100,10 +115,29 @@ router.delete("/delete-user/:id", async (req, res) => {
 // Add user route
 router.post("/add-user", async (req, res) => {
   console.log("Request body:", req.body); // Log the request body for debugging
-  const { role, firstname, lastname, email, password } = req.body;
+  const {
+    role,
+    firstname,
+    lastname,
+    email,
+    password,
+    address,
+    personalContactNumber,
+    emergencyContactPerson,
+    emergencyContactNumber,
+  } = req.body;
 
   // Check if all required fields are provided
-  if (!firstname || !lastname || !email | !password) {
+  if (
+    !firstname ||
+    !lastname ||
+    !email ||
+    !password ||
+    !address ||
+    !personalContactNumber ||
+    !emergencyContactPerson ||
+    !emergencyContactNumber
+  ) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -123,7 +157,7 @@ router.post("/add-user", async (req, res) => {
   }
 
   try {
-    // Check if a user with the same emailalready exists
+    // Check if a user with the same email already exists
     const existingUser = await UsersModel.findOne({
       $or: [{ email }],
     });
@@ -144,6 +178,10 @@ router.post("/add-user", async (req, res) => {
       lastname,
       email,
       password: hashedPassword, // Store the hashed password
+      address, // Added field
+      personalContactNumber, // Added field
+      emergencyContactPerson, // Added field
+      emergencyContactNumber, // Added field
     });
 
     // Save the user to the database
