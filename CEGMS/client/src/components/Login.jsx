@@ -57,16 +57,40 @@ const Login = () => {
         loginData
       );
 
-      const { token, username, firstname, email, lastname, role, userId } =
-        response.data;
+      const {
+        token,
+        username,
+        firstname,
+        email,
+        lastname,
+        role,
+        userId,
+        address,
+        emergencyContactPerson,
+        emergencyContactNumber,
+        personalContactNumber,
+      } = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("username", username);
-      localStorage.setItem("firstname", firstname);
-      localStorage.setItem("email", email);
-      localStorage.setItem("lastname", lastname);
-      localStorage.setItem("role", role);
-      localStorage.setItem("userId", userId);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("firstname", response.data.firstname);
+      localStorage.setItem("lastname", response.data.lastname);
+      localStorage.setItem("email", response.data.email);
+      localStorage.setItem("role", response.data.role);
+      localStorage.setItem("userId", response.data.userId); // userId should be user._id from backend
+      localStorage.setItem("address", response.data.address || "");
+      localStorage.setItem(
+        "emergencyContactPerson",
+        response.data.emergencyContactPerson || ""
+      );
+      localStorage.setItem(
+        "emergencyContactNumber",
+        response.data.emergencyContactNumber || ""
+      );
+      localStorage.setItem(
+        "personalContactNumber",
+        response.data.personalContactNumber || ""
+      );
 
       if (role === "Employee") {
         navigate("/employee/dashboard");

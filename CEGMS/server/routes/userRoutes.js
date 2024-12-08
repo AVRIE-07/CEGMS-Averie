@@ -10,9 +10,9 @@ router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-    // Match user by email
+    // Match user by email or username
     const user = await UsersModel.findOne({
-      $or: [{ email: identifier }],
+      $or: [{ email: identifier }, { username: identifier }], // Ensure both email and username are checked
     });
 
     if (!user) {
@@ -30,11 +30,16 @@ router.post("/login", async (req, res) => {
 
     res.json({
       token,
+      username: user.username, // Ensure username is sent
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
-      userId: user.userId,
+      userId: user._id, // Correcting to user._id
+      address: user.address || "", // Default empty string if address is not set
+      emergencyContactPerson: user.emergencyContactPerson || "", // Same for emergency contact person
+      emergencyContactNumber: user.emergencyContactNumber || "", // Same for emergency contact number
+      personalContactNumber: user.personalContactNumber || "", // Same for personal contact number
     });
   } catch (err) {
     console.error(err);

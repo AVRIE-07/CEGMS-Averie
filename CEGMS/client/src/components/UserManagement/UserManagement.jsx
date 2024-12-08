@@ -275,6 +275,7 @@ function UserManagement() {
                 {user.firstname} {user.lastname}
               </td>
               <td>{user.email}</td>
+              <td>{user.email}</td>
               <td>
                 <Button
                   variant="info"

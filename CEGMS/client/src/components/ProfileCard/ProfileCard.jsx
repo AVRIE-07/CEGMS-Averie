@@ -10,6 +10,9 @@ const ProfileCard = () => {
     lastname: "",
     email: "",
     username: "",
+    address: "", // New field for address
+    emergencyContactNumber: "", // New field for emergency contact number
+    emergencyContactPerson: "", // New field for emergency contact person
   });
   const [role, setRole] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -35,30 +38,40 @@ const ProfileCard = () => {
     const storedLastname = localStorage.getItem("lastname");
     const storedEmail = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
+    const storedAddress = localStorage.getItem("address");
+    const storedEmergencyContactNumber = localStorage.getItem(
+      "emergencyContactNumber"
+    );
+    const storedEmergencyContactPerson = localStorage.getItem(
+      "emergencyContactPerson"
+    );
     const userId = localStorage.getItem("userId");
+    const storedPersonalContactNumber = localStorage.getItem(
+      "personalContactNumber"
+    );
 
-    if (storedUsername && storedFirstname && storedLastname && storedEmail) {
+    // Check if the values are available in localStorage, otherwise provide default values
+    if (
+      storedUsername &&
+      storedFirstname &&
+      storedLastname &&
+      storedEmail &&
+      storedPersonalContactNumber
+    ) {
       setUser({
         username: storedUsername,
         firstname: storedFirstname,
         lastname: storedLastname,
         email: storedEmail,
+        address: storedAddress || "Not available", // Ensure default if not found
+        emergencyContactNumber: storedEmergencyContactNumber || "Not available", // Ensure default
+        emergencyContactPerson: storedEmergencyContactPerson || "Not available", // Ensure default
         userId: userId,
+        personalContactNumber: storedPersonalContactNumber || "Not available",
       });
       setRole(storedRole || "Not specified");
     }
   }, []);
-
-  useEffect(() => {
-    if (message && messageType === "success") {
-      const timer = setTimeout(() => {
-        setMessage("");
-        setMessageType("");
-      }, 3000); // Hide message after 3 seconds
-
-      return () => clearTimeout(timer); // Cleanup the timer on unmount
-    }
-  }, [message, messageType]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -133,6 +146,16 @@ const ProfileCard = () => {
       localStorage.setItem("firstname", updatedUser.firstname);
       localStorage.setItem("lastname", updatedUser.lastname);
       localStorage.setItem("email", updatedUser.email);
+      localStorage.setItem("address", updatedUser.address);
+      localStorage.setItem(
+        "emergencyContactNumber",
+        updatedUser.emergencyContactNumber
+      );
+      localStorage.setItem(
+        "emergencyContactPerson",
+        updatedUser.emergencyContactPerson
+      );
+
       // Show success message
       setProfileUpdateMessage("Profile updated successfully!");
       setProfileUpdateMessageType("success");
@@ -153,20 +176,6 @@ const ProfileCard = () => {
     }
   };
 
-  const handleModalClose = () => setShowModal(false);
-
-  const handleSaveChanges = () => {
-    setIsEditing(true);
-  };
-
-  const togglePasswordModal = () => {
-    setIsPasswordModalVisible((prevState) => !prevState);
-  };
-
-  const handleForgotPassword = () => {
-    setIsForgotPassword(true); // Show the Forgot Password form
-  };
-
   return (
     <div className={`container mt-5 ${styles.profileCard}`}>
       <div className="row justify-content-center">
@@ -181,70 +190,79 @@ const ProfileCard = () => {
         {isEditing || isForgotPassword ? (
           <>
             <form className="text-start">
-              {/* Only show the Email field when editing profile, not when changing password */}
-              {!isForgotPassword && (
-                <div className="mb-3">
-                  <p className="fw-bold mb-1 text-start">Email</p>
-                  <input
-                    type="email"
-                    name="email"
-                    value={user.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email"
-                    className="form-control"
-                  />
-                </div>
-              )}
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">Email</p>
+                <input
+                  type="email"
+                  name="email"
+                  value={user.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  className="form-control"
+                />
+              </div>
 
-              {isForgotPassword && (
-                <>
-                  <div className="mb-3">
-                    <p className="fw-bold mb-1 text-start">Current Password</p>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter current password"
-                      className="form-control"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <p className="fw-bold mb-1 text-start">New Password</p>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter new password"
-                      className="form-control"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <p className="fw-bold mb-1 text-start">
-                      Confirm New Password
-                    </p>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Confirm new password"
-                      className="form-control"
-                    />
-                  </div>
-                </>
-              )}
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">Address</p>
+                <input
+                  type="text"
+                  name="address"
+                  value={user.address}
+                  onChange={handleInputChange}
+                  placeholder="Enter your address"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">
+                  Personal Contact Number
+                </p>
+                <input
+                  type="text"
+                  name="personalContactNumber"
+                  value={user.personalContactNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter personal contact person's name"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">
+                  Emergency Contact Person
+                </p>
+                <input
+                  type="text"
+                  name="emergencyContactPerson"
+                  value={user.emergencyContactPerson}
+                  onChange={handleInputChange}
+                  placeholder="Enter emergency contact person's name"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="mb-3">
+                <p className="fw-bold mb-1 text-start">
+                  Emergency Contact Number
+                </p>
+                <input
+                  type="text"
+                  name="emergencyContactNumber"
+                  value={user.emergencyContactNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter emergency contact number"
+                  className="form-control"
+                />
+              </div>
 
               <div className="d-flex justify-content-end buttonGroup">
                 <button
                   type="button"
                   className="btn btn-primary me-2"
-                  onClick={
-                    isForgotPassword ? handlePasswordSubmit : handleSubmit
-                  } // Trigger the correct form submission
+                  onClick={handleSubmit}
                 >
-                  {isForgotPassword ? "Reset Password" : "Save Changes"}
+                  Save Changes
                 </button>
                 <button
                   type="button"
@@ -268,57 +286,52 @@ const ProfileCard = () => {
               <p className="card-text">
                 <strong>Email:</strong> {user.email || "Not available"}
               </p>
+
               <p className="card-text">
-                <strong>Role:</strong> {role}
+                <strong>Role:</strong> {role || "Not specified"}
+              </p>
+              <p className="card-text">
+                <strong>Address:</strong> {user.address || "Not available"}
+              </p>
+              <p className="card-text">
+                <strong>Personal Contact Number:</strong>{" "}
+                {user.personalContactNumber || "Not available"}
+              </p>
+              <p className="card-text">
+                <strong>Emergency Contact Person:</strong>{" "}
+                {user.emergencyContactPerson || "Not available"}
+              </p>
+              <p className="card-text">
+                <strong>Emergency Contact Number:</strong>{" "}
+                {user.emergencyContactNumber || "Not available"}
               </p>
             </div>
             <div className="buttonGroup">
               <button
-                className="btn btn-primary me-3"
+                className="btn btn-primary"
                 onClick={() => setIsEditing(true)}
               >
                 Edit Profile
               </button>
               <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleForgotPassword} // Trigger the forgot password form
+                className="btn btn-secondary ms-2"
+                onClick={() => setIsForgotPassword(true)}
               >
-                Forgot Password
+                Change Password
               </button>
             </div>
+            {profileUpdateMessage && (
+              <div
+                className={`alert mt-3 ${
+                  profileUpdateMessageType === "success"
+                    ? "alert-success"
+                    : "alert-danger"
+                }`}
+              >
+                {profileUpdateMessage}
+              </div>
+            )}
           </>
-        )}
-
-        {/* Display success or error message after submitting the form */}
-        {profileUpdateMessage && (
-          <div
-            className={`alert ${
-              profileUpdateMessageType === "error"
-                ? "alert-danger"
-                : "alert-success"
-            } mt-3`}
-          >
-            {profileUpdateMessage}
-          </div>
-        )}
-
-        {/* Success or Error message */}
-        {message && (
-          <div
-            className={`alert ${
-              messageType === "error" ? "alert-danger" : "alert-success"
-            } mt-3`}
-          >
-            {message}
-          </div>
-        )}
-
-        {/* Password Change Confirmation */}
-        {passwordChangeConfirmed && (
-          <div className="alert alert-success mt-3">
-            Password changed successfully!
-          </div>
         )}
       </div>
     </div>
