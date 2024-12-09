@@ -219,143 +219,154 @@ const ProfileCard = () => {
 
         {isEditing ? (
           <>
-            <form className="text-start p-4 border rounded shadow-sm bg-light">
-              <h3 className="mb-4 text-primary">User Information</h3>
+            <div className="container-fluid py-1">
+              <form className="text-start p-2 rounded bg-white">
+                <h3 className="mb-2 text-primary text-center">
+                  User Information
+                </h3>
 
-              {/* Personal Information Section */}
-              <div className="row mb-4">
-                <div className="col-md-6 mb-3">
-                  <label htmlFor="firstname" className="fw-bold form-label">
-                    First Name
-                  </label>
-                  <input
-                    id="firstname"
-                    type="text"
-                    name="firstname"
-                    value={user.firstname}
-                    onChange={handleInputChange}
-                    placeholder="Enter your first name"
-                    className="form-control"
-                  />
+                {/* Personal Information Section */}
+                <div className="row mb-1">
+                  <div className="col-md-4 mb-3">
+                    <label htmlFor="firstname" className="fw-bold form-label">
+                      First Name
+                    </label>
+                    <input
+                      id="firstname"
+                      type="text"
+                      name="firstname"
+                      value={user.firstname}
+                      onChange={handleInputChange}
+                      placeholder="Enter your first name"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-4 mb-3">
+                    <label htmlFor="lastname" className="fw-bold form-label">
+                      Last Name
+                    </label>
+                    <input
+                      id="lastname"
+                      type="text"
+                      name="lastname"
+                      value={user.lastname}
+                      onChange={handleInputChange}
+                      placeholder="Enter your last name"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label htmlFor="email" className="fw-bold form-label">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      value={user.email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                      className="form-control"
+                    />
+                  </div>
                 </div>
-                <div className="col-md-6 mb-3">
-                  <label htmlFor="lastname" className="fw-bold form-label">
-                    Last Name
-                  </label>
-                  <input
-                    id="lastname"
-                    type="text"
-                    name="lastname"
-                    value={user.lastname}
-                    onChange={handleInputChange}
-                    placeholder="Enter your last name"
-                    className="form-control"
-                  />
-                </div>
-                <div className="col-md-12">
-                  <label htmlFor="email" className="fw-bold form-label">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={user.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email"
-                    className="form-control"
-                  />
-                </div>
-              </div>
 
-              {/* Contact Information Section */}
-              <h4 className="mb-3 text-secondary">Contact Information</h4>
-              <div className="row mb-4">
-                <div className="col-md-12 mb-3">
-                  <label htmlFor="address" className="fw-bold form-label">
-                    Address
-                  </label>
-                  <input
-                    id="address"
-                    type="text"
-                    name="address"
-                    value={user.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter your address"
-                    className="form-control"
-                  />
+                {/* Contact Information Section */}
+                <h4 className="mb-1 text-secondary">Contact Information</h4>
+                <div className="row mb-4">
+                  <div className="col-md-12">
+                    <label htmlFor="address" className="fw-bold form-label">
+                      Address
+                    </label>
+                    <input
+                      id="address"
+                      type="text"
+                      name="address"
+                      value={user.address}
+                      onChange={handleInputChange}
+                      placeholder="Enter your address"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label
+                      htmlFor="personalContactNumber"
+                      className="fw-bold form-label"
+                    >
+                      Personal Contact Number
+                    </label>
+                    <input
+                      id="personalContactNumber"
+                      type="text"
+                      name="personalContactNumber"
+                      value={user.personalContactNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter your personal contact number"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label
+                      htmlFor="emergencyContactPerson"
+                      className="fw-bold form-label"
+                    >
+                      Emergency Contact Person
+                    </label>
+                    <input
+                      id="emergencyContactPerson"
+                      type="text"
+                      name="emergencyContactPerson"
+                      value={user.emergencyContactPerson}
+                      onChange={handleInputChange}
+                      placeholder="Enter emergency contact person"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label
+                      htmlFor="emergencyContactNumber"
+                      className="fw-bold form-label"
+                    >
+                      Emergency Contact Number
+                    </label>
+                    <input
+                      id="emergencyContactNumber"
+                      type="text"
+                      name="emergencyContactNumber"
+                      value={user.emergencyContactNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter emergency contact number"
+                      className="form-control"
+                    />
+                  </div>
                 </div>
-                <div className="col-md-6 mb-3">
-                  <label
-                    htmlFor="personalContactNumber"
-                    className="fw-bold form-label"
-                  >
-                    Personal Contact Number
-                  </label>
-                  <input
-                    id="personalContactNumber"
-                    type="text"
-                    name="personalContactNumber"
-                    value={user.personalContactNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter your personal contact number"
-                    className="form-control"
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
-                  <label
-                    htmlFor="emergencyContactPerson"
-                    className="fw-bold form-label"
-                  >
-                    Emergency Contact Person
-                  </label>
-                  <input
-                    id="emergencyContactPerson"
-                    type="text"
-                    name="emergencyContactPerson"
-                    value={user.emergencyContactPerson}
-                    onChange={handleInputChange}
-                    placeholder="Enter emergency contact person"
-                    className="form-control"
-                  />
-                </div>
-                <div className="col-md-12">
-                  <label
-                    htmlFor="emergencyContactNumber"
-                    className="fw-bold form-label"
-                  >
-                    Emergency Contact Number
-                  </label>
-                  <input
-                    id="emergencyContactNumber"
-                    type="text"
-                    name="emergencyContactNumber"
-                    value={user.emergencyContactNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter emergency contact number"
-                    className="form-control"
-                  />
-                </div>
-              </div>
 
-              {/* Buttons */}
-              <div className="d-flex justify-content-end mt-4">
-                <button
-                  type="button"
-                  className="btn btn-primary me-2 px-4"
-                  onClick={handleSubmit}
-                >
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary px-4"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                {/* Buttons */}
+                <div className="d-flex justify-content-end mt-1">
+                  <button
+                    type="button"
+                    className="btn btn-primary me-1 px-4"
+                    onClick={handleSubmit}
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary me-1"
+                    onClick={togglePasswordModal}
+                  >
+                    Change Password
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary px-4"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </>
         ) : (
           <>
@@ -408,17 +419,6 @@ const ProfileCard = () => {
             {profileUpdateMessage}
           </div>
         )}
-
-        {/* Change Password Button */}
-        <div className="mt-4">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={togglePasswordModal}
-          >
-            Change Password
-          </button>
-        </div>
 
         {/* Success or Error message */}
         {message && (

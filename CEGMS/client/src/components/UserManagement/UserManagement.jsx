@@ -39,7 +39,7 @@ function UserManagement() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Number of users per page
+  const itemsPerPage = 3; // Number of users per page
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -136,14 +136,14 @@ function UserManagement() {
 
     const payload = {
       role: formData.role,
-      firstname: " ",
-      lastname: " ",
+      firstname: "To be Edited",
+      lastname: "To be Edited",
       email: formData.email.trim(),
       password: "Password1",
-      address: " ",
-      personalContactNumber: " ",
-      emergencyContactPerson: " ",
-      emergencyContactNumber: " ",
+      address: "To be Edited",
+      personalContactNumber: "To be Edited",
+      emergencyContactPerson: "To be Edited",
+      emergencyContactNumber: "To be Edited",
     };
 
     try {

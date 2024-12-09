@@ -492,15 +492,7 @@ const Storage = () => {
                 Stock Movement
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                to="/Storage/Reports" // Link to Reports component
-                className="nav-link fw-semibold text-decoration-none"
-                style={{ color: "#6a6d71" }}
-              >
-                Reports
-              </Link>
-            </li>
+            <li className="nav-item"></li>
           </ul>
         </div>
 

@@ -304,15 +304,7 @@ const CreateProducts = () => {
                 Stock Movement
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                to="/Storage/Reports"
-                className="nav-link fw-semibold text-decoration-none"
-                style={{ color: "#6a6d71" }}
-              >
-                Reports
-              </Link>
-            </li>
+            <li className="nav-item"></li>
           </ul>
         </div>
 
@@ -370,6 +362,7 @@ const CreateProducts = () => {
                     />
                     <label htmlFor={field.name}>
                       {field.placeholder}{" "}
+                      <span style={{ color: "red" }}>*</span>
                       {isSubmitted && !newProduct[field.name] && (
                         <span className="text-danger">*</span>
                       )}
@@ -396,7 +389,7 @@ const CreateProducts = () => {
                     ))}
                   </select>
                   <label htmlFor="product_Supplier">
-                    Select Supplier{" "}
+                    Select Supplier <span style={{ color: "red" }}>*</span>
                     {isSubmitted && !newProduct.product_Supplier && (
                       <span className="text-danger">*</span>
                     )}
@@ -425,7 +418,7 @@ const CreateProducts = () => {
                     ))}
                   </select>
                   <label htmlFor="product_Category">
-                    Select Category{" "}
+                    Select Category <span style={{ color: "red" }}>*</span>
                     {isSubmitted && !newProduct.product_Category && (
                       <span className="text-danger">*</span>
                     )}
@@ -446,7 +439,7 @@ const CreateProducts = () => {
                     required
                   />
                   <label htmlFor="product_Shelf_Life">
-                    Shelf Life (in days, months, etc.){" "}
+                    Shelf Life (in days) <span style={{ color: "red" }}>*</span>
                     {isSubmitted && newProduct.product_Shelf_Life === "" && (
                       <span className="text-danger">*</span>
                     )}
