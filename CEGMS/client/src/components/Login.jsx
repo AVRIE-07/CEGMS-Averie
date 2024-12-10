@@ -106,15 +106,15 @@ const Login = () => {
       ) {
         const message = error.response.data.message;
 
-        if (message.toLowerCase().includes("email not found")) {
-          setError("Email not found. Please register or use a valid email.");
+        if (message.toLowerCase().includes("account does not exist")) {
+          setError("Account doesn't exist. Please register.");
         } else if (message.toLowerCase().includes("incorrect password")) {
-          setError("Incorrect password. Please try again.");
+          setError("Wrong password. Please try again.");
         } else {
-          setError("Email or Password is incorrect. Please try again.");
+          setError("An error occurred. Please try again.");
         }
       } else {
-        setError("Email or Password is incorrect. Please try again.");
+        setError("Unable to connect to the server. Please try later.");
       }
     }
   };

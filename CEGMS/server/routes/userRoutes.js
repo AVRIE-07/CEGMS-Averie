@@ -10,18 +10,19 @@ router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-    // Match user by email or username
+    // Find user by email or username
     const user = await UsersModel.findOne({
-      $or: [{ email: identifier }, { username: identifier }], // Ensure both email and username are checked
+      $or: [{ email: identifier }, { username: identifier }],
     });
 
     if (!user) {
-      return res.status(400).json({ msg: "User does not exist" });
+      return res.status(404).json({ message: "Account does not exist" });
     }
 
+    // Compare the password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     const token = jwt.sign({ userId: user._id }, "yourSecretKey", {
@@ -30,20 +31,20 @@ router.post("/login", async (req, res) => {
 
     res.json({
       token,
-      username: user.username, // Ensure username is sent
+      username: user.username,
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
-      userId: user.userId, // Correcting to user._id
-      address: user.address || "", // Default empty string if address is not set
-      emergencyContactPerson: user.emergencyContactPerson || "", // Same for emergency contact person
-      emergencyContactNumber: user.emergencyContactNumber || "", // Same for emergency contact number
-      personalContactNumber: user.personalContactNumber || "", // Same for personal contact number
+      userId: user._id, // Use correct property name
+      address: user.address || "",
+      emergencyContactPerson: user.emergencyContactPerson || "",
+      emergencyContactNumber: user.emergencyContactNumber || "",
+      personalContactNumber: user.personalContactNumber || "",
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
